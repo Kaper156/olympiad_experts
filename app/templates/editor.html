@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% macro editor_form(form, form_name, action=None, header='') %}
+{{ header|safe }}
+<form method="post" action="{{ action }}" name="{{ form_name }}" class="forms">
+    {# CSRF #}
+    {{ form.hidden_tag() }}
+
+    {# Show all fields #}
+    {% for field in form if field.widget.input_type != 'hidden' %}
+        <section>
+            <label>{{ field.label }}</label>
+            {{ field }}
+        </section>
+    {% endfor %}
+
+    {# Submit button #}
+    <section>
+        <input type="submit" value="Ок" class="btn">
+    </section>
+</form>
+{% endmacro %}
+
+{% block content %}
+    {{ editor_form(form=form, form_name=form_name, action=action, header=header) }}
+{% endblock %}

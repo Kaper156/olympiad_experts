@@ -1,0 +1,32 @@
+@import url('kube.min.css');
+@import url('elegant_ico.css');
+
+
+body, html {
+    background-color: #177199;
+}
+header{
+    background-color: white;
+}
+
+#wrapper > row > column{
+    background-color: white;
+    padding: 10px;
+}
+
+h3.title {
+    text-align: center;
+}
+
+.element{
+    border: 1px solid #2f77d1;
+    padding: 5px;
+    /*border-radius: 15px;*/
+    margin-bottom: 5px;
+}
+.element > .buttons {text-align: right}
+
+/*children must have 10px left margin */
+.element > .element{
+    margin-left: 10px;
+}

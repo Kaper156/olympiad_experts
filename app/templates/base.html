@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% block head %}
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" type="text/css">
+        <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/loading.js') }}"></script>
+    {% endblock %}
+</head>
+<body>
+<header>
+    <row centered>
+        <column cols="3">
+            <a href="{{ url_for('add_olympiad') }}" class="btn" outline>Добавить олимпиаду</a>
+            <a href="{{ url_for('test_add') }}" class="btn" outline>Test</a>
+            <a href="{{ url_for('hierarchy') }}" class="btn" outline>Hierarchy</a>
+        </column>
+    </row>
+</header>
+
+<div id="wrapper">
+    <row centered>
+        <column cols="8">
+
+            {# Page title here #}
+            <h3 class="title">{{ title }}</h3>
+
+            {# Show errors #}
+            {% with messages = get_flashed_messages() %}
+              {% if messages and messages != [None] %} {# A strange bug with getted [None] in form #}
+                <ul class=flashes>
+                {% for message in messages %}
+                  <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+
+            {# Main content block #}
+            <div id="content">
+            {% block content %}
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquam consectetur corporis, facilis perspiciatis quis quo voluptate! Ad atque eos ex maxime quae! Consectetur cumque eos esse maxime neque reiciendis tempora!</p>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquam consectetur corporis, facilis perspiciatis quis quo voluptate! Ad atque eos ex maxime quae! Consectetur cumque eos esse maxime neque reiciendis tempora!</p>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquam consectetur corporis, facilis perspiciatis quis quo voluptate! Ad atque eos ex maxime quae! Consectetur cumque eos esse maxime neque reiciendis tempora!</p>
+            {% endblock %}
+            </div>
+
+        </column>
+    </row>
+</div>
+<footer>Some stuff for footer</footer>
+</body>
+</html>
