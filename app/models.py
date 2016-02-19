@@ -9,11 +9,12 @@ class Aspect(db.Model):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(String)
     description = Column(Text)
-    measurements = relationship("Measurements")
+    measurements = relationship("Measurement")
 
     def __init__(self, name, description=None):
         self.name = name
         self.description = description
+
 
 # Хранит конкретные методы вычисления
 class MeasurementType(db.Model):
@@ -23,12 +24,13 @@ class MeasurementType(db.Model):
     description = Column(String)
     # TODO хранить текст лямбда функций?
     method = Column(Text)
-    measurements = relationship("Measurements")
+    measurements = relationship("Measurement")
 
     def __init__(self, name, method, description=None):
         self.name = name
         self.method = method
         self.description = description
+
 
 # Ссылается на метод вычисления и аспект
 class Measurement(db.Model):

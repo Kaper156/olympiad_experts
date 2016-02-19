@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% title = title or 'Аспекты' %}
+{% block content %}
+    <ul>
+    {% for aspect in aspects %}
+        <li>
+        {{ aspect }}
+        </li>
+    {% endfor %}
+    </ul>
+{% endblock %}
