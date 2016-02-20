@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% set title = title or 'Олимпиады' %}
+
+{% block content %}
+    <div class="olympiads">
+    <div class="control-panel">
+        <p class="left">Олимпиады</p>
+        <a href="#" class="btn">Добавить</a>
+    </div>
+    <div class="editor">
+        
+    </div>
+    {% for olympiad in olympiads %}
+        <span class="name">{{ olympiad.name }}</span>
+        <span class="date">{{ olympiad.date }}</span>
+        <p class="description">{{ olympiad.description }}</p>
+    {% endfor %}
+    </div>
+{% endblock %}

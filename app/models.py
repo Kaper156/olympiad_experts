@@ -22,6 +22,7 @@ class Aspect(OlympiadBase):
     # name = Column(String)
     description = Column(Text)
     measurements = relationship("Measurement")
+    id_sub_criterion = Column(Integer, ForeignKey('SubCriterion.id'))
 
     def __init__(self, name, max_balls=0, description=None):
         OlympiadBase.__init__(self, name, max_balls)
@@ -36,7 +37,7 @@ class MeasurementType(db.Model):
     description = Column(String)
     # TODO хранить текст лямбда функций?
     method = Column(Text)
-    measurements = relationship("Measurement")
+    measurements = relationship('Measurement')
 
     def __init__(self, name, method, description=None):
         self.name = name
@@ -50,7 +51,7 @@ class Measurement(db.Model):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     max_balls = Column(Float, nullable=False)
     id_aspect = Column(Integer, ForeignKey('Aspect.id'))
-    id_measurement_type = Column(Integer, ForeignKey('Measurement.id'))
+    id_measurement_type = Column(Integer, ForeignKey('MeasurementType.id'))
 
     def __init__(self, max_balls, aspect, measurement):
         # TODO init from parent id, calc ball_limit = parent.balls - sum([parent.children.ball])
@@ -70,7 +71,7 @@ class SubCriterion(OlympiadBase):
 class Criterion(OlympiadBase):
     __tablename__ = 'Criterion'
     id_olympiad = Column(Integer, ForeignKey('Olympiad.id'))
-    subcriterion = relationship('SubCriterion.id')
+    sub_criterion = relationship('SubCriterion')
 
 
 # Мероприятие

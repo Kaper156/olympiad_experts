@@ -19,3 +19,9 @@ class MeasurementForm(Form):
 class AspectForm(Form):
     name = StringField('Название', validators=[DataRequired()])
     description = TextAreaField('Описание', validators=[DataRequired()])
+
+
+class OlympiadForm(Form):
+    name = StringField('Название', validators=[DataRequired()])
+    date = DateField('Дата начала', validators=[DataRequired()])
+    description = TextAreaField('Описание')
