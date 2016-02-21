@@ -20,7 +20,7 @@ def olympiads():
     flash_errors(form)
     return render_template('olympiads.html', olympiads=olympiads, form=form)
 
-@app.route('/olympiads/edit-<int:id>')
+@app.route('/olympiads/edit-<int:id>', methods=['POST'])
 def edit_olympiads(id):
     Form = model_form(Olympiad, base_class=OlympiadForm, db_session=db.session)
     olympiad = db.session.query(Olympiad).get(id)
@@ -52,6 +52,19 @@ def edit_olympiads(id):
 #
 #
 
+@app.route('/test')
+def test():
+    olympiads = (db.session.query(Olympiad).get(1))
+    form = OlympiadForm()
+    if request.method == 'POST' and form.validate():
+        olympiad = Olympiad(name=form.name.data,
+                            date=form.date.data,
+                            description=form.description.data)
+        db.session.add(olympiad)
+        db.session.commit()
+        flash('Олимпиада добавлена! \n %s: %s' % (olympiad.id, olympiad.name), 'error')
+    flash_errors(form)
+    return render_template('ajax_form.html', olympiad=olympiads, form=form)
 
 @app.route('/add/measurement', methods=['POST'])
 def add_measurement():
