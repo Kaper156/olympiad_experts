@@ -1,19 +1,31 @@
-{% set title = 'Олимпиады' %}
 <!DOCTYPE html>
+{% set title = 'Олимпиады' %}
 <html>
 <head>
     {% block head %}
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+{#        <meta name="csrf-token" content="{{ csrf_token() }}">#}
+        <script>
+            var csrftoken = "{{ csrf_token() }}";
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken)
+                    }
+                }
+            });
+        </script>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" type="text/css">
         <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
         <script src="{{ url_for('static', filename='js/loading.js') }}"></script>
+        <title>{{ title }}</title>
     {% endblock %}
 </head>
 <body>
 <header>
     <row centered>
         <column cols="3">
-            <a href="{{ url_for('add_measurement') }}" class="btn" outline>add_measurement</a>
+            <a href="{{ url_for('olympiads') }}" class="btn" outline>olympiads</a>
             <a href="{{ url_for('view_measurements', id=1) }}" class="btn" outline>view_measurement</a>
             <a href="{{ url_for('view_aspects', id=1) }}" class="btn" outline>view_aspects</a>
         </column>
@@ -53,3 +65,4 @@
 <footer>Some stuff for footer</footer>
 </body>
 </html>
+

@@ -23,6 +23,15 @@ from app import forms
 import wtforms_json
 wtforms_json.init()
 
+def flash_errors(form):
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error
+            ))
+
+
 
 # Routing
 from app import views

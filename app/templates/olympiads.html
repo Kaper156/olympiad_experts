@@ -1,19 +1,120 @@
 {% extends 'base.html' %}
 {% set title = title or 'Олимпиады' %}
-
+{% macro editor(form, link='olympiads', args=[]) -%}
+    <form action="{{ url_for(link, args) }}" method="post">
+        <table>
+            <tr>
+                <td>{{ form.name.label }}:</td>
+                <td>{{ form.name() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.date.label }}:</td>
+                <td>{{ form.date() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.description.label }}:</td>
+                <td>{{ form.description() }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.hidden_tag() }}</td>
+                <td><input type="submit" value="Добавить" class="btn"/></td>
+            </tr>
+        </table>
+    </form>
+{%- endmacro %}
 {% block content %}
     <div class="olympiads">
-    <div class="control-panel">
-        <p class="left">Олимпиады</p>
-        <a href="#" class="btn">Добавить</a>
-    </div>
-    <div class="editor">
-        
-    </div>
-    {% for olympiad in olympiads %}
-        <span class="name">{{ olympiad.name }}</span>
-        <span class="date">{{ olympiad.date }}</span>
-        <p class="description">{{ olympiad.description }}</p>
-    {% endfor %}
+        <div class="control-panel">
+            <h4 class="text-centered">Управление</h4>
+            <a href="#" class="btn right" id="btn-toggle">Добавить</a>
+        </div>
+        <div class="editor" id="editor">
+            <form action="{{ url_for('olympiads') }}" method="post">
+                <table>
+                    <tr>
+                        <td>{{ form.name.label }}:</td>
+                        <td>{{ form.name() }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ form.date.label }}:</td>
+                        <td>{{ form.date() }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ form.description.label }}:</td>
+                        <td>{{ form.description() }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ form.hidden_tag() }}</td>
+                        <td><input type="submit" value="Добавить" class="btn"/></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+
+        <script>
+            $(document).ready(function () {
+                $('.editor').hide();
+                $('#btn-toggle').click(function () {
+                    $('#editor').toggle();
+                });
+
+                $('.btn-toggle').click(function () {
+                    var object_id = $(this).attr('about');
+                    var editor = $('div#editor-' + object_id);
+
+                    if (editor.html() == '') {
+                        var query = $.ajax({
+                            url: '/olympiads/edit-' + object_id,
+                            method: "POST",
+                            dataType: "json",
+                            success: function (data) {
+                                var html = '';
+                                for (var key in data) {
+                                    html += "<tr><td>" + data[key].label + "</td><td>" + data[key] + "</td></tr>";
+                                }
+                                editor.html(html);
+
+                            }
+                        });
+
+
+                        query.done(function (data) {
+                            var html = '';
+                            for (var key in data) {
+                                html += "<tr><td>" + data[key].label + "</td><td>" + data[key] + "</td></tr>";
+                            }
+                            editor.html(html);
+
+                        });
+                    }
+                    editor.toggle();
+                });
+            });
+        </script>
+
+        {% for olympiad in olympiads %}
+            <div class="object-line">
+                <div class="info">
+                    <p class="field">Название: <span class="value">{{ olympiad.name }}</span></p>
+
+                    <p class="field">Дата: <span class="value">{{ olympiad.date }}</span></p>
+
+                    <p class="field">Описание: <span class="value">{{ olympiad.description }}</span></p>
+                </div>
+                <div class="buttons">
+                <span class="btn-group">
+                    <a id="delete-{{ olympiad.id }}" href="{{ url_for('olympiads') }}" class="btn">
+                        <i class="icon_close_alt big"></i>Удалить
+                    </a>
+                    <a href="#" class="btn-toggle btn" about="{{ olympiad.id }}">
+                        <i class="icon_pencil-edit big"></i>Редактировать
+                    </a>
+                </span>
+                </div>
+                <div class="editor" id="editor-{{ olympiad.id }}"></div>
+            </div>
+            <br>
+        {% endfor %}
     </div>
 {% endblock %}
+
