@@ -8,34 +8,32 @@ from wtforms.ext.sqlalchemy.orm import model_form
 @app.route('/')
 @app.route('/olympiads', methods=['POST', 'GET'])
 def olympiads():
-    olympiads = list(db.session.query(Olympiad).all())
-    form = OlympiadForm()
-    if request.method == 'POST' and form.validate():
-        olympiad = Olympiad(name=form.name.data,
-                            date=form.date.data,
-                            description=form.description.data)
+    instances = list()
+    for olympiad in db.session.query(Olympiad).all():
+        inst_form = model_form(olympiad.__class__, base_class=OlympiadForm, db_session=db.session)
+        instances.append((olympiad, inst_form(request.form, olympiad)))
+
+    editor = OlympiadForm()
+    if request.method == 'POST' and editor.validate():
+        olympiad = Olympiad(name=editor.name.data,
+                            date=editor.date.data,
+                            description=editor.description.data)
         db.session.add(olympiad)
         db.session.commit()
         flash('Олимпиада добавлена! \n %s: %s' % (olympiad.id, olympiad.name), 'error')
-    flash_errors(form)
-    return render_template('olympiads.html', olympiads=olympiads, form=form)
+    flash_errors(editor)
+    return render_template('olympiads.html', olympiads=instances, form=editor)
 
-@app.route('/olympiads/edit-<int:id>', methods=['POST'])
+@app.route('/olympiads/edit-<int:id>', methods=['POST', 'GET'])
 def edit_olympiads(id):
     Form = model_form(Olympiad, base_class=OlympiadForm, db_session=db.session)
     olympiad = db.session.query(Olympiad).get(id)
-    form = Form(request.form, olympiad)
+    form = Form(request.form, Olympiad)
     if request.method == 'POST' and form.validate():
         form.populate_obj(olympiad)
         flash('Олимпиада измененна', 'success')
-        return jsonify('success')
-    else:
-        print(form.name)
-        print(form.date)
-        print(form.description)
-        json = dict([(field.name, field) for field in form])
-        # return jsonify(json)
-        return render_template('ajax_form.html', form=form)
+        return jsonify({'answer': True})
+    return jsonify({'answer': False})
 
 #
 #

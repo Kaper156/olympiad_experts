@@ -1,22 +1,26 @@
 {% extends 'base.html' %}
 {% set title = title or 'Олимпиады' %}
 {% macro editor(form, link='olympiads', args=[]) -%}
-    <form action="{{ url_for(link, args) }}" method="post">
+    <form action="{{ url_for(link, **args) }}" method="post">
         <table>
+{#            <tr>#}
+{#                <td>{{ form.name.label }}:</td>#}
+{#                <td>{{ form.name() }}</td>#}
+{#            </tr>#}
+{#            <tr>#}
+{#                <td>{{ form.date.label }}:</td>#}
+{#                <td>{{ form.date() }}</td>#}
+{#            </tr>#}
+            {{ form.hidden_tag() }}
+            {% for field in form if field.widget.input_type != 'hidden' %}
+                <tr>
+                    <td>{{ field.label }}:</td>
+                    <td>{{ field() }}</td>
+                </tr>
+            {% endfor %}
+
             <tr>
-                <td>{{ form.name.label }}:</td>
-                <td>{{ form.name() }}</td>
-            </tr>
-            <tr>
-                <td>{{ form.date.label }}:</td>
-                <td>{{ form.date() }}</td>
-            </tr>
-            <tr>
-                <td>{{ form.description.label }}:</td>
-                <td>{{ form.description() }}</td>
-            </tr>
-            <tr>
-                <td>{{ form.hidden_tag() }}</td>
+                <td></td> {# {{ form.hidden_tag() }} #}
                 <td><input type="submit" value="Добавить" class="btn"/></td>
             </tr>
         </table>
@@ -50,7 +54,6 @@
                 </table>
             </form>
         </div>
-
 <script>
     function dump(obj) {
         var out = "";
@@ -74,27 +77,25 @@
             var editor = $('div#editor-' + object_id);
 
 {#            if (editor.html() == '') {#}
-                var query = $.ajax({
-                    url: '/olympiads/edit-' + object_id,
-                    method: "POST",
-                    data: {'id': object_id},
-                    dataType: "json",
-                    success: function (data) {
-                        var html = '';
-                        for (var key in data) {
-                            html += "<tr><td>" + key + "</td><td>" + data[key] + "</td></tr>";
-                        }
-                        editor.html(html);
-                    }
-                });
+{#                var query = $.ajax({#}
+{#                    url: '/olympiads/edit-' + object_id,#}
+{#                    method: "POST",#}
+{#                    data: {'id': object_id},#}
+{#                    dataType: "json",#}
+{#                    success: function (data) {#}
+{#                        var html = '';#}
+{#                        for (var key in data) {#}
+{#                            html += "<tr><td>" + key + "</td><td>" + data[key] + "</td></tr>";#}
+{#                        }#}
+{#                        editor.html(html);#}
+{#                    }#}
+{#                });#}
 {#            }#}
             editor.toggle();
         });
     });
 </script>
-
-
-        {% for olympiad in olympiads %}
+        {% for olympiad, form in olympiads %}
             <div class="object-line">
                 <div class="info">
                     <p class="field">Название: <span class="value">{{ olympiad.name }}</span></p>
@@ -113,7 +114,9 @@
                         </a>
                     </span>
                 </div>
-                <div class="editor" id="editor-{{ olympiad.id }}"></div>
+                <div class="editor" id="editor-{{ olympiad.id }}">
+                    {{ editor(form, link='edit_olympiads', args={'id': olympiad.id}) }}
+                </div>
             </div>
             <br>
         {% endfor %}
