@@ -51,46 +51,48 @@
             </form>
         </div>
 
-        <script>
-            $(document).ready(function () {
-                $('.editor').hide();
-                $('#btn-toggle').click(function () {
-                    $('#editor').toggle();
-                });
+<script>
+    function dump(obj) {
+        var out = "";
+        if(obj && typeof(obj) == "object"){
+            for (var i in obj) {
+                out += i + ": " + obj[i] + "\n";
+            }
+        } else {
+            out = obj;
+        }
+        alert(out);
+    }
+    $(document).ready(function () {
+        $('.editor').hide();
+        $('#btn-toggle').click(function () {
+            $('#editor').toggle();
+        });
 
-                $('.btn-toggle').click(function () {
-                    var object_id = $(this).attr('about');
-                    var editor = $('div#editor-' + object_id);
+        $('.btn-toggle').click(function () {
+            var object_id = $(this).attr('about');
+            var editor = $('div#editor-' + object_id);
 
-                    if (editor.html() == '') {
-                        var query = $.ajax({
-                            url: '/olympiads/edit-' + object_id,
-                            method: "POST",
-                            dataType: "json",
-                            success: function (data) {
-                                var html = '';
-                                for (var key in data) {
-                                    html += "<tr><td>" + data[key].label + "</td><td>" + data[key] + "</td></tr>";
-                                }
-                                editor.html(html);
-
-                            }
-                        });
-
-
-                        query.done(function (data) {
-                            var html = '';
-                            for (var key in data) {
-                                html += "<tr><td>" + data[key].label + "</td><td>" + data[key] + "</td></tr>";
-                            }
-                            editor.html(html);
-
-                        });
+{#            if (editor.html() == '') {#}
+                var query = $.ajax({
+                    url: '/olympiads/edit-' + object_id,
+                    method: "POST",
+                    data: {'id': object_id},
+                    dataType: "json",
+                    success: function (data) {
+                        var html = '';
+                        for (var key in data) {
+                            html += "<tr><td>" + key + "</td><td>" + data[key] + "</td></tr>";
+                        }
+                        editor.html(html);
                     }
-                    editor.toggle();
                 });
-            });
-        </script>
+{#            }#}
+            editor.toggle();
+        });
+    });
+</script>
+
 
         {% for olympiad in olympiads %}
             <div class="object-line">
@@ -102,14 +104,14 @@
                     <p class="field">Описание: <span class="value">{{ olympiad.description }}</span></p>
                 </div>
                 <div class="buttons">
-                <span class="btn-group">
-                    <a id="delete-{{ olympiad.id }}" href="{{ url_for('olympiads') }}" class="btn">
-                        <i class="icon_close_alt big"></i>Удалить
-                    </a>
-                    <a href="#" class="btn-toggle btn" about="{{ olympiad.id }}">
-                        <i class="icon_pencil-edit big"></i>Редактировать
-                    </a>
-                </span>
+                    <span class="btn-group">
+                        <a id="delete-{{ olympiad.id }}" href="{{ url_for('olympiads') }}" class="btn">
+                            <i class="icon_close_alt big"></i>Удалить
+                        </a>
+                        <a href="#" class="btn-toggle btn" about="{{ olympiad.id }}">
+                            <i class="icon_pencil-edit big"></i>Редактировать
+                        </a>
+                    </span>
                 </div>
                 <div class="editor" id="editor-{{ olympiad.id }}"></div>
             </div>

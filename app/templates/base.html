@@ -6,7 +6,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 {#        <meta name="csrf-token" content="{{ csrf_token() }}">#}
         <script>
-            var csrftoken = "{{ csrf_token() }}";
+{#            var csrftoken = "{{ csrf_token() }}";#}
             $.ajaxSetup({
                 beforeSend: function(xhr, settings) {
                     if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {

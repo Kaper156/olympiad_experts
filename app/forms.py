@@ -22,6 +22,6 @@ class AspectForm(Form):
 
 
 class OlympiadForm(Form):
-    name = StringField('Название', validators=[DataRequired()])
-    date = DateField('Дата начала', format='%d.%m.%Y')  # , validators=[DataRequired()]
+    name = StringField('Название', validators=[DataRequired()], description='Название')
+    date = DateField('Дата начала', format='%d.%m.%Y', description='Дата начала')  # , validators=[DataRequired()]
     description = TextAreaField('Описание')

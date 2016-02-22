@@ -3,7 +3,7 @@ from flask_wtf.csrf import CsrfProtect
 
 app = Flask(__name__)
 app.config.from_object('config.DevelopConfig')
-CsrfProtect(app)
+# CsrfProtect(app)
 
 
 # Error handlers

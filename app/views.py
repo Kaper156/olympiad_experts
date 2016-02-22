@@ -30,10 +30,12 @@ def edit_olympiads(id):
         flash('Олимпиада измененна', 'success')
         return jsonify('success')
     else:
-        # form = OlympiadForm()
+        print(form.name)
+        print(form.date)
+        print(form.description)
         json = dict([(field.name, field) for field in form])
-        return jsonify(json)
-        # return render_template('ajax_form.html', form=form)
+        # return jsonify(json)
+        return render_template('ajax_form.html', form=form)
 
 #
 #
