@@ -1,27 +1,18 @@
 {% extends 'base.html' %}
 {% set title = title or 'Олимпиады' %}
-{% macro editor(form, link='olympiads', args=[]) -%}
+{% macro editor(form, link='olympiads', args=[], btn_text='Изменить') -%}
     <form action="{{ url_for(link, **args) }}" method="post">
         <table>
-{#            <tr>#}
-{#                <td>{{ form.name.label }}:</td>#}
-{#                <td>{{ form.name() }}</td>#}
-{#            </tr>#}
-{#            <tr>#}
-{#                <td>{{ form.date.label }}:</td>#}
-{#                <td>{{ form.date() }}</td>#}
-{#            </tr>#}
-            {{ form.hidden_tag() }}
-            {% for field in form if field.widget.input_type != 'hidden' %}
-                <tr>
-                    <td>{{ field.label }}:</td>
-                    <td>{{ field() }}</td>
-                </tr>
-            {% endfor %}
 
+            {% for field in form if field.widget.input_type != 'hidden' %}
             <tr>
-                <td></td> {# {{ form.hidden_tag() }} #}
-                <td><input type="submit" value="Добавить" class="btn"/></td>
+                <td>{{ field.label }}:</td>
+                <td>{{ field() }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td>{{ form.hidden_tag() }}</td>
+                <td><input type="submit" value="{{ btn_text }}" class="btn"/></td>
             </tr>
         </table>
     </form>
@@ -33,26 +24,7 @@
             <a href="#" class="btn right" id="btn-toggle">Добавить</a>
         </div>
         <div class="editor" id="editor">
-            <form action="{{ url_for('olympiads') }}" method="post">
-                <table>
-                    <tr>
-                        <td>{{ form.name.label }}:</td>
-                        <td>{{ form.name() }}</td>
-                    </tr>
-                    <tr>
-                        <td>{{ form.date.label }}:</td>
-                        <td>{{ form.date() }}</td>
-                    </tr>
-                    <tr>
-                        <td>{{ form.description.label }}:</td>
-                        <td>{{ form.description() }}</td>
-                    </tr>
-                    <tr>
-                        <td>{{ form.hidden_tag() }}</td>
-                        <td><input type="submit" value="Добавить" class="btn"/></td>
-                    </tr>
-                </table>
-            </form>
+            {{ editor(form, 'olympiads', {}, btn_text='Добавить') }}
         </div>
 <script>
     function dump(obj) {
@@ -75,7 +47,7 @@
         $('.btn-toggle').click(function () {
             var object_id = $(this).attr('about');
             var editor = $('div#editor-' + object_id);
-
+            editor.ajaxForm({url: '/olympiads/edit-'+object_id, type: 'post'});
 {#            if (editor.html() == '') {#}
 {#                var query = $.ajax({#}
 {#                    url: '/olympiads/edit-' + object_id,#}
