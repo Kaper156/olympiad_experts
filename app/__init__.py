@@ -22,6 +22,25 @@ db.create_all()
 from app import forms
 import wtforms_json
 wtforms_json.init()
+from flask.json import JSONEncoder, dumps
+from sqlalchemy.ext.declarative import DeclarativeMeta
+
+
+class CustomJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj.__class__, DeclarativeMeta):
+            # обрабатываем объект sqlalchemy
+            fields = dict()
+            obj_dict = obj.__dict__
+            for field in obj.__table__.columns.keys():  # получаем список полей связанной с моделью таблицы
+                data = obj_dict.get(field)  # извлекаем данные по имени поля
+                try:
+                    dumps(data)
+                    fields[field] = data
+                except TypeError:
+                    fields[field] = None
+            return fields
+
 
 def flash_errors(form):
     for field, errors in form.errors.items():
@@ -30,7 +49,6 @@ def flash_errors(form):
                 getattr(form, field).label.text,
                 error
             ))
-
 
 
 # Routing

@@ -39,64 +39,13 @@ def edit_olympiads(id):
     return jsonify({'answer': False})
 
 
-def view_olympiad(id):
-    return jsonify(db.session.query(Olympiad).get(id))
+
+@app.route('/ajax/get/olympiad_<int:id>')
+def get_olympiad(id):
+    return get_element(Olympiad, id)
 
 
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
+def get_element(cls, id):
+    print((db.session.query(cls).get(id)).__dict__)
+    return jsonify(**db.session.query(cls).get(id).__dict__)
 
-@app.route('/test')
-def test():
-    olympiads = (db.session.query(Olympiad).get(1))
-    form = OlympiadForm()
-    if request.method == 'POST' and form.validate():
-        olympiad = Olympiad(name=form.name.data,
-                            date=form.date.data,
-                            description=form.description.data)
-        db.session.add(olympiad)
-        db.session.commit()
-        flash('Олимпиада добавлена! \n %s: %s' % (olympiad.id, olympiad.name), 'error')
-    flash_errors(form)
-    return render_template('ajax_form.html', olympiad=olympiads, form=form)
-
-
-@app.route('/add/measurement', methods=['POST'])
-def add_measurement():
-    Form = model_form(Measurement, MeasurementForm)
-    form = Form(request.form)
-    if form.validate():
-        obj = Measurement(max_balls=form.max_balls.data, measurement=form.measurement_type.data)
-        db.session.add(obj)
-        return redirect(url_for('view_measurements', id=obj.id))
-    return render_template('add_measurement.html')
-
-
-@app.route('/view/measurement/<int:id>')
-def view_measurements(id):
-
-    obj = db.session.query(Measurement).filter(id=id)
-    render_template('view_measurement.html', obj=obj)
-
-
-@app.route('/view/aspect/<int:id>')
-def view_aspects(id):
-    if id == 0:
-        aspects = db.session.query(Aspect).all()
-        return render_template('view_aspects.html', aspects=aspects)
-    obj = db.session.query(Measurement).filter(id=id)
-    return render_template('view_aspects.html', obj=obj)

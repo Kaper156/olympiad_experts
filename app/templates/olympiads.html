@@ -1,14 +1,20 @@
 {% extends 'base.html' %}
 {% set title = title or 'Олимпиады' %}
-{% macro editor(form, link='olympiads', args=[], btn_text='Изменить') -%}
+{% macro editor(form, link='olympiads', args=[], new=False) -%}
     <form action="{{ url_for(link, **args) }}" method="post">
         <table>
+            {% if new %}
+                <h3>Добавление элемента</h3>
+            {% else %}
+                <h3>Изменение элемента</h3>
+            {% endif %}
+
 
             {% for field in form if field.widget.input_type != 'hidden' %}
-            <tr>
-                <td>{{ field.label }}:</td>
-                <td>{{ field() }}</td>
-            </tr>
+                <tr>
+                    <td>{{ field.label }}:</td>
+                    <td>{{ field() }}</td>
+                </tr>
             {% endfor %}
             <tr>
                 <td>{{ form.hidden_tag() }}</td>
@@ -24,49 +30,9 @@
             <a href="#" class="btn right" id="btn-toggle">Добавить</a>
         </div>
         <div class="editor" id="editor">
-            {{ editor(form, 'olympiads', {}, btn_text='Добавить') }}
+            {{ editor(form, 'olympiads', {}, new=True) }}
         </div>
-<script>
-    function dump(obj) {
-        var out = "";
-        if(obj && typeof(obj) == "object"){
-            for (var i in obj) {
-                out += i + ": " + obj[i] + "\n";
-            }
-        } else {
-            out = obj;
-        }
-        alert(out);
-    }
-    $(document).ready(function () {
-        $('.editor').hide();
-        $('#btn-toggle').click(function () {
-            $('#editor').toggle();
-        });
 
-        $('.btn-toggle').click(function () {
-            var object_id = $(this).attr('about');
-            var editor = $('div#editor-' + object_id);
-            editor.ajaxForm({url: '/olympiads/edit-'+object_id, type: 'post'});
-{#            if (editor.html() == '') {#}
-{#                var query = $.ajax({#}
-{#                    url: '/olympiads/edit-' + object_id,#}
-{#                    method: "POST",#}
-{#                    data: {'id': object_id},#}
-{#                    dataType: "json",#}
-{#                    success: function (data) {#}
-{#                        var html = '';#}
-{#                        for (var key in data) {#}
-{#                            html += "<tr><td>" + key + "</td><td>" + data[key] + "</td></tr>";#}
-{#                        }#}
-{#                        editor.html(html);#}
-{#                    }#}
-{#                });#}
-{#            }#}
-            editor.toggle();
-        });
-    });
-</script>
         {% for olympiad, form in olympiads %}
             <div class="object-line">
                 <div class="info">
