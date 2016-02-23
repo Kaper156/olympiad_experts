@@ -1,31 +1,4 @@
 <!DOCTYPE html>
-{#  Macros  #}
-{% macro modal(title, body, footer, form=False, id=None) -%}
-    <div class="modal fade" tabindex="-1" role="dialog" id="{{ id }}">
-        <div class="modal-dialog">
-            {{ form|safe }}
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                            aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">{{ title|safe }}</h4>
-                </div>
-                <div class="modal-body">
-                    {{ body|safe }}
-                </div>
-                <div class="modal-footer">
-                    {{ footer|safe }}
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-            {% if form %}
-                </form>
-            {% endif %}
-        </div>
-    </div>
-{%- endmacro %}
-
-
 <html>
 <head>
 	{% block head %}
@@ -38,10 +11,7 @@
         <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 
         <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
-		{#        <script src="{{ url_for('static', filename='js/jquery.form.js') }}"></script>#}
-		{#        <script src="{{ url_for('static', filename='js/jquery.magnific-popup.min.js') }}"></script>#}
         <script src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
-
 
         {% set title = title or 'Олимпиады' %}
         <title>{{ title }}</title>
@@ -49,7 +19,8 @@
 </head>
 
 <body>
-{#  Head things    #}
+
+{#  Head menu    #}
 <header>
     <nav class="navbar navbar-default navbar-static-top">
         <div class="container-fluid">
@@ -58,7 +29,7 @@
             </div>
             <ul class="nav navbar-nav navbar-right">
 
-                <li><a class="btn" href="{{ url_for('olympiads') }}">Olympiads</a></li>
+                <li><a class="btn" href="{{ url_for('olympiads') }}">Олимпиады</a></li>
             </ul>
         </div>
     </nav>
@@ -67,6 +38,7 @@
 {#  Contents    #}
 <div class="container-fluid">
     <div class="col-md-8 col-md-offset-2" id="wrapper">
+
 		{#  BreadCrumbs   #}
 		{% if breadcrumbs %}
             <div class="nav navbar-nav">
@@ -80,10 +52,10 @@
             <br>
 		{% endif %}
 
-		{# Page title here #}
+		{# Page title #}
         <h2 class="title text-center">{{ title }}</h2>
 
-		{# Show errors #}
+		{# Show messages #}
 		{% with messages = get_flashed_messages() %}
 			{% if messages and messages != [None] %} {# A strange bug with getted [None] in form #}
                 <ul class=flashes>

@@ -1,5 +1,5 @@
 -DB: Change relationships (object must don't have a children field)
--FRONT-END: Change design to normal, not this
++FRONT-END: Change design to normal, not this
 -js:
     on click show form (modal)
     +validate form
@@ -12,3 +12,8 @@
     else:
         flash = Bad
     flash
+-FRONT-END: Change buttons in control panel
+
+
+-Additional: breadcrumbs to normal (classes and other)
+-Additional: macros to display mapped objects (field name must be in russian language)

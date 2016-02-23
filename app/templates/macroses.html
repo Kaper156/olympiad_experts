@@ -1,0 +1,59 @@
+{#  Macros  #}
+{% macro modal(title, body, footer, form=False, attr_id=None) -%}
+    <div class="modal fade" tabindex="-1" role="dialog" id="{{ attr_id }}">
+        <div class="modal-dialog">
+            {{ form|safe }}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">{{ title|safe }}</h4>
+                </div>
+                <div class="modal-body">
+                    {{ body|safe }}
+                </div>
+                <div class="modal-footer">
+                    {{ footer|safe }}
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+            {% if form %}
+                </form>
+            {% endif %}
+        </div>
+    </div>
+{%- endmacro %}
+
+{% macro editor(form, link, args=[], attr_id=None) -%}
+    {% set modal_form -%}
+        <form action="{{ url_for(link, **args) }}" method="post">
+    {%- endset %}
+
+    {% if attr_id %}
+        {% set modal_title = 'Изменение олимпиады' %}
+    {% else %}
+        {% set modal_title = 'Добавление олимпиады' %}
+    {% endif %}
+
+    {% set modal_body %}
+        <div class="form-horizontal">
+            {% for field in form if field.widget.input_type != 'hidden' %}
+                <div class="form-group">
+                    {{ field.label }}:
+                    {{ field() }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endset %}
+
+    {% set modal_footer %}
+        {{ form.hidden_tag() }}
+        <input type="submit" value="{{ btn_text }}" class="btn"/>
+    {% endset %}
+
+    {% if attr_id %}
+        {% set attr_id = 'modal-editor-' ~ attr_id %}
+    {% endif %}
+
+    {{ modal(title=modal_title, body=modal_body, footer=modal_footer, form=modal_form, attr_id=attr_id) }}
+{%- endmacro %}
