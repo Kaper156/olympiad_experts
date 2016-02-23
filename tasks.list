@@ -1,2 +1,14 @@
 -DB: Change relationships (object must don't have a children field)
 -FRONT-END: Change design to normal, not this
+-js:
+    on click show form (modal)
+    +validate form
+
+    send form
+    get response
+    if resp == good:
+        change view, from form
+        flash = All good
+    else:
+        flash = Bad
+    flash

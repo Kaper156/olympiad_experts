@@ -1,63 +1,103 @@
 {% extends 'base.html' %}
-{% set title = title or 'Олимпиады' %}
-{% macro editor(form, link='olympiads', args=[], new=False) -%}
-    <form action="{{ url_for(link, **args) }}" method="post">
-        <table>
-            {% if new %}
-                <h3>Добавление элемента</h3>
-            {% else %}
-                <h3>Изменение элемента</h3>
-            {% endif %}
 
+{% macro editor(form, link='olympiads', args=[], id=None) -%}
 
-            {% for field in form if field.widget.input_type != 'hidden' %}
-                <tr>
-                    <td>{{ field.label }}:</td>
-                    <td>{{ field() }}</td>
-                </tr>
-            {% endfor %}
-            <tr>
-                <td>{{ form.hidden_tag() }}</td>
-                <td><input type="submit" value="{{ btn_text }}" class="btn"/></td>
-            </tr>
-        </table>
-    </form>
+    {% set modal_form -%}
+        <form action="{{ url_for(link, **args) }}" method="post">
+    {%- endset %}
+
+	{% if id %}
+		{% set modal_title = 'Изменение олимпиады' %}
+	{% else %}
+		{% set modal_title = 'Добавление олимпиады' %}
+	{% endif %}
+
+	{% set modal_body %}
+        {% for field in form if field.widget.input_type != 'hidden' %}
+            {{ field.label }}: {{ field() }}
+        {% endfor %}
+	{% endset %}
+
+	{% set modal_footer %}
+        {{ form.hidden_tag() }}
+        <input type="submit" value="{{ btn_text }}" class="btn"/>
+	{% endset %}
+
+	{{ modal(title=modal_title, body=modal_body, footer=modal_footer, form=modal_form, id='modal-editor-'.id) }}
 {%- endmacro %}
-{% block content %}
-    <div class="olympiads">
-        <div class="control-panel">
-            <h4 class="text-centered">Управление</h4>
-            <a href="#" class="btn right" id="btn-toggle">Добавить</a>
-        </div>
-        <div class="editor" id="editor">
-            {{ editor(form, 'olympiads', {}, new=True) }}
-        </div>
 
-        {% for olympiad, form in olympiads %}
-            <div class="object-line">
-                <div class="info">
-                    <p class="field">Название: <span class="value">{{ olympiad.name }}</span></p>
 
-                    <p class="field">Дата: <span class="value">{{ olympiad.date }}</span></p>
+	{% block content %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="">Управление</h4>
 
-                    <p class="field">Описание: <span class="value">{{ olympiad.description }}</span></p>
-                </div>
-                <div class="buttons">
-                    <span class="btn-group">
-                        <a id="delete-{{ olympiad.id }}" href="{{ url_for('olympiads') }}" class="btn">
-                            <i class="icon_close_alt big"></i>Удалить
-                        </a>
-                        <a href="#" class="btn-toggle btn" about="{{ olympiad.id }}">
-                            <i class="icon_pencil-edit big"></i>Редактировать
-                        </a>
-                    </span>
-                </div>
-                <div class="editor" id="editor-{{ olympiad.id }}">
-                    {{ editor(form, link='edit_olympiads', args={'id': olympiad.id}) }}
+                <div class="btn-group">
+                    <a class="btn btn-default" href="/">
+                        <span class="glyphicon glyphicon-zoom-out"></span> Добавить
+                    </a>
+
+                    <a class="btn btn-default" href="/">
+                        <span class="glyphicon glyphicon-bed"></span> Выставить результаты
+                    </a>
+
+                    <a class="btn btn-default" href="/">
+                        <span class="glyphicon glyphicon-plus-sign"></span> Проверить состояние
+                    </a>
+
+                    <a class="btn btn-default" href="/">
+                        <span class="glyphicon glyphicon-plus-sign"></span> Просмотреть
+                    </a>
+
                 </div>
             </div>
-            <br>
-        {% endfor %}
-    </div>
-{% endblock %}
 
+            <div class="panel-body">
+                <div class="editor" id="editor">
+					{{ editor(form, 'olympiads', {}, id=None) }}
+                </div>
+            </div>
+
+            <table class="table">
+                <tr>
+                    <th>#</th>
+                    <th>Название</th>
+                    <th>Дата</th>
+                    <th>Статус</th>
+                    <th>Описание</th>
+                    <th>Действия</th>
+                </tr>
+				{% for olympiad, form in olympiads %}
+                    <tr class="info" id="info-{{ olympiad.id }}">
+                        <td>{{ olympiad.id }}</td>
+                        <td>{{ olympiad.name }}</td>
+                        <td>{{ olympiad.date }}</td>
+                        <td>Open</td>
+                        <td>{{ olympiad.description }}</td>
+                        <td>
+                        <span class="btn-group">
+                            <a class="btn btn-primary toggle-btn" href="{{ url_for('olympiads') }}"
+                               id="edit-{{ olympiad.id }}">
+	                            {#                                'modal-editor-'.id   #}
+                                <span class="glyphicon glyphicon-pencil"></span>
+                            </a>
+                            <a class="btn btn-danger" href="{{ url_for('olympiads') }}" id="delete-{{ olympiad.id }}">
+                                <span class="glyphicon glyphicon-remove-circle"></span>
+                            </a>
+                        </span>
+                        </td>
+                    </tr>
+                    {{ editor(form, link='edit_olympiads', args={'id': olympiad.id}, id=olympiad.id) }}
+				{% endfor %}
+            </table>
+        </div>
+
+
+		{#<!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+        Launch demo modal
+    </button>
+
+	<!-- Modal -->
+    {{ modal(title='EXAMPLE', body='ul>li{li#}{#*8', footer='eee', id='myModal', form='') }}#}
+	{% endblock %}

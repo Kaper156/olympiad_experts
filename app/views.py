@@ -1,4 +1,5 @@
 from app import render_template, db, app, request, redirect, url_for, flash, abort, jsonify, flash_errors
+from app import breadcrumbs
 from app.models import Olympiad, Criterion, SubCriterion, Aspect, Measurement, MeasurementType
 from app.models import User, Role, Privilege
 from app.forms import OlympiadForm, MeasurementForm, AspectForm
@@ -6,6 +7,10 @@ from wtforms.ext.sqlalchemy.orm import model_form
 
 
 @app.route('/')
+def index():
+    return render_template('base.html', breadcrumbs=breadcrumbs[:1])
+
+
 @app.route('/olympiads', methods=['POST', 'GET'])
 def olympiads():
     instances = list()
@@ -22,9 +27,10 @@ def olympiads():
         db.session.commit()
         flash('Олимпиада добавлена! \n %s: %s' % (olympiad.id, olympiad.name), 'error')
     flash_errors(editor)
-    return render_template('olympiads.html', olympiads=instances, form=editor)
+    return render_template('olympiads.html', breadcrumbs=breadcrumbs[:2], olympiads=instances, form=editor)
 
 
+# for ajax
 @app.route('/olympiads/edit-<int:id>', methods=['POST'])
 def edit_olympiads(id):
     Form = model_form(Olympiad, base_class=OlympiadForm, db_session=db.session)
@@ -39,13 +45,11 @@ def edit_olympiads(id):
     return jsonify({'answer': False})
 
 
-
-@app.route('/ajax/get/olympiad_<int:id>')
-def get_olympiad(id):
-    return get_element(Olympiad, id)
-
-
-def get_element(cls, id):
-    print((db.session.query(cls).get(id)).__dict__)
-    return jsonify(**db.session.query(cls).get(id).__dict__)
-
+# @app.route('/ajax/get/olympiad_<int:id>')
+# def get_olympiad(id):
+#     return get_element(Olympiad, id)
+#
+#
+# def get_element(cls, id):
+#     print((db.session.query(cls).get(id)).__dict__)
+#     return jsonify(**db.session.query(cls).get(id).__dict__)

@@ -1,55 +1,116 @@
 <!DOCTYPE html>
-{% set title = 'Олимпиады' %}
+{#  Macros  #}
+{% macro modal(title, body, footer, form=False, id=None) -%}
+    <div class="modal fade" tabindex="-1" role="dialog" id="{{ id }}">
+        <div class="modal-dialog">
+            {{ form|safe }}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">{{ title|safe }}</h4>
+                </div>
+                <div class="modal-body">
+                    {{ body|safe }}
+                </div>
+                <div class="modal-footer">
+                    {{ footer|safe }}
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+            {% if form %}
+                </form>
+            {% endif %}
+        </div>
+    </div>
+{%- endmacro %}
+
+
 <html>
 <head>
-    {% block head %}
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	{% block head %}
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link href="{{ url_for('static', filename='css/bootstrap-glyphicons.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
         <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/jquery.form.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/jquery.magnific-popup.min.js') }}"></script>
+		{#        <script src="{{ url_for('static', filename='js/jquery.form.js') }}"></script>#}
+		{#        <script src="{{ url_for('static', filename='js/jquery.magnific-popup.min.js') }}"></script>#}
+        <script src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
+
+
+        {% set title = title or 'Олимпиады' %}
         <title>{{ title }}</title>
-    {% endblock %}
+	{% endblock %}
 </head>
+
 <body>
+{#  Head things    #}
 <header>
-    <row centered>
-        <column cols="1">
-            <a href="{{ url_for('olympiads') }}" class="btn" outline>olympiads</a>
-        </column>
-    </row>
+    <nav class="navbar navbar-default navbar-static-top">
+        <div class="container-fluid">
+            <div class="navbar-header navbar-left">
+                <a class="navbar-brand" href="/">Олимпиады ОАТ</a>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+
+                <li><a class="btn" href="{{ url_for('olympiads') }}">Olympiads</a></li>
+            </ul>
+        </div>
+    </nav>
 </header>
 
-<div id="wrapper">
-    <row centered>
-        <column cols="8">
-
-            {# Page title here #}
-            <h3 class="title">{{ title }}</h3>
-
-            {# Show errors #}
-            {% with messages = get_flashed_messages() %}
-              {% if messages and messages != [None] %} {# A strange bug with getted [None] in form #}
-                <ul class=flashes>
-                {% for message in messages %}
-                  <li>{{ message }}</li>
-                {% endfor %}
-                </ul>
-              {% endif %}
-            {% endwith %}
-
-            {# Main content block #}
-            <div id="content">
-            {% block content %}
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquam consectetur corporis, facilis perspiciatis quis quo voluptate! Ad atque eos ex maxime quae! Consectetur cumque eos esse maxime neque reiciendis tempora!</p>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquam consectetur corporis, facilis perspiciatis quis quo voluptate! Ad atque eos ex maxime quae! Consectetur cumque eos esse maxime neque reiciendis tempora!</p>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquam consectetur corporis, facilis perspiciatis quis quo voluptate! Ad atque eos ex maxime quae! Consectetur cumque eos esse maxime neque reiciendis tempora!</p>
-            {% endblock %}
+{#  Contents    #}
+<div class="container-fluid">
+    <div class="col-md-8 col-md-offset-2" id="wrapper">
+		{#  BreadCrumbs   #}
+		{% if breadcrumbs %}
+            <div class="nav navbar-nav">
+                <ol class="breadcrumb">
+					{% for text, link in breadcrumbs[:-1] %}
+                        <li><a href="{{ url_for(link) }}">{{ text }}</a></li>
+					{% endfor %}
+                    <li class="active">{{ breadcrumbs[-1][0] }}</li>
+                </ol>
             </div>
+            <br>
+		{% endif %}
 
-        </column>
-    </row>
+		{# Page title here #}
+        <h2 class="title text-center">{{ title }}</h2>
+
+		{# Show errors #}
+		{% with messages = get_flashed_messages() %}
+			{% if messages and messages != [None] %} {# A strange bug with getted [None] in form #}
+                <ul class=flashes>
+					{% for message in messages %}
+                        <li>{{ message }}</li>
+					{% endfor %}
+                </ul>
+			{% endif %}
+		{% endwith %}
+
+		{# Main content block #}
+        <div id="content">
+			{% block content %}
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquam consectetur corporis, facilis
+                    perspiciatis quis quo voluptate! Ad atque eos ex maxime quae! Consectetur cumque eos esse maxime
+                    neque reiciendis tempora!</p>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquam consectetur corporis, facilis
+                    perspiciatis quis quo voluptate! Ad atque eos ex maxime quae! Consectetur cumque eos esse maxime
+                    neque reiciendis tempora!</p>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquam consectetur corporis, facilis
+                    perspiciatis quis quo voluptate! Ad atque eos ex maxime quae! Consectetur cumque eos esse maxime
+                    neque reiciendis tempora!</p>
+			{% endblock %}
+        </div>
+
+    </div>
 </div>
-<footer>Some stuff for footer</footer>
 </body>
 </html>
 

@@ -52,4 +52,8 @@ def flash_errors(form):
 
 
 # Routing
+breadcrumbs = [
+    ('Главная', 'index'),
+    ('Олимпиады', 'olympiads'),
+]
 from app import views
