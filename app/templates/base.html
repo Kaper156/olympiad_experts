@@ -26,6 +26,19 @@
         <div class="container-fluid">
             <div class="navbar-header navbar-left">
                 <a class="navbar-brand" href="/">Олимпиады ОАТ</a>
+
+                {#  BreadCrumbs   #}
+                {% if breadcrumbs %}
+                    <div class="nav navbar-nav">
+                        <ol class="breadcrumb">
+                            {% for text, link in breadcrumbs[:-1] %}
+                                <li><a href="{{ url_for(link) }}">{{ text }}</a></li>
+                            {% endfor %}
+                            <li class="active">{{ breadcrumbs[-1][0] }}</li>
+                        </ol>
+                    </div>
+                    <br>
+                {% endif %}
             </div>
             <ul class="nav navbar-nav navbar-right">
 
@@ -39,32 +52,11 @@
 <div class="container-fluid">
     <div class="col-md-8 col-md-offset-2" id="wrapper">
 
-		{#  BreadCrumbs   #}
-		{% if breadcrumbs %}
-            <div class="nav navbar-nav">
-                <ol class="breadcrumb">
-					{% for text, link in breadcrumbs[:-1] %}
-                        <li><a href="{{ url_for(link) }}">{{ text }}</a></li>
-					{% endfor %}
-                    <li class="active">{{ breadcrumbs[-1][0] }}</li>
-                </ol>
-            </div>
-            <br>
-		{% endif %}
-
 		{# Page title #}
         <h2 class="title text-center">{{ title }}</h2>
 
 		{# Show messages #}
-		{% with messages = get_flashed_messages() %}
-			{% if messages and messages != [None] %} {# A strange bug with getted [None] in form #}
-                <ul class=flashes>
-					{% for message in messages %}
-                        <li>{{ message }}</li>
-					{% endfor %}
-                </ul>
-			{% endif %}
-		{% endwith %}
+
 
 		{# Main content block #}
         <div id="content">
