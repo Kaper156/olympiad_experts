@@ -26,7 +26,8 @@ from flask.json import JSONEncoder, dumps
 from sqlalchemy.ext.declarative import DeclarativeMeta
 
 
-class CustomJSONEncoder(JSONEncoder):
+# Routing
+class MappedJSONEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj.__class__, DeclarativeMeta):
             # обрабатываем объект sqlalchemy
@@ -40,6 +41,7 @@ class CustomJSONEncoder(JSONEncoder):
                 except TypeError:
                     fields[field] = None
             return fields
+app.json_encoder = MappedJSONEncoder
 
 
 def flash_errors(form):
@@ -51,7 +53,6 @@ def flash_errors(form):
             ))
 
 
-# Routing
 breadcrumbs = [
     ('Главная', 'index'),
     ('Олимпиады', 'olympiads'),

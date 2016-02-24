@@ -1,20 +1,32 @@
--DB: Change relationships (object must don't have a children field)
-+FRONT-END: Change design to normal, not this
--js:
-    on click show form (modal)
-    +validate form
++DB: Change relationships (object must don't have a children field)
+    use exclude fields in model_form()
 
-    send form
-    get response
-    if resp == good:
-        change view, from form
-        flash = All good
-    else:
-        flash = Bad
-    flash
++FRONT-END: Change design to normal, not this
+
++js:
+    ajax_submit
+    to flash
+    dynamic change html
+
 -FRONT-END: Change buttons in control panel
+-FRONT-END: Change modal editor form (sticky)
+
++Models-forms: date format olympiad
+    format is Day.Month.YEAR
+
++Flash()
+    don't need, ajax get response like
+        {'category': ['mes1', 'mes2'], 'etc': ['e1']}
+
++Jquery form-submit
+    maybe work on all pages, maybe
+
 
 -DB: Add status field to olympiad
+-Rewrite flash_errors(form)
+-Ajax-Wrapper function (get function, return json-answer)
+
+
 
 -Additional: breadcrumbs to normal (classes and other)
 -Additional: macros to display mapped objects (field name must be in russian language)

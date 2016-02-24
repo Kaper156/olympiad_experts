@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 
 {% from 'macroses.html' import modal, editor, show_flashed %}
-
+{% block head %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/jquery.form.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+{% endblock %}
 {% block content %}
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -13,9 +17,14 @@
                     <span class="glyphicon glyphicon-plus"></span> Добавить
                 </button>
 
+                <a class="btn btn-default" href="{{ url_for('olympiads') }}">
+                    <span class="glyphicon glyphicon-refresh"></span> Обновить
+                </a>
+
                 <a class="btn btn-default" href="/">
                     <span class="glyphicon glyphicon-bed"></span> Выставить результаты
                 </a>
+
 
                 <a class="btn btn-default" href="/">
                     <span class="glyphicon glyphicon-plus-sign"></span> Проверить состояние
@@ -27,14 +36,16 @@
 
             </div>
         </div>
-
-        {{ show_flashed() }}
-
-        <div class="panel-body">
-                {{ editor(form, 'olympiads', {}, attr_id='editor-new') }}
+        <div class='flash-list'>
+            {{ show_flashed() }}
         </div>
 
-        <table class="table">
+
+        <div class="panel-body">
+			{{ editor(form=form, attr_id='editor-new', link='add_olympiad', args={}, new=True) }}
+        </div>
+
+        <table class="table" id="objects-table">
             <tr>
                 <th>#</th>
                 <th>Название</th>
@@ -43,7 +54,7 @@
                 <th>Описание</th>
                 <th>Действия</th>
             </tr>
-            {% for olympiad, form in olympiads %}
+			{% for olympiad, form in olympiads %}
                 <tr class="info" id="info-{{ olympiad.id }}">
                     <td>{{ olympiad.id }}</td>
                     <td>{{ olympiad.name }}</td>
@@ -62,8 +73,8 @@
                     </span>
                     </td>
                 </tr>
-                {{ editor(form, link='edit_olympiads', args={'id': olympiad.id}, attr_id=olympiad.id) }}
-            {% endfor %}
+				{{ editor(form, link='edit_olympiads', args={'id': olympiad.id}, attr_id=olympiad.id) }}
+			{% endfor %}
         </table>
     </div>
 

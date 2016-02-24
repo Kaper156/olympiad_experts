@@ -1,6 +1,6 @@
 {#  Macros  #}
-{% macro modal(title, body, footer, form=False, attr_id=None) -%}
-    <div class="modal fade" tabindex="-1" role="dialog" id="{{ attr_id }}">
+{% macro modal(title, body, footer, form=False, attr_id=None, additional_cls='') -%}
+    <div class="modal fade {{ additional_cls }} " tabindex="-1" role="dialog" id="{{ attr_id }}">
         <div class="modal-dialog">
             {{ form|safe }}
             <div class="modal-content">
@@ -24,7 +24,7 @@
     </div>
 {%- endmacro %}
 
-{% macro editor(form, link, args=[], attr_id=None) -%}
+{% macro editor(form, attr_id, link, args=[], new=None) -%}
     {% set modal_form -%}
         <form action="{{ url_for(link, **args) }}" method="post">
     {%- endset %}
@@ -51,21 +51,23 @@
         <input type="submit" value="{{ btn_text }}" class="btn"/>
     {% endset %}
 
-    {% if attr_id %}
+    {% if attr_id and not new %}
         {% set attr_id = 'modal-editor-' ~ attr_id %}
     {% endif %}
 
-    {{ modal(title=modal_title, body=modal_body, footer=modal_footer, form=modal_form, attr_id=attr_id) }}
+    {% set additional_cls='editor' %}
+
+    {{ modal(title=modal_title, body=modal_body, footer=modal_footer, form=modal_form, attr_id=attr_id, additional_cls=additional_cls) }}
 {%- endmacro %}
 
 {%  macro show_flashed() -%}
     {% with messages = get_flashed_messages() %}
             {% if messages and messages != [None] %} {# A strange bug with getted [None] in form #}
-                <ul class=flashes>
+{#                <ul class=flashes>#}
                     {% for message in messages %}
                         <li>{{ message }}</li>
                     {% endfor %}
-                </ul>
+{#                </ul>#}
             {% endif %}
         {% endwith %}
 {%- endmacro %}
