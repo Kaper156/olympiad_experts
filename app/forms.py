@@ -28,3 +28,10 @@ class OlympiadForm(Form):
     date = DateField('Дата начала', format='%d.%m.%Y', description='Дата начала')  # , validators=[DataRequired()]
     description = TextAreaField('Описание')
 
+
+class CriterionForm(Form):
+    class Meta:
+        exclude = ['Role', 'Criterion']
+    name = StringField('Название', validators=[DataRequired()], description='Название')
+    date = DateField('Дата начала', format='%d.%m.%Y', description='Дата начала')  # , validators=[DataRequired()]
+    description = TextAreaField('Описание')

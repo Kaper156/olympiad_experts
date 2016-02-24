@@ -7,8 +7,8 @@ from sqlalchemy.orm import relationship
 class OlympiadBase(db.Model):
     __abstract__ = True
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    max_balls = Column(Float, nullable=False)
-    name = Column(String, nullable=False)
+    name = Column('Название', String, nullable=False)
+    max_balls = Column('Максимум баллов', Float, nullable=False)
 
     def __init__(self, name, max_balls):
         self.name = name
@@ -18,7 +18,7 @@ class OlympiadBase(db.Model):
 # Конкретное задание: Установить ОС Windows Xp
 class Aspect(OlympiadBase):
     __tablename__ = 'Aspect'
-    description = Column(Text)
+    description = Column('Описание', Text)
     sub_criterion_id = db.Column(db.Integer, db.ForeignKey('SubCriterion.id'))
     sub_criterion = db.relationship('SubCriterion', backref=db.backref('Aspect', lazy='dynamic'))
 
@@ -78,9 +78,9 @@ class Criterion(OlympiadBase):
 class Olympiad(db.Model):
     __tablename__ = 'Olympiad'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(String, nullable=False)
-    date = Column(Date, nullable=False)
-    description = Column(String)
+    name = Column('Название', String, nullable=False)
+    date = Column('Дата', Date, nullable=False)
+    description = Column('Описание', String)
 
     def __init__(self, name, date, description=None):
         self.name = name
@@ -99,7 +99,7 @@ class Privilege(db.Model):
     __tablename__ = 'Privilege'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(String, nullable=False)
-    rights = Column(String, nullable=False)
+    rights = Column('Уровень', Integer, nullable=False)
 
     def __init__(self, name, rights):
         self.name = name
@@ -110,8 +110,8 @@ class Privilege(db.Model):
 class User(db.Model):
     __tablename__ = 'User'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    login = Column(String, nullable=False)
-    password = Column(String, nullable=False)
+    login = Column('Логин', String, nullable=False)
+    password = Column('Пароль', String, nullable=False)
 
     def __init__(self, login, password):
         self.login = login
