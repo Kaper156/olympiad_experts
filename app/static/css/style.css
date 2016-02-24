@@ -1,2 +1,6 @@
 body {background-image: url("../img/6875A3.png")}
 #wrapper {background-color: white}
+.table-striped>tbody>tr:nth-child(odd)>td,
+.table-striped>tbody>tr:nth-child(odd)>th {
+   background-color: white;
+ }

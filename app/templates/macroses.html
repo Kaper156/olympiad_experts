@@ -1,5 +1,7 @@
 {#  Macros  #}
+{#  Print modal form for showing with buttons on JS  #}
 {% macro modal(title, body, footer, form=False, attr_id=None, additional_cls='') -%}
+    {# attr_id: id to button data-toggle  #}
     <div class="modal fade {{ additional_cls }} " tabindex="-1" role="dialog" id="{{ attr_id }}">
         <div class="modal-dialog">
             {{ form|safe }}
@@ -14,7 +16,7 @@
                 </div>
                 <div class="modal-footer">
                     {{ footer|safe }}
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
                 </div>
             </div>
             {% if form %}
@@ -24,7 +26,35 @@
     </div>
 {%- endmacro %}
 
-{% macro editor(form, attr_id, link, args=[], new=None) -%}
+{% macro delete_object(title, body, attr_id, link, args) -%}
+    {# attr_id: id to button data-toggle  #}
+    {# link: string param to url_for #}
+    {# args: dict of param to url_for ({id:1}) #}
+    {% set link = url_for(link, **args) %}
+    {% set form = '<form action="' ~ link ~ '" method="post">' %}
+
+    {% set footer = '<input type="submit" value="Удалить" class="btn btn-danger"/>' %}
+
+{#    {%- endset %}#}
+    {{ modal(title=title, body=body, footer=footer, form=form, attr_id=attr_id) }}
+{%- endmacro %}
+
+{% macro delete_olympiad(attr_id) -%}
+    {# attr_id: only number of object #}
+    {% set link = 'del_olympiad' %}
+    {% set args = {'id':attr_id} %}
+    {% set attr_id = 'modal-delete-'~attr_id %}
+    {% set title = 'Вы действительно хотите удалить эту олимпиаду?' %}
+    {% set body -%}
+        <p>
+            Пути назад нет.
+        </p>
+    {#TODO#}
+    {%- endset %}
+    {{ delete_object(title=title, body=body, attr_id=attr_id, link=link, args=args) }}
+{%- endmacro %}
+
+{% macro editor(form, attr_id, link, args={}, new=None) -%}
     {% set modal_form -%}
         <form action="{{ url_for(link, **args) }}" method="post">
     {%- endset %}
@@ -61,13 +91,11 @@
 {%- endmacro %}
 
 {%  macro show_flashed() -%}
-    {% with messages = get_flashed_messages() %}
-            {% if messages and messages != [None] %} {# A strange bug with getted [None] in form #}
-{#                <ul class=flashes>#}
-                    {% for message in messages %}
-                        <li>{{ message }}</li>
-                    {% endfor %}
-{#                </ul>#}
-            {% endif %}
-        {% endwith %}
+	{% with messages = get_flashed_messages(with_categories=true) %}
+		{% if messages %}
+			{% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+			{% endfor %}
+		{% endif %}
+	{% endwith %}
 {%- endmacro %}

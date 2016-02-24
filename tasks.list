@@ -21,10 +21,13 @@
 +Jquery form-submit
     maybe work on all pages, maybe
 
+-FRONT-END: Change id to modal with object types
+-FRONT-END: SubLine of tables (aspect, etc) have in
+                                        http://getbootstrap.com/javascript/#collapse
 
 -DB: Add status field to olympiad
 -Rewrite flash_errors(form)
--Ajax-Wrapper function (get function, return json-answer)
+    add function to flash-edit, del, add objects
 
 
 

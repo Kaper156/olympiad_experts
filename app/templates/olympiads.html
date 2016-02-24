@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% from 'macroses.html' import modal, editor, show_flashed %}
+{% from 'macroses.html' import modal, editor, show_flashed, delete_olympiad %}
 
 {% block content %}
     <div class="panel panel-default">
@@ -20,16 +20,7 @@
                 <a class="btn btn-default" href="/">
                     <span class="glyphicon glyphicon-bed"></span> Выставить результаты
                 </a>
-
-
-                <a class="btn btn-default" href="/">
-                    <span class="glyphicon glyphicon-plus-sign"></span> Проверить состояние
-                </a>
-
-                <a class="btn btn-default" href="/">
-                    <span class="glyphicon glyphicon-plus-sign"></span> Просмотреть
-                </a>
-
+                
             </div>
         </div>
         <div class='flash-list'>
@@ -41,39 +32,48 @@
 			{{ editor(form=form, attr_id='editor-new', link='add_olympiad', args={}, new=True) }}
         </div>
 
-        <table class="table" id="objects-table">
-            <tr>
-                <th>#</th>
-                <th>Название</th>
-                <th>Дата</th>
-                <th>Статус</th>
-                <th>Описание</th>
-                <th>Действия</th>
-            </tr>
-			{% for olympiad, form in olympiads %}
-                <tr class="info" id="info-{{ olympiad.id }}">
-                    <td>{{ olympiad.id }}</td>
-                    <td>{{ olympiad.name }}</td>
-                    <td>{{ olympiad.date }}</td>
-                    <td>Open</td>
-                    <td>{{ olympiad.description }}</td>
-                    <td>
-                    <span class="btn-group">
-                        <button type="button" class="btn btn-primary"
-                                data-toggle="modal" data-target="#modal-editor-{{ olympiad.id }}">
-                            <span class="glyphicon glyphicon-pencil"></span>
-                        </button>
-
-                        <button type="button" class="btn btn-primary"
-                                data-toggle="modal" data-target="#modal-delete-{{ olympiad.id }}">
-                            <span class="glyphicon glyphicon-remove-circle"></span>
-                        </button>
-                    </span>
-                    </td>
+        <table class="table table-striped" id="objects-table">
+            <tbody>
+                <tr>
+                    <th>#</th>
+                    <th>Название</th>
+                    <th>Дата</th>
+                    <th>Статус</th>
+                    <th>Описание</th>
+                    <th>Действия</th>
                 </tr>
-                
-				{{ editor(form, link='edit_olympiads', args={'id': olympiad.id}, attr_id=olympiad.id) }}
-			{% endfor %}
+                {% for olympiad, form in olympiads %}
+                    <tr class="info" id="info-{{ olympiad.id }}">
+                        <td>{{ olympiad.id }}</td>
+                        <td>{{ olympiad.name }}</td>
+                        <td>{{ olympiad.date }}</td>
+                        <td>Open</td>
+                        <td>{{ olympiad.description }}</td>
+                        <td>
+                        <span class="btn-group">
+                            <button type="button" class="btn btn-primary"
+                                    data-toggle="modal" data-target="#modal-editor-{{ olympiad.id }}">
+                                <span class="glyphicon glyphicon-pencil"></span> Редактировать
+                            </button>
+
+
+                            <button type="button" class="btn btn-primary"
+                                    data-toggle="modal" data-target="#modal-delete-{{ olympiad.id }}">
+                                <span class="glyphicon glyphicon-list"></span> Распределить
+                            </button>
+
+                            <button type="button" class="btn btn-danger"
+                                    data-toggle="modal" data-target="#modal-delete-{{ olympiad.id }}">
+                                <span class="glyphicon glyphicon-remove-circle"></span> Удалить
+                            </button>
+
+                        </span>
+                        </td>
+                    </tr>
+                    {{ delete_olympiad(attr_id=olympiad.id) }}
+                    {{ editor(form, link='edit_olympiads', args={'id': olympiad.id}, attr_id=olympiad.id) }}
+                {% endfor %}
+            </tbody>
         </table>
     </div>
 

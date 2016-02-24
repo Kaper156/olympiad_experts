@@ -28,7 +28,7 @@ def olympiads():
                             description=editor.description.data)
         db.session.add(olympiad)
         db.session.commit()
-        flash('Олимпиада добавлена! \n %s: %s' % (olympiad.id, olympiad.name), 'error')
+        flash('Олимпиада добавлена! \n %s: %s' % (olympiad.id, olympiad.name), 'info')
     flash_errors(editor)
     return render_template('olympiads.html', breadcrumbs=breadcrumbs[:2], olympiads=instances, form=editor)
 
@@ -41,7 +41,7 @@ def edit_olympiads(id):
     if request.method == 'POST' and form.validate():
         form.populate_obj(olympiad)
         db.session.commit()
-        flash('Олимпиада измененна', 'primary')
+        flash('Олимпиада #%s: "%s" измененна' % (olympiad.id, olympiad.name), 'info')
     else:
         flash('Ошибка при изменении олимпиады', 'warning')
         flash_errors(form)
@@ -57,7 +57,7 @@ def add_olympiad():
                             description=form.description.data)
         db.session.add(olympiad)
         db.session.commit()
-        flash('Олимпиада #%s: "%s"добавлена! \n ' % (olympiad.id, olympiad.name), 'primary')
+        flash('Олимпиада #%s: "%s" добавлена! \n ' % (olympiad.id, olympiad.name), 'info')
     else:
         flash_errors(form)
     return redirect(url_for('olympiads'))
@@ -65,7 +65,10 @@ def add_olympiad():
 
 @app.route('/olympiads/delete-<int:id>', methods=['POST'])
 def del_olympiad(id):
-    db.session.session.query(Olympiad).filter(Olympiad.id == id).delete()
+    olympiad = db.session.query(Olympiad).get(id)
+    flash('Олимпиада #%s: "%s" удалена! \n ' % (olympiad.id, olympiad.name), 'warning')
+
+    db.session.query(Olympiad).filter(Olympiad.id == id).delete()
     db.session.commit()
     return redirect(url_for('olympiads'))
 

@@ -87,6 +87,12 @@ class Olympiad(db.Model):
         self.date = date
         self.description = description
 
+# Этап олимпиады
+class Status(db.Model):
+    __tablename__ = 'Status'
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    name = Column(String, nullable=False)
+
 
 # Права
 class Privilege(db.Model):
