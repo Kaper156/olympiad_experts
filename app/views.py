@@ -11,7 +11,7 @@ def index():
     return render_template('base.html', breadcrumbs=breadcrumbs[:1])
 
 
-@app.route('/olympiads', methods=['POST', 'GET'])
+@app.route('/olympiads/', methods=['POST', 'GET'])
 def olympiads():
     instances = list()
     for olympiad in db.session.query(Olympiad).all():
@@ -33,28 +33,23 @@ def olympiads():
     return render_template('olympiads.html', breadcrumbs=breadcrumbs[:2], olympiads=instances, form=editor)
 
 
-# for ajax
 @app.route('/olympiads/edit-<int:id>', methods=['POST'])
 def edit_olympiads(id):
-    answer = ajax_init_answer()
-
     Form = model_form(Olympiad, base_class=OlympiadForm, db_session=db.session)
     olympiad = db.session.query(Olympiad).get(id)
     form = Form(request.form, Olympiad)
     if request.method == 'POST' and form.validate():
         form.populate_obj(olympiad)
         db.session.commit()
-        answer['primary'].append('Олимпиада измененна')
-        answer['status'] = True
+        flash('Олимпиада измененна', 'primary')
     else:
-        answer['warning'].append('Ошибка при изменении олимпиады')
-        answer['warning'].extend(flash_errors(form))
-    return jsonify(**answer)
+        flash('Ошибка при изменении олимпиады', 'warning')
+        flash_errors(form)
+    return redirect(url_for('olympiads'))
+
 
 @app.route('/olympiads/add', methods=['POST'])
 def add_olympiad():
-    answer = ajax_init_answer()
-
     form = OlympiadForm()
     if request.method == 'POST' and form.validate():
         olympiad = Olympiad(name=form.name.data,
@@ -62,17 +57,15 @@ def add_olympiad():
                             description=form.description.data)
         db.session.add(olympiad)
         db.session.commit()
-        answer['primary'].append('Олимпиада #%s: "%s"добавлена! \n ' % (olympiad.id, olympiad.name))
-        answer['elements'].append(olympiad)
-        answer['status'] = True
+        flash('Олимпиада #%s: "%s"добавлена! \n ' % (olympiad.id, olympiad.name), 'primary')
     else:
-        answer['warning'].extend(flash_errors(form))
-    return jsonify(**answer)
+        flash_errors(form)
+    return redirect(url_for('olympiads'))
 
 
-def ajax_init_answer():
-    return {'status': False,
-            'elements': [],
-            'primary': [],
-            'warning': [],
-            }
+@app.route('/olympiads/delete-<int:id>', methods=['POST'])
+def del_olympiad(id):
+    db.session.session.query(Olympiad).filter(Olympiad.id == id).delete()
+    db.session.commit()
+    return redirect(url_for('olympiads'))
+

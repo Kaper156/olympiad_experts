@@ -1,11 +1,7 @@
 {% extends 'base.html' %}
 
 {% from 'macroses.html' import modal, editor, show_flashed %}
-{% block head %}
-    {{ super() }}
-    <script src="{{ url_for('static', filename='js/jquery.form.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/editor.js') }}"></script>
-{% endblock %}
+
 {% block content %}
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -67,12 +63,15 @@
                                 data-toggle="modal" data-target="#modal-editor-{{ olympiad.id }}">
                             <span class="glyphicon glyphicon-pencil"></span>
                         </button>
-                        <a class="btn btn-danger" href="{{ url_for('olympiads') }}" id="delete-{{ olympiad.id }}">
+
+                        <button type="button" class="btn btn-primary"
+                                data-toggle="modal" data-target="#modal-delete-{{ olympiad.id }}">
                             <span class="glyphicon glyphicon-remove-circle"></span>
-                        </a>
+                        </button>
                     </span>
                     </td>
                 </tr>
+                
 				{{ editor(form, link='edit_olympiads', args={'id': olympiad.id}, attr_id=olympiad.id) }}
 			{% endfor %}
         </table>
