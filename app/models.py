@@ -18,11 +18,9 @@ class OlympiadBase(db.Model):
 # Конкретное задание: Установить ОС Windows Xp
 class Aspect(OlympiadBase):
     __tablename__ = 'Aspect'
-    # id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    # name = Column(String)
     description = Column(Text)
-    measurements = relationship("Measurement")
-    id_sub_criterion = Column(Integer, ForeignKey('SubCriterion.id'))
+    sub_criterion_id = db.Column(db.Integer, db.ForeignKey('SubCriterion.id'))
+    sub_criterion = db.relationship('SubCriterion', backref=db.backref('Aspect', lazy='dynamic'))
 
     def __init__(self, name, max_balls=0, description=None):
         OlympiadBase.__init__(self, name, max_balls)
@@ -37,7 +35,6 @@ class MeasurementType(db.Model):
     description = Column(String)
     # TODO хранить текст лямбда функций?
     method = Column(Text)
-    measurements = relationship('Measurement')
 
     def __init__(self, name, method, description=None):
         self.name = name
@@ -50,8 +47,11 @@ class Measurement(db.Model):
     __tablename__ = 'Measurement'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     max_balls = Column(Float, nullable=False)
-    id_aspect = Column(Integer, ForeignKey('Aspect.id'))
-    id_measurement_type = Column(Integer, ForeignKey('MeasurementType.id'))
+
+    aspect_id = db.Column(db.Integer, db.ForeignKey('Aspect.id'))
+    aspect = db.relationship('Aspect', backref=db.backref('Measurement', lazy='dynamic'))
+    measurement_type_id = db.Column(db.Integer, db.ForeignKey('MeasurementType.id'))
+    measurement_type = db.relationship('MeasurementType', backref=db.backref('Measurement', lazy='dynamic'))
 
     def __init__(self, max_balls, aspect, measurement):
         # TODO init from parent id, calc ball_limit = parent.balls - sum([parent.children.ball])
@@ -63,15 +63,15 @@ class Measurement(db.Model):
 # Часть привязанная к конкретной области: ОС Linux, Программирование на Python
 class SubCriterion(OlympiadBase):
     __tablename__ = 'SubCriterion'
-    id_criterion = Column(Integer, ForeignKey('Criterion.id'))
-    aspects = relationship('Aspect')
+    criterion_id = db.Column(db.Integer, db.ForeignKey('Criterion.id'))
+    criterion = db.relationship('Criterion', backref=db.backref('SubCriterion', lazy='dynamic'))
 
 
 # Часть олимпиады: Настройка сетевого оборудования, etc
 class Criterion(OlympiadBase):
     __tablename__ = 'Criterion'
-    id_olympiad = Column(Integer, ForeignKey('Olympiad.id'))
-    sub_criterion = relationship('SubCriterion')
+    olympiad_id = db.Column(db.Integer, db.ForeignKey('Olympiad.id'))
+    olympiad = db.relationship('Olympiad', backref=db.backref('Criterion', lazy='dynamic'))
 
 
 # Мероприятие
@@ -81,8 +81,6 @@ class Olympiad(db.Model):
     name = Column(String, nullable=False)
     date = Column(Date, nullable=False)
     description = Column(String)
-    criterion = relationship('Criterion')
-    role = relationship('Role')
 
     def __init__(self, name, date, description=None):
         self.name = name
@@ -96,7 +94,6 @@ class Privilege(db.Model):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(String, nullable=False)
     rights = Column(String, nullable=False)
-    role = relationship('Role')
 
     def __init__(self, name, rights):
         self.name = name
@@ -109,7 +106,6 @@ class User(db.Model):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     login = Column(String, nullable=False)
     password = Column(String, nullable=False)
-    role = relationship('Role')
 
     def __init__(self, login, password):
         self.login = login
@@ -120,9 +116,15 @@ class User(db.Model):
 class Role(db.Model):
     __tablename__ = 'Role'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    id_user = Column(Integer, ForeignKey('User.id'))
-    id_olympiad = Column(Integer, ForeignKey('Olympiad.id'))
-    id_privilege = Column(Integer, ForeignKey('Privilege.id'))
+
+    olympiad_id = db.Column(db.Integer, db.ForeignKey('Olympiad.id'))
+    olympiad = db.relationship('Olympiad', backref=db.backref('Role', lazy='dynamic'))
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.id'))
+    user = db.relationship('User', backref=db.backref('Role', lazy='dynamic'))
+
+    privilege_id = db.Column(db.Integer, db.ForeignKey('Privilege.id'))
+    privilege = db.relationship('Privilege', backref=db.backref('Role', lazy='dynamic'))
 
     def __init__(self, user, olympiad, privilege):
         self.id_olympiad = olympiad

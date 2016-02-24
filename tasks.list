@@ -18,3 +18,4 @@
 
 -Additional: breadcrumbs to normal (classes and other)
 -Additional: macros to display mapped objects (field name must be in russian language)
+-Additional: Flask-Migrate
