@@ -7,11 +7,43 @@ from app.flashing import flash, flash_form_errors, flash_error, flash_add, flash
 from wtforms.ext.sqlalchemy.orm import model_form
 
 
+# UNIFICATED ADD, DELETE, EDIT instances
+def add_instance(_class, _form):
+    instance = _class()
+    form = _form(request.form)
+    if form.validate_on_submit():
+        form.populate_obj(instance)
+        db.session.add(instance)
+        db.session.commit()
+        flash_add(instance)
+    else:
+        flash_form_errors(form)
+
+
+def edit_instance(_class, _form, _id):
+    instance = db.session.query(_class).get(_id)
+    form = _form(request.form, _class)
+    if request.method == 'POST' and form.validate():
+        form.populate_obj(instance)
+        db.session.commit()
+        flash_edit(instance)
+    else:
+        flash_form_errors(form)
+
+
+def del_instance(_class, _id):
+    instance = db.session.query(_class).get(_id)
+    db.session.query(_class).filter(_class.id == _id).delete()
+    flash_delete(instance)
+    db.session.commit()
+
+
 @app.route('/')
 def index():
     return render_template('base.html', breadcrumbs=breadcrumbs[:1])
 
 
+# Olympiads pages
 @app.route('/olympiads/', methods=['POST', 'GET'])
 def olympiads():
 
@@ -29,40 +61,23 @@ def olympiads():
 
 @app.route('/olympiads/add', methods=['POST'])
 def add_olympiad():
-    olympiad = Olympiad()
-    editor = OlympiadForm(request.form)
-    if editor.validate_on_submit():
-        editor.populate_obj(olympiad)
-        db.session.add(olympiad)
-        db.session.commit()
-        flash_add(olympiad)
-    else:
-        flash_form_errors(editor)
+    add_instance(_class=Olympiad, _form=OlympiadForm)
     return redirect(url_for('olympiads'))
 
 
 @app.route('/olympiad-<int:id>/edit', methods=['POST'])
-def edit_olympiads(id):
-    olympiad = db.session.query(Olympiad).get(id)
-    form = OlympiadForm(request.form, Olympiad)
-    if request.method == 'POST' and form.validate():
-        form.populate_obj(olympiad)
-        db.session.commit()
-        flash_edit(olympiad)
-    else:
-        flash_form_errors(form)
+def edit_olympiad(id):
+    edit_instance(_class=Olympiad, _form=OlympiadForm, _id=id)
     return redirect(url_for('olympiads'))
 
 
 @app.route('/olympiad-<int:id>/delete', methods=['POST'])
 def del_olympiad(id):
-    olympiad = db.session.query(Olympiad).get(id)
-    db.session.query(Olympiad).filter(Olympiad.id == id).delete()
-    flash_delete(olympiad)
-    db.session.commit()
+    del_instance(_class=Olympiad, _id=id)
     return redirect(url_for('olympiads'))
 
 
+# Criterion pages
 @app.route('/olympiad-<int:olympiad_id>/criterion')
 def criteria(olympiad_id):
 
@@ -83,6 +98,6 @@ def criteria(olympiad_id):
         db.session.add(olympiad)
         db.session.commit()
         flash('Олимпиада добавлена! \n %s: %s' % (olympiad.id, olympiad.name), 'info')
-    flash_errors(editor)
+    flash_form_errors(editor)
 
     return render_template('criterion.html')
