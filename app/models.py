@@ -1,14 +1,16 @@
 from app import db
-from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, Date
-from sqlalchemy.orm import relationship
+from sqlalchemy import Integer, String, Text, Float, Date
+from sqlalchemy_defaults import make_lazy_configured, Column
+from wtforms.validators import Optional
+make_lazy_configured(db.mapper)
 
 
 # Абстрактный класс, хранит поля требуемые компонентам олимпиады
 class OlympiadBase(db.Model):
     __abstract__ = True
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column('Название', String, nullable=False)
-    max_balls = Column('Максимум баллов', Float, nullable=False)
+    name = Column(String, label='Название', nullable=False)
+    max_balls = Column(Float, label='Максимум баллов', nullable=False)
 
     def __init__(self, name, max_balls):
         self.name = name
@@ -18,7 +20,7 @@ class OlympiadBase(db.Model):
 # Конкретное задание: Установить ОС Windows Xp
 class Aspect(OlympiadBase):
     __tablename__ = 'Aspect'
-    description = Column('Описание', Text)
+    description = Column(Text, label='Описание', )
     sub_criterion_id = db.Column(db.Integer, db.ForeignKey('SubCriterion.id'))
     sub_criterion = db.relationship('SubCriterion', backref=db.backref('Aspect', lazy='dynamic'))
 
@@ -78,14 +80,15 @@ class Criterion(OlympiadBase):
 class Olympiad(db.Model):
     __tablename__ = 'Olympiad'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column('Название', String, nullable=False)
-    date = Column('Дата', Date, nullable=False)
-    description = Column('Описание', String)
+    name = Column(String, label='Название', nullable=False)
+    date = Column(Date, label='Дата', nullable=False)
+    description = Column(String, label='Описание')
 
     def __init__(self, name, date, description=None):
         self.name = name
         self.date = date
         self.description = description
+
 
 # Этап олимпиады
 class Status(db.Model):

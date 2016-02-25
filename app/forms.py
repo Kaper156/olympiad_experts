@@ -1,37 +1,16 @@
-from app import db
-from app.models import Measurement
-from flask_wtf import Form
-from wtforms import StringField, FloatField, TextAreaField, DateField, FieldList, SelectField
-from wtforms.validators import DataRequired
+from app.models import Olympiad, Criterion, SubCriterion, Aspect, Measurement
+from flask.ext.wtf import Form
+from wtforms_alchemy import model_form_factory
+
+ModelForm = model_form_factory(Form)
 
 
-class MeasurementForm(Form):
-    max_balls = FloatField('Баллы', validators=[DataRequired()])
-    measurement_type = SelectField('Тип измерения', validators=[DataRequired()])
-
-    def __init__(self, **kwargs):
-        Form.__init__(self, **kwargs)
-
-        measurement_types = db.session.query(Measurement).all()
-        self.measurement_type.choices = list(measurement_types)
-
-
-class AspectForm(Form):
-    name = StringField('Название', validators=[DataRequired()])
-    description = TextAreaField('Описание', validators=[DataRequired()])
-
-
-class OlympiadForm(Form):
+class OlympiadForm(ModelForm, Form):
     class Meta:
-        exclude = ['Role', 'Criterion']
-    name = StringField('Название', validators=[DataRequired()], description='Название')
-    date = DateField('Дата начала', format='%d.%m.%Y', description='Дата начала')  # , validators=[DataRequired()]
-    description = TextAreaField('Описание')
+        model = Olympiad
 
 
-class CriterionForm(Form):
+
+class CriterionForm(ModelForm, Form):
     class Meta:
-        exclude = ['Role', 'Criterion']
-    name = StringField('Название', validators=[DataRequired()], description='Название')
-    date = DateField('Дата начала', format='%d.%m.%Y', description='Дата начала')  # , validators=[DataRequired()]
-    description = TextAreaField('Описание')
+        model = Criterion

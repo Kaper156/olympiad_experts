@@ -2,7 +2,7 @@ from app import render_template, db, app, request, redirect, url_for, flash, abo
 from app import breadcrumbs, OBJECT_PER_PAGE
 from app.models import Olympiad, Criterion, SubCriterion, Aspect, Measurement, MeasurementType
 from app.models import User, Role, Privilege
-from app.forms import OlympiadForm, MeasurementForm, AspectForm
+from app.forms import OlympiadForm, CriterionForm
 from wtforms.ext.sqlalchemy.orm import model_form
 
 
@@ -16,11 +16,7 @@ def olympiads():
     instances = list()
     olympiads = db.session.query(Olympiad).limit(OBJECT_PER_PAGE)
     for olympiad in olympiads:
-        inst_form = model_form(Olympiad,
-                               base_class=OlympiadForm,
-                               db_session=db.session,
-                               exclude=['Role', 'Criterion'])
-        instances.append((olympiad, inst_form(request.form, olympiad)))
+        instances.append((olympiad, OlympiadForm()))
 
     editor = OlympiadForm()
     if request.method == 'POST' and editor.validate():
@@ -77,9 +73,24 @@ def del_olympiad(id):
 @app.route('/olympiad-<int:olympiad_id>/criterion')
 def criteria(olympiad_id):
 
-    return render_template('criterion.html')
     instances = list()
     criteria = db.session.query(Criterion).filter(Criterion.olympiad_id == olympiad_id).limit(OBJECT_PER_PAGE)
     for criterion in criteria:
         inst_form = model_form(Criterion,
-                               base_class=CriterionForm)
+                               base_class=CriterionForm,
+                               db_session=db.session,)
+
+        instances.append((criterion, inst_form(request.form, criterion)))
+
+    editor = OlympiadForm()
+    if request.method == 'POST' and editor.validate():
+        olympiad = Olympiad(name=editor.name.data,
+                            date=editor.date.data,
+                            description=editor.description.data)
+        db.session.add(olympiad)
+        db.session.commit()
+        flash('Олимпиада добавлена! \n %s: %s' % (olympiad.id, olympiad.name), 'info')
+    flash_errors(editor)
+
+    return render_template('criterion.html')
+    return render_template('olympiad.html', breadcrumbs=breadcrumbs[:2], olympiads=instances, form=editor)

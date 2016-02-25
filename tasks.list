@@ -34,6 +34,8 @@
 
 -Labels to form-editors in Яussian
 
+-USE WTForms-Alchemy
+
 -Dynamic JS table edit
 
 -Additional: breadcrumbs to normal (classes and other)

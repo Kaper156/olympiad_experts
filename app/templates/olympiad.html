@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% from 'macroses.html' import modal, editor, show_flashed, delete_olympiad %}
+{% from 'macroses.html' import modal, editor_olympiad as editor, show_flashed, delete_olympiad %}
 
 {% block content %}
     <div class="panel panel-default">
@@ -59,11 +59,11 @@
 
                             <button type="button" class="btn btn-primary"
                                     data-toggle="modal" data-target="#modal-delete-{{ olympiad.id }}">
-                                <span class="glyphicon glyphicon-list"></span> Распределить
+                                <span class="glyphicon glyphicon-edit"></span> Распределить
                             </button>
 
                             <a class="btn btn-primary" href="{{ url_for('criteria', **{'olympiad_id':olympiad.id}) }}">
-                                <span class="glyphicon glyphicon-list"></span> К модулям
+                                <span class="glyphicon glyphicon-th-list"></span> К модулям
                             </a>
 
                             <button type="button" class="btn btn-danger"
