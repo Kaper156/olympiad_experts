@@ -1,5 +1,5 @@
 from app import render_template, db, app, request, redirect, url_for, flash, abort, jsonify, flash_errors
-from app import breadcrumbs
+from app import breadcrumbs, OBJECT_PER_PAGE
 from app.models import Olympiad, Criterion, SubCriterion, Aspect, Measurement, MeasurementType
 from app.models import User, Role, Privilege
 from app.forms import OlympiadForm, MeasurementForm, AspectForm
@@ -14,7 +14,8 @@ def index():
 @app.route('/olympiads/', methods=['POST', 'GET'])
 def olympiads():
     instances = list()
-    for olympiad in db.session.query(Olympiad).all():
+    olympiads = db.session.query(Olympiad).limit(OBJECT_PER_PAGE)
+    for olympiad in olympiads:
         inst_form = model_form(Olympiad,
                                base_class=OlympiadForm,
                                db_session=db.session,
@@ -30,10 +31,10 @@ def olympiads():
         db.session.commit()
         flash('Олимпиада добавлена! \n %s: %s' % (olympiad.id, olympiad.name), 'info')
     flash_errors(editor)
-    return render_template('olympiads.html', breadcrumbs=breadcrumbs[:2], olympiads=instances, form=editor)
+    return render_template('olympiad.html', breadcrumbs=breadcrumbs[:2], olympiads=instances, form=editor)
 
 
-@app.route('/olympiads/edit-<int:id>', methods=['POST'])
+@app.route('/olympiad-<int:id>/edit', methods=['POST'])
 def edit_olympiads(id):
     Form = model_form(Olympiad, base_class=OlympiadForm, db_session=db.session)
     olympiad = db.session.query(Olympiad).get(id)
@@ -63,7 +64,7 @@ def add_olympiad():
     return redirect(url_for('olympiads'))
 
 
-@app.route('/olympiads/delete-<int:id>', methods=['POST'])
+@app.route('/olympiad-<int:id>/delete', methods=['POST'])
 def del_olympiad(id):
     olympiad = db.session.query(Olympiad).get(id)
     flash('Олимпиада #%s: "%s" удалена! \n ' % (olympiad.id, olympiad.name), 'warning')
@@ -72,3 +73,13 @@ def del_olympiad(id):
     db.session.commit()
     return redirect(url_for('olympiads'))
 
+
+@app.route('/olympiad-<int:olympiad_id>/criterion')
+def criteria(olympiad_id):
+
+    return render_template('criterion.html')
+    instances = list()
+    criteria = db.session.query(Criterion).filter(Criterion.olympiad_id == olympiad_id).limit(OBJECT_PER_PAGE)
+    for criterion in criteria:
+        inst_form = model_form(Criterion,
+                               base_class=CriterionForm)

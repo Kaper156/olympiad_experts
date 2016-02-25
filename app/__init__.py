@@ -24,6 +24,7 @@ import wtforms_json
 wtforms_json.init()
 
 # Routing
+OBJECT_PER_PAGE = 5
 
 def flash_errors(form):
     for field, errors in form.errors.items():

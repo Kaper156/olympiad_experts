@@ -20,7 +20,7 @@
                 <a class="btn btn-default" href="/">
                     <span class="glyphicon glyphicon-bed"></span> Выставить результаты
                 </a>
-                
+
             </div>
         </div>
         <div class='flash-list'>
@@ -61,6 +61,10 @@
                                     data-toggle="modal" data-target="#modal-delete-{{ olympiad.id }}">
                                 <span class="glyphicon glyphicon-list"></span> Распределить
                             </button>
+
+                            <a class="btn btn-primary" href="{{ url_for('criteria', **{'olympiad_id':olympiad.id}) }}">
+                                <span class="glyphicon glyphicon-list"></span> К модулям
+                            </a>
 
                             <button type="button" class="btn btn-danger"
                                     data-toggle="modal" data-target="#modal-delete-{{ olympiad.id }}">

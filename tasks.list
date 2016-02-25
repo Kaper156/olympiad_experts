@@ -8,7 +8,7 @@
     to flash
     dynamic change html
 
--FRONT-END: Change buttons in control panel
++FRONT-END: Change buttons in control panel
 -FRONT-END: Change modal editor form (sticky)
 
 +Models-forms: date format olympiad
@@ -25,11 +25,16 @@
 -FRONT-END: SubLine of tables (aspect, etc) have in
                                         http://getbootstrap.com/javascript/#collapse
 
--DB: Add status field to olympiad
++DB: Add status field to olympiad
+    too add model Status
+
+
 -Rewrite flash_errors(form)
-    add function to flash-edit, del, add objects
+    add function to flash-edit, del, add objects (in view)
 
+-Labels to form-editors in Яussian
 
+-Dynamic JS table edit
 
 -Additional: breadcrumbs to normal (classes and other)
 -Additional: macros to display mapped objects (field name must be in russian language)
