@@ -13,26 +13,22 @@ def not_found(error):
 
 # DataBase
 from flask.ext.sqlalchemy import SQLAlchemy
+
 db = SQLAlchemy(app)
 from app import models
+
 db.create_all()
 
 
 # Forms
 from app import forms
 import wtforms_json
+
 wtforms_json.init()
 
 # Routing
+from app import flashing
 OBJECT_PER_PAGE = 5
-
-def flash_errors(form):
-    for field, errors in form.errors.items():
-        for error in errors:
-            flash(u"Error in the %s field - %s" % (
-                getattr(form, field).label.text,
-                error
-            ))
 
 
 breadcrumbs = [

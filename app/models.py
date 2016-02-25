@@ -1,7 +1,7 @@
 from app import db
 from sqlalchemy import Integer, String, Text, Float, Date
 from sqlalchemy_defaults import make_lazy_configured, Column
-from wtforms.validators import Optional
+
 make_lazy_configured(db.mapper)
 
 
@@ -27,6 +27,9 @@ class Aspect(OlympiadBase):
     def __init__(self, name, max_balls=0, description=None):
         OlympiadBase.__init__(self, name, max_balls)
         self.description = description
+
+    def __str__(self):
+        return '<Модуль: "%s" (%s)>' % (self.name, self.max_balls)
 
 
 # Хранит конкретные методы вычисления
@@ -68,12 +71,18 @@ class SubCriterion(OlympiadBase):
     criterion_id = db.Column(db.Integer, db.ForeignKey('Criterion.id'))
     criterion = db.relationship('Criterion', backref=db.backref('SubCriterion', lazy='dynamic'))
 
+    def __str__(self):
+        return '<Подмодуль: "%s" (%s)>' % (self.name, self.max_balls)
+
 
 # Часть олимпиады: Настройка сетевого оборудования, etc
 class Criterion(OlympiadBase):
     __tablename__ = 'Criterion'
     olympiad_id = db.Column(db.Integer, db.ForeignKey('Olympiad.id'))
     olympiad = db.relationship('Olympiad', backref=db.backref('Criterion', lazy='dynamic'))
+
+    def __str__(self):
+        return '<Модуль: "%s" (%s)>' % (self.name, self.max_balls)
 
 
 # Мероприятие
@@ -84,10 +93,8 @@ class Olympiad(db.Model):
     date = Column(Date, label='Дата', nullable=False)
     description = Column(String, label='Описание')
 
-    def __init__(self, name, date, description=None):
-        self.name = name
-        self.date = date
-        self.description = description
+    def __str__(self):
+        return '<Олимпиада: "%s" от [%s]>' % (self.name, self.date)
 
 
 # Этап олимпиады
