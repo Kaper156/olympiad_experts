@@ -8,6 +8,16 @@ from wtforms.ext.sqlalchemy.orm import model_form
 
 
 # UNIFICATED ADD, DELETE, EDIT instances
+def get_all_instance(_class, _form):
+    result = list()
+    for instance in db.session.query(_class).limit(OBJECT_PER_PAGE):
+        result.append((instance, _form(obj=instance)))
+
+    # form to add new inst
+    editor = _form()
+    return editor, result
+
+
 def add_instance(_class, _form):
     instance = _class()
     form = _form(request.form)
@@ -46,16 +56,7 @@ def index():
 # Olympiads pages
 @app.route('/olympiads/', methods=['POST', 'GET'])
 def olympiads():
-
-    # list of all objects on page
-    instances = list()
-    olympiads = db.session.query(Olympiad).limit(OBJECT_PER_PAGE)
-    for olympiad in olympiads:
-        instances.append((olympiad, OlympiadForm(obj=olympiad)))
-
-    # form to add new inst
-    editor = OlympiadForm()
-
+    editor, instances = get_all_instance(_class=Olympiad, _form=OlympiadForm)
     return render_template('olympiad.html', breadcrumbs=breadcrumbs[:2], olympiads=instances, form=editor)
 
 
@@ -78,26 +79,24 @@ def del_olympiad(id):
 
 
 # Criterion pages
-@app.route('/olympiad-<int:olympiad_id>/criterion')
+@app.route('/olympiad-<int:olympiad_id>/criteria')
 def criteria(olympiad_id):
+    editor, criteria = get_all_instance(_class=Criterion, _form=CriterionForm)
+    return render_template('criterion.html', form=editor, criteria=criteria, olympiad_id=olympiad_id)
 
-    instances = list()
-    criteria = db.session.query(Criterion).filter(Criterion.olympiad_id == olympiad_id).limit(OBJECT_PER_PAGE)
-    for criterion in criteria:
-        inst_form = model_form(Criterion,
-                               base_class=CriterionForm,
-                               db_session=db.session,)
 
-        instances.append((criterion, inst_form(request.form, criterion)))
+@app.route('/olympiad-<int:olympiad_id>/criteria/add', methods=['POST'])
+def add_criterion(olympiad_id):
+    add_instance(_class=Criterion, _form=CriterionForm)  # , init_args={'olympiad_id': 1})
+    return redirect(url_for('criteria', olympiad_id=olympiad_id))
 
-    editor = OlympiadForm()
-    if request.method == 'POST' and editor.validate():
-        olympiad = Olympiad(name=editor.name.data,
-                            date=editor.date.data,
-                            description=editor.description.data)
-        db.session.add(olympiad)
-        db.session.commit()
-        flash('Олимпиада добавлена! \n %s: %s' % (olympiad.id, olympiad.name), 'info')
-    flash_form_errors(editor)
 
-    return render_template('criterion.html')
+@app.route('/olympiad-<int:olympiad_id>/criterion-<int:criterion_id>/edit', methods=['POST'])
+def edit_criterion(olympiad_id, criterion_id):
+    edit_instance(_class=Criterion, _form=CriterionForm, _id=criterion_id)
+    return redirect(url_for('criteria', olympiad_id=olympiad_id))
+
+@app.route('/olympiad-<int:olympiad_id>/criterion-<int:criterion_id>/delete', methods=['POST'])
+def del_olympiad(olympiad_id, criterion_id):
+    del_instance(_class=Criterion, _id=criterion_id)
+    return redirect(url_for('criteria'))

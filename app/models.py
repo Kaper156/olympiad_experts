@@ -12,10 +12,6 @@ class OlympiadBase(db.Model):
     name = Column(String, label='Название', nullable=False)
     max_balls = Column(Float, label='Максимум баллов', nullable=False)
 
-    def __init__(self, name, max_balls):
-        self.name = name
-        self.max_balls = max_balls
-
 
 # Конкретное задание: Установить ОС Windows Xp
 class Aspect(OlympiadBase):

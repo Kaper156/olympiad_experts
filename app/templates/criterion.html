@@ -1,9 +1,79 @@
 {% extends 'base.html' %}
-{% macro ef() %}
-	<p>
-		Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad animi architecto cumque delectus dolorum ea eum ipsam laboriosam maxime nisi officiis placeat possimus quo quod reprehenderit sapiente soluta ullam, velit?
-	</p>
-{% endmacro %}
+
+{% from 'macroses.html' import modal, editor_olympiad as editor, show_flashed, delete_olympiad %}
+
+{% set title = title or 'Модули' %}
+
 {% block content %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="">Управление</h4>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-default"
+                        data-toggle="modal" data-target="#editor-new">
+                    <span class="glyphicon glyphicon-plus"></span> Добавить
+                </button>
+
+                <a class="btn btn-default" href="{{ url_for('criteria', olympiad_id=olympiad_id) }}">
+                    <span class="glyphicon glyphicon-refresh"></span> Обновить
+                </a>
+
+            </div>
+        </div>
+        <div class='flash-list'>
+            {{ show_flashed() }}
+        </div>
+
+
+        <div class="panel-body">
+			{{ editor(form=form, attr_id='editor-new', link='add_criterion', args={'olympiad_id': olympiad_id}, new=True) }}
+        </div>
+
+        <table class="table table-striped" id="objects-table">
+            <tbody>
+                <tr>
+                    <th>#</th>
+                    <th>Название</th>
+                    <th>Максимум баллов</th>
+                    <th>Действия</th>
+                </tr>
+                {% for criterion, form in criteria %}
+                    <tr class="info" id="info-{{ criterion.id }}">
+                        <td>{{ criterion.id }}</td>
+                        <td>{{ criterion.name }}</td>
+                        <td>{{ criterion.max_balls }}</td>
+                        <td>
+                            <span class="btn-group">
+                                <button type="button" class="btn btn-primary"
+                                        data-toggle="modal" data-target="#modal-editor-{{ criterion.id }}">
+                                    <span class="glyphicon glyphicon-pencil"></span> Редактировать
+                                </button>
+
+
+                                <button type="button" class="btn btn-primary"
+                                        data-toggle="modal" data-target="#modal-delete-{{ criterion.id }}">
+                                    <span class="glyphicon glyphicon-edit"></span> Распределить
+                                </button>
+
+                                <a class="btn btn-primary" href="{{ url_for('criteria', **{'olympiad_id':olympiad_id}) }}">
+                                    <span class="glyphicon glyphicon-th-list"></span> К модулям
+                                </a>
+
+                                <button type="button" class="btn btn-danger"
+                                        data-toggle="modal" data-target="#modal-delete-{{ criterion.id }}">
+                                    <span class="glyphicon glyphicon-remove-circle"></span> Удалить
+                                </button>
+
+                            </span>
+                        </td>
+                    </tr>
+{#                    {{ delete_olympiad(attr_id=olympiad.id) }}#}
+                    {{ editor(form, link='edit_criterion', args={'olympiad_id': olympiad_id, 'criterion_id': criterion.id }, attr_id=criterion.id) }}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
 
 {% endblock %}
