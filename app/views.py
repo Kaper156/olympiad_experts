@@ -1,4 +1,4 @@
-from app import render_template, db, app, request, redirect, url_for
+from app import render_template, db, app, request, redirect, url_for, jsonify
 from app import breadcrumbs, OBJECT_PER_PAGE
 from app.models import Olympiad, Criterion, SubCriterion, Aspect, Measurement, MeasurementType
 from app.models import User, Role, Privilege
@@ -18,6 +18,10 @@ def get_all_instance(_class, _form):
     return editor, result
 
 
+def get_all_instances(_class):
+    return list(db.session.query(_class).limit(OBJECT_PER_PAGE))
+
+
 def add_instance(_class, _form):
     instance = _class()
     form = _form(request.form)
@@ -30,9 +34,9 @@ def add_instance(_class, _form):
         flash_form_errors(form)
 
 
-def edit_instance(_class, _form, _id):
+def edit_instance(_class, _form, _id, data=None):
     instance = db.session.query(_class).get(_id)
-    form = _form(request.form, _class)
+    form = _form(data or request.form, _class)
     if request.method == 'POST' and form.validate():
         form.populate_obj(instance)
         db.session.commit()
@@ -58,6 +62,11 @@ def index():
 def olympiads():
     editor, instances = get_all_instance(_class=Olympiad, _form=OlympiadForm)
     return render_template('olympiad.html', breadcrumbs=breadcrumbs[:2], olympiads=instances, form=editor)
+
+
+@app.route('/ajax/all/olympiads')
+def all_olympiads():
+    return jsonify(dataResult=get_all_instances(Olympiad), )
 
 
 @app.route('/olympiads/add', methods=['POST'])
@@ -96,7 +105,8 @@ def edit_criterion(olympiad_id, criterion_id):
     edit_instance(_class=Criterion, _form=CriterionForm, _id=criterion_id)
     return redirect(url_for('criteria', olympiad_id=olympiad_id))
 
+
 @app.route('/olympiad-<int:olympiad_id>/criterion-<int:criterion_id>/delete', methods=['POST'])
-def del_olympiad(olympiad_id, criterion_id):
+def del_criterion(olympiad_id, criterion_id):
     del_instance(_class=Criterion, _id=criterion_id)
     return redirect(url_for('criteria'))

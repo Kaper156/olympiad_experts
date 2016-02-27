@@ -4,6 +4,16 @@
 
 {% set title = title or 'Олимпиады' %}
 
+{% block head %}
+    {{ super() }}
+
+    <link href="{{ url_for('static', filename='css/jsgrid.min.css') }}"             rel="stylesheet"/>
+    <link href="{{ url_for('static', filename='css/jsgrid-theme.min.css') }}"       rel="stylesheet"/>
+
+    <script src="{{ url_for('static', filename='js/jsgrid.min.js') }}">             </script>
+{% endblock %}
+
+
 {% block content %}
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -26,7 +36,7 @@
             </div>
         </div>
         <div class='flash-list'>
-            {{ show_flashed() }}
+			{{ show_flashed() }}
         </div>
 
 
@@ -35,23 +45,25 @@
         </div>
 
         <table class="table table-striped" id="objects-table">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Название</th>
+                <th>Дата</th>
+                <th>Статус</th>
+                <th>Описание</th>
+                <th>Действия</th>
+            </tr>
+            </thead>
             <tbody>
-                <tr>
-                    <th>#</th>
-                    <th>Название</th>
-                    <th>Дата</th>
-                    <th>Статус</th>
-                    <th>Описание</th>
-                    <th>Действия</th>
-                </tr>
-                {% for olympiad, form in olympiads %}
-                    <tr class="info" id="info-{{ olympiad.id }}">
-                        <td>{{ olympiad.id }}</td>
-                        <td>{{ olympiad.name }}</td>
-                        <td>{{ olympiad.date }}</td>
-                        <td>Open</td>
-                        <td>{{ olympiad.description }}</td>
-                        <td>
+			{% for olympiad, form in olympiads %}
+                <tr class="info" id="info-{{ olympiad.id }}">
+                    <td>{{ olympiad.id }}</td>
+                    <td>{{ olympiad.name }}</td>
+                    <td>{{ olympiad.date }}</td>
+                    <td>Open</td>
+                    <td>{{ olympiad.description }}</td>
+                    <td>
                         <span class="btn-group">
                             <button type="button" class="btn btn-primary"
                                     data-toggle="modal" data-target="#modal-editor-{{ olympiad.id }}">
@@ -74,14 +86,76 @@
                             </button>
 
                         </span>
-                        </td>
-                    </tr>
-                    {{ delete_olympiad(attr_id=olympiad.id) }}
-                    {{ editor(form, link='edit_olympiad', args={'id': olympiad.id}, attr_id=olympiad.id) }}
-                {% endfor %}
+                    </td>
+                </tr>
+				{{ delete_olympiad(attr_id=olympiad.id) }}
+				{{ editor(form, link='edit_olympiad', args={'id': olympiad.id}, attr_id=olympiad.id) }}
+			{% endfor %}
             </tbody>
         </table>
     </div>
+    <script>
+        db = {};
+        db['olympiads'] = {
+            loadData: function (filter) {
+                return $.ajax({
+                    type: "GET",
+                    url: "/ajax/all/olympiads",
+                    data: filter,
+                    dataType: "json"
+                });
+            },
 
+            insertItem: function (item) {
+                return $.ajax({
+                    type: "POST",
+                    url: "/items",
+                    data: item,
+                    dataType: "json"
+                });
+            },
+
+            updateItem: function (item) {
+                return $.ajax({
+                    type: "PUT",
+                    url: "/items",
+                    data: item,
+                    dataType: "json"
+                });
+            },
+
+            deleteItem: function (item) {
+                return $.ajax({
+                    type: "DELETE",
+                    url: "/items",
+                    data: item,
+                    dataType: "json"
+                });
+            }
+        };
+
+        $("#objects-table").jsGrid({
+            width: "100%",
+            height: "400px",
+
+            filtering: false,
+            editing: true,
+            sorting: false,
+            paging: true,
+
+            data: db.olympiads,
+
+            fields: [
+                {name: "ID", type: "number", width: 50},
+                {name: "Название", type: "text", width: 250},
+                {name: "Дата", type: "date", width: 100},
+{#                {name: "Country", type: "select", items: db.countries, valueField: "Id", textField: "Name"},#}
+                {name: "Описание", type: "text"},
+                {type: "control"}
+            ]
+        });
+
+
+    </script>
 
 {% endblock %}
