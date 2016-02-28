@@ -2,7 +2,7 @@ from app import flash
 
 
 def flash_form_errors(form):
-    result = '<span>В форме объекта <%d>:</span><ul>' % form.id
+    result = '<span>Ошибки при заполнении формы:</span><ul>'
     for field, errors in form.errors.items():
         for error in errors:
             result += "\n<li>Ошибка в поле %s - %s</li>" % (getattr(form, field).label.text, error)
