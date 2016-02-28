@@ -22,7 +22,6 @@ def get_all_instances(_class):
     return list(db.session.query(_class).limit(OBJECT_PER_PAGE))
 
 
-
 def add_instance(_class, _form, init_args={}):
     instance = _class(**init_args)
     form = _form(request.form)
@@ -33,6 +32,7 @@ def add_instance(_class, _form, init_args={}):
         flash_add(instance)
     else:
         flash_form_errors(form)
+    return instance
 
 
 def edit_instance(_class, _form, _id, data=None):
@@ -44,6 +44,7 @@ def edit_instance(_class, _form, _id, data=None):
         flash_edit(instance)
     else:
         flash_form_errors(form)
+    return instance
 
 
 def del_instance(_class, _id):
@@ -51,6 +52,23 @@ def del_instance(_class, _id):
     db.session.query(_class).filter(_class.id == _id).delete()
     flash_delete(instance)
     db.session.commit()
+
+
+def check_instance(query, value, maximum=100):
+    wrong = False
+    _sum = 0
+
+    for instance in query:
+        _sum += instance.max_balls
+    # todo change to reduce
+
+    if _sum + value > maximum:
+        # Если значение преышает допустимый порог баллов
+        # то вернуть максимально возможное количество баллов
+        wrong = True
+        value = maximum - _sum
+    return jsonify(**{'wrong': wrong,
+                      'result': float(value)})
 
 
 @app.route('/')
@@ -65,25 +83,20 @@ def olympiads():
     return render_template('olympiad.html', breadcrumbs=breadcrumbs[:2], olympiads=instances, form=editor)
 
 
-@app.route('/ajax/all/olympiads')
-def all_olympiads():
-    return jsonify(dataResult=get_all_instances(Olympiad), )
-
-
 @app.route('/olympiads/add', methods=['POST'])
-def add_olympiad():
+def olympiad_add():
     add_instance(_class=Olympiad, _form=OlympiadForm)
     return redirect(url_for('olympiads'))
 
 
 @app.route('/olympiad-<int:id>/edit', methods=['POST'])
-def edit_olympiad(id):
+def olympiad_edit(id):
     edit_instance(_class=Olympiad, _form=OlympiadForm, _id=id)
     return redirect(url_for('olympiads'))
 
 
 @app.route('/olympiad-<int:id>/delete', methods=['POST'])
-def del_olympiad(id):
+def olympiad_del(id):
     del_instance(_class=Olympiad, _id=id)
     return redirect(url_for('olympiads'))
 
@@ -97,18 +110,24 @@ def criteria(olympiad_id):
 
 
 @app.route('/olympiad-<int:olympiad_id>/criteria/add', methods=['POST'])
-def add_criterion(olympiad_id):
+def criterion_add(olympiad_id):
     add_instance(_class=Criterion, _form=CriterionForm, init_args={'olympiad_id': olympiad_id})
     return redirect(url_for('criteria', olympiad_id=olympiad_id))
 
 
-@app.route('/olympiad-<int:olympiad_id>/criterion-<int:criterion_id>/edit', methods=['POST'])
-def edit_criterion(olympiad_id, criterion_id):
-    edit_instance(_class=Criterion, _form=CriterionForm, _id=criterion_id)
-    return redirect(url_for('criteria', olympiad_id=olympiad_id))
+@app.route('/criterion-<int:criterion_id>/edit', methods=['POST'])
+def criterion_edit(criterion_id):
+    new_instance = edit_instance(_class=Criterion, _form=CriterionForm, _id=criterion_id)
+    return redirect(url_for('criteria', olympiad_id=new_instance.olympiad_id))
 
 
-@app.route('/olympiad-<int:olympiad_id>/criterion-<int:criterion_id>/delete', methods=['POST'])
-def del_criterion(olympiad_id, criterion_id):
+@app.route('/criterion-<int:criterion_id>/delete', methods=['POST'])
+def criterion_del(criterion_id):
     del_instance(_class=Criterion, _id=criterion_id)
     return redirect(url_for('criteria'))
+
+
+@app.route('/olympiad-<int:olympiad_id>/criterion-<int:criterion_id>/check-<int:value>', methods=['POST', 'GET'])
+def criterion_check(olympiad_id, criterion_id, value):
+    query = db.session.query(Criterion).filter(Criterion.olympiad_id == olympiad_id).filter(Criterion.id != criterion_id)
+    return check_instance(query=query, value=value)

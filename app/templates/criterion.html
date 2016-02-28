@@ -27,10 +27,8 @@
 
 
         <div class="panel-body">
-			{{ editor(form=form, attr_id='editor-new', link='add_criterion', args={'olympiad_id': olympiad_id}, new=True) }}
-        </div>
-
-        <table class="table table-striped" id="objects-table">
+			{{ editor(form=form, attr_id='editor-new', link='criterion_add', args={'olympiad_id': olympiad_id}, new=True) }}
+            <table class="table table-striped" id="objects-table">
             <tbody>
                 <tr>
                     <th>#</th>
@@ -47,32 +45,28 @@
                             <span class="btn-group">
                                 <button type="button" class="btn btn-primary"
                                         data-toggle="modal" data-target="#modal-editor-{{ criterion.id }}">
-                                    <span class="glyphicon glyphicon-pencil"></span> Редактировать
-                                </button>
-
-
-                                <button type="button" class="btn btn-primary"
-                                        data-toggle="modal" data-target="#modal-delete-{{ criterion.id }}">
-                                    <span class="glyphicon glyphicon-edit"></span> Распределить
+                                    <span class="glyphicon glyphicon-pencil"></span>
                                 </button>
 
                                 <a class="btn btn-primary" href="{{ url_for('criteria', **{'olympiad_id':olympiad_id}) }}">
-                                    <span class="glyphicon glyphicon-th-list"></span> К модулям
+                                    <span class="glyphicon glyphicon-th-list"></span>
                                 </a>
 
                                 <button type="button" class="btn btn-danger"
                                         data-toggle="modal" data-target="#modal-delete-{{ criterion.id }}">
-                                    <span class="glyphicon glyphicon-remove-circle"></span> Удалить
+                                    <span class="glyphicon glyphicon-remove-circle"></span>
                                 </button>
 
                             </span>
                         </td>
                     </tr>
 {#                    {{ delete_olympiad(attr_id=olympiad.id) }}#}
-                    {{ editor(form, link='edit_criterion', args={'olympiad_id': olympiad_id, 'criterion_id': criterion.id }, attr_id=criterion.id) }}
+                    {{ editor(form, link='criterion_edit', args={'olympiad_id': olympiad_id, 'criterion_id': criterion.id }, attr_id=criterion.id) }}
                 {% endfor %}
             </tbody>
         </table>
+        </div>
+
     </div>
 
 

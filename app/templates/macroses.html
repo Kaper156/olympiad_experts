@@ -41,7 +41,7 @@
 
 {% macro delete_olympiad(attr_id) -%}
     {# attr_id: only number of object #}
-    {% set link = 'del_olympiad' %}
+    {% set link = 'olympiad_del' %}
     {% set args = {'id':attr_id} %}
     {% set attr_id = 'modal-delete-'~attr_id %}
     {% set title = 'Вы действительно хотите удалить эту олимпиаду?' %}
@@ -102,7 +102,7 @@
 	{% with messages = get_flashed_messages(with_categories=true) %}
 		{% if messages %}
 			{% for category, message in messages %}
-                <div class="alert alert-{{ category }}">{{ message }}</div>
+                <div class="alert alert-{{ category }}">{{ message|safe }}</div>
 			{% endfor %}
 		{% endif %}
 	{% endwith %}
