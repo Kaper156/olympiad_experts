@@ -4,15 +4,6 @@
 
 {% set title = title or 'Олимпиады' %}
 
-{% block head %}
-    {{ super() }}
-
-    <link href="{{ url_for('static', filename='css/jsgrid.min.css') }}"             rel="stylesheet"/>
-    <link href="{{ url_for('static', filename='css/jsgrid-theme.min.css') }}"       rel="stylesheet"/>
-
-    <script src="{{ url_for('static', filename='js/jsgrid.min.js') }}">             </script>
-{% endblock %}
-
 
 {% block content %}
     <div class="panel panel-default">
@@ -90,68 +81,5 @@
             </tbody>
         </table>
     </div>
-    <script>
-        db = {};
-        db['olympiads'] = {
-            loadData: function (filter) {
-                return $.ajax({
-                    type: "GET",
-                    url: "/ajax/all/olympiads",
-                    data: filter,
-                    dataType: "json"
-                });
-            },
-
-            insertItem: function (item) {
-                return $.ajax({
-                    type: "POST",
-                    url: "/items",
-                    data: item,
-                    dataType: "json"
-                });
-            },
-
-            updateItem: function (item) {
-                return $.ajax({
-                    type: "PUT",
-                    url: "/items",
-                    data: item,
-                    dataType: "json"
-                });
-            },
-
-            deleteItem: function (item) {
-                return $.ajax({
-                    type: "DELETE",
-                    url: "/items",
-                    data: item,
-                    dataType: "json"
-                });
-            }
-        };
-
-        $("#objects-table").jsGrid({
-            width: "100%",
-            height: "400px",
-
-            filtering: false,
-            editing: true,
-            sorting: false,
-            paging: true,
-
-            data: db.olympiads,
-
-            fields: [
-                {name: "ID", type: "number", width: 50},
-                {name: "Название", type: "text", width: 250},
-                {name: "Дата", type: "date", width: 100},
-{#                {name: "Country", type: "select", items: db.countries, valueField: "Id", textField: "Name"},#}
-                {name: "Описание", type: "text"},
-                {type: "control"}
-            ]
-        });
-
-
-    </script>
 
 {% endblock %}
