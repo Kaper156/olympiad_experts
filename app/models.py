@@ -53,7 +53,6 @@ class Measurement(db.Model):
     aspect = db.relationship('Aspect', backref=db.backref('Measurement', lazy='dynamic'))
 
 
-
 # Часть привязанная к конкретной области: ОС Linux, Программирование на Python
 class SubCriterion(OlympiadBase):
     __tablename__ = 'SubCriterion'
@@ -69,6 +68,7 @@ class Criterion(OlympiadBase):
     __tablename__ = 'Criterion'
     olympiad_id = db.Column(db.Integer, db.ForeignKey('Olympiad.id'))
     olympiad = db.relationship('Olympiad', backref=db.backref('Criterion', lazy='dynamic'))
+    # max_balls = Column('Максимум баллов', Integer, )
 
     def __str__(self):
         return '<Модуль: "%s" (%s)>' % (self.name, self.max_balls)
@@ -103,14 +103,12 @@ class Privilege(db.Model):
     rights = Column('Уровень', Integer, nullable=False)
 
 
-
 # Пользователь системы
 class User(db.Model):
     __tablename__ = 'User'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     login = Column('Логин', String, nullable=False)
     password = Column('Пароль', String, nullable=False)
-
 
 
 # Связь между пользователем, правами и олимпиадой

@@ -54,6 +54,20 @@
     {{ delete_object(title=title, body=body, attr_id=attr_id, link=link, args=args) }}
 {%- endmacro %}
 
+{% macro delete_criterion(attr_id, olympiad_id) -%}
+    {# attr_id: only number of object #}
+    {% set link = 'criterion_del' %}
+    {% set args = {'id':attr_id, 'olympiad_id': olympiad_id} %}
+    {% set attr_id = 'modal-delete-'~attr_id %}
+    {% set title = 'Вы действительно хотите удалить этот модуль?' %}
+    {% set body -%}
+        <p>
+            Пути назад нет.
+        </p>
+    {#TODO#}
+    {%- endset %}
+    {{ delete_object(title=title, body=body, attr_id=attr_id, link=link, args=args) }}
+{%- endmacro %}
 
 {% macro editor(form, attr_id, link, args={}, new=None, title_for='объекта') -%}
     {% set modal_form -%}

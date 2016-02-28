@@ -115,19 +115,19 @@ def criterion_add(olympiad_id):
     return redirect(url_for('criteria', olympiad_id=olympiad_id))
 
 
-@app.route('/criterion-<int:criterion_id>/edit', methods=['POST'])
-def criterion_edit(criterion_id):
-    new_instance = edit_instance(_class=Criterion, _form=CriterionForm, _id=criterion_id)
+@app.route('/criterion-<id>/edit', methods=['POST'])
+def criterion_edit(id):
+    new_instance = edit_instance(_class=Criterion, _form=CriterionForm, _id=id)
     return redirect(url_for('criteria', olympiad_id=new_instance.olympiad_id))
 
 
-@app.route('/criterion-<int:criterion_id>/delete', methods=['POST'])
-def criterion_del(criterion_id):
-    del_instance(_class=Criterion, _id=criterion_id)
-    return redirect(url_for('criteria'))
+@app.route('/olympiad-<int:olympiad_id>/criterion-<id>/delete', methods=['POST'])
+def criterion_del(olympiad_id, id):
+    del_instance(_class=Criterion, _id=id)
+    return redirect(url_for('criteria', olympiad_id=olympiad_id))
 
 
-@app.route('/olympiad-<int:olympiad_id>/criterion-<int:criterion_id>/check-<int:value>', methods=['POST', 'GET'])
-def criterion_check(olympiad_id, criterion_id, value):
-    query = db.session.query(Criterion).filter(Criterion.olympiad_id == olympiad_id).filter(Criterion.id != criterion_id)
+@app.route('/olympiad-<int:olympiad_id>/criterion-<id>/check-<int:value>', methods=['POST', 'GET'])
+def criterion_check(olympiad_id, value, id):
+    query = db.session.query(Criterion).filter(Criterion.olympiad_id == olympiad_id).filter(Criterion.id != id)
     return check_instance(query=query, value=value)

@@ -43,9 +43,21 @@
 -Static table fields (buttons)
 -Data = dict(from_ajax) to init model
 
++URL like:
+    /parent-id/children
+    /parent-id/children/add
+    /parent-id/child-id/check-value (balls)
+    /child-id/edit
+    /child-id/delete
 
--Dynamic JS table edit
+-Add js function to validate field max_balls
+    NO, just use numeric-up-down with min-max
+        min = 1
+        max =
+    if no way- check balls after they get (in view)
+
++Dynamic JS table edit
+    Don't need now
 
 -Additional: breadcrumbs to normal (classes and other)
--Additional: macros to display mapped objects (field name must be in russian language)
 -Additional: Flask-Migrate
