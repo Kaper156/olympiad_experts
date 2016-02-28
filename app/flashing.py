@@ -2,12 +2,12 @@ from app import flash
 
 
 def flash_form_errors(form):
+    result = '<span>В форме объекта <%d>:</span><ul>' % form.id
     for field, errors in form.errors.items():
         for error in errors:
-            flash(u"Ошибка в поле %s - %s" %
-                  (getattr(form, field).label.text, error),
-                  'danger')
-
+            result += "\n<li>Ошибка в поле %s - %s</li>" % (getattr(form, field).label.text, error)
+    result += '\n</ul>'
+    flash(result, 'danger')
 
 def flash_add(instance):
     flash('Добавлен объект: %s' % instance, 'info')

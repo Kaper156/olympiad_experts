@@ -29,14 +29,14 @@
     too add model Status
 
 
--Rewrite flash_errors(form)
-    add function to flash-edit, del, add objects (in view)
-    -Repr to models (or parent class with id, name (because many classes have this))
-    and use like flash_add(object) or flash_edit(object)
++Rewrite flash_errors(form)
+    +add function to flash-edit, del, add objects (in view)
+    +Repr to models (or parent class with id, name (because many classes have this))
+    +and use like flash_add(object) or flash_edit(object)
 
 +Labels to form-editors in Яussian
 
--USE WTForms-Alchemy
++USE WTForms-Alchemy
 
 -Init args to add_instance
 -Macro for all models

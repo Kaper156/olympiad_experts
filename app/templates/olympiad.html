@@ -46,14 +46,14 @@
 
         <table class="table table-striped" id="objects-table">
             <thead>
-            <tr>
-                <th>#</th>
-                <th>Название</th>
-                <th>Дата</th>
-                <th>Статус</th>
-                <th>Описание</th>
-                <th>Действия</th>
-            </tr>
+                <tr>
+                    <th>#</th>
+                    <th>Название</th>
+                    <th>Дата</th>
+                    <th>Статус</th>
+                    <th>Описание</th>
+                    <th>Действия</th>
+                </tr>
             </thead>
             <tbody>
 			{% for olympiad, form in olympiads %}
@@ -65,24 +65,20 @@
                     <td>{{ olympiad.description }}</td>
                     <td>
                         <span class="btn-group">
+
                             <button type="button" class="btn btn-primary"
                                     data-toggle="modal" data-target="#modal-editor-{{ olympiad.id }}">
-                                <span class="glyphicon glyphicon-pencil"></span> Редактировать
+                                <span class="glyphicon glyphicon-pencil"></span>
                             </button>
 
-
-                            <button type="button" class="btn btn-primary"
-                                    data-toggle="modal" data-target="#modal-delete-{{ olympiad.id }}">
-                                <span class="glyphicon glyphicon-edit"></span> Распределить
-                            </button>
-
-                            <a class="btn btn-primary" href="{{ url_for('criteria', **{'olympiad_id':olympiad.id}) }}">
-                                <span class="glyphicon glyphicon-th-list"></span> К модулям
+                            <a class="btn btn-primary"
+                               href="{{ url_for('criteria', **{'olympiad_id':olympiad.id}) }}">
+                                <span class="glyphicon glyphicon-th-list"></span>
                             </a>
 
                             <button type="button" class="btn btn-danger"
                                     data-toggle="modal" data-target="#modal-delete-{{ olympiad.id }}">
-                                <span class="glyphicon glyphicon-remove-circle"></span> Удалить
+                                <span class="glyphicon glyphicon-remove-circle"></span>
                             </button>
 
                         </span>
