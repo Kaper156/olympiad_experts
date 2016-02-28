@@ -16,13 +16,14 @@ class OlympiadBase(db.Model):
 # Конкретное задание: Установить ОС Windows Xp
 class Aspect(OlympiadBase):
     __tablename__ = 'Aspect'
-    description = Column(Text, label='Описание', )
+    description = Column(Text, label='Описание')
+    max_balls = Column(Float, nullable=False)
+
     sub_criterion_id = db.Column(db.Integer, db.ForeignKey('SubCriterion.id'))
     sub_criterion = db.relationship('SubCriterion', backref=db.backref('Aspect', lazy='dynamic'))
 
-    def __init__(self, name, max_balls=0, description=None):
-        OlympiadBase.__init__(self, name, max_balls)
-        self.description = description
+    measurement_type_id = db.Column(db.Integer, db.ForeignKey('MeasurementType.id'))
+    measurement_type = db.relationship('MeasurementType', backref=db.backref('Aspect', lazy='dynamic'))
 
     def __str__(self):
         return '<Модуль: "%s" (%s)>' % (self.name, self.max_balls)
@@ -34,31 +35,23 @@ class MeasurementType(db.Model):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(String)
     description = Column(String)
-    # TODO хранить текст лямбда функций?
+    # TODO хранить текст лямбда функций?+
+    a = lambda a: a*2
     method = Column(Text)
 
-    def __init__(self, name, method, description=None):
-        self.name = name
-        self.method = method
-        self.description = description
+    def calc(self, value):
+        return self.method(value)
 
 
 # Ссылается на метод вычисления и аспект
 class Measurement(db.Model):
     __tablename__ = 'Measurement'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    max_balls = Column(Float, nullable=False)
+    value = Column(Float, nullable=False)
 
     aspect_id = db.Column(db.Integer, db.ForeignKey('Aspect.id'))
     aspect = db.relationship('Aspect', backref=db.backref('Measurement', lazy='dynamic'))
-    measurement_type_id = db.Column(db.Integer, db.ForeignKey('MeasurementType.id'))
-    measurement_type = db.relationship('MeasurementType', backref=db.backref('Measurement', lazy='dynamic'))
 
-    def __init__(self, max_balls, aspect, measurement):
-        # TODO init from parent id, calc ball_limit = parent.balls - sum([parent.children.ball])
-        self.max_balls = max_balls
-        self.id_aspect = aspect
-        self.id_measurement_type = measurement
 
 
 # Часть привязанная к конкретной области: ОС Linux, Программирование на Python
@@ -88,13 +81,15 @@ class Olympiad(db.Model):
     name = Column(String, label='Название', nullable=False)
     date = Column(Date, label='Дата', nullable=False)
     description = Column(String, label='Описание')
+    # Status?
 
     def __str__(self):
         return '<Олимпиада: "%s" от [%s]>' % (self.name, self.date)
 
 
-# Этап олимпиады
+# Этап олимпиады 
 class Status(db.Model):
+    # рано
     __tablename__ = 'Status'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(String, nullable=False)
@@ -107,9 +102,6 @@ class Privilege(db.Model):
     name = Column(String, nullable=False)
     rights = Column('Уровень', Integer, nullable=False)
 
-    def __init__(self, name, rights):
-        self.name = name
-        self.rights = rights
 
 
 # Пользователь системы
@@ -119,9 +111,6 @@ class User(db.Model):
     login = Column('Логин', String, nullable=False)
     password = Column('Пароль', String, nullable=False)
 
-    def __init__(self, login, password):
-        self.login = login
-        self.password = hash(password)
 
 
 # Связь между пользователем, правами и олимпиадой
@@ -137,8 +126,3 @@ class Role(db.Model):
 
     privilege_id = db.Column(db.Integer, db.ForeignKey('Privilege.id'))
     privilege = db.relationship('Privilege', backref=db.backref('Role', lazy='dynamic'))
-
-    def __init__(self, user, olympiad, privilege):
-        self.id_olympiad = olympiad
-        self.id_user = user
-        self.id_privilege = privilege
