@@ -22,4 +22,7 @@ def flash_delete(instance):
 
 
 def flash_error(error):
-    flash('Ошибка! %s' % error, 'info')
+    flash('Ошибка! <br>\n%s' % error, 'warning')
+
+def flash_max_ball(getted, needed):
+    flash_error('Вы ввели недопустимое количество баллов: %s <br>\nМаксимально возможное: %s' % (getted, needed))

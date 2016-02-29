@@ -61,7 +61,7 @@
                         </td>
                     </tr>
                     {{ delete_criterion(attr_id=criterion.id, olympiad_id=olympiad_id) }}
-                    {{ editor(form, link='criterion_edit', args={'olympiad_id': olympiad_id, 'id': criterion.id }, attr_id=criterion.id) }}
+                    {{ editor(form, link='criterion_edit', args={'olympiad_id': olympiad_id, 'criterion_id': criterion.id }, attr_id=criterion.id) }}
                 {% endfor %}
             </tbody>
         </table>

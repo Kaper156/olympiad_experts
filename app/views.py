@@ -3,7 +3,7 @@ from app import breadcrumbs, OBJECT_PER_PAGE
 from app.models import Olympiad, Criterion, SubCriterion, Aspect, Measurement, MeasurementType
 from app.models import User, Role, Privilege
 from app.forms import OlympiadForm, CriterionForm
-from app.flashing import flash, flash_form_errors, flash_error, flash_add, flash_edit, flash_delete
+from app.flashing import flash, flash_form_errors, flash_error, flash_add, flash_edit, flash_delete, flash_max_ball
 from wtforms.ext.sqlalchemy.orm import model_form
 
 
@@ -54,9 +54,9 @@ def del_instance(_class, _id):
     db.session.commit()
 
 
-def check_instance(query, value, maximum=100):
-    wrong = False
-    _sum = 0
+def check_instance(query, value, maximum=100.0):
+    is_good = True
+    _sum = 0.0
 
     for instance in query:
         _sum += instance.max_balls
@@ -65,10 +65,9 @@ def check_instance(query, value, maximum=100):
     if _sum + value > maximum:
         # Если значение преышает допустимый порог баллов
         # то вернуть максимально возможное количество баллов
-        wrong = True
+        is_good = False
         value = maximum - _sum
-    return jsonify(**{'wrong': wrong,
-                      'result': float(value)})
+    return is_good, value
 
 
 @app.route('/')
@@ -111,14 +110,58 @@ def criteria(olympiad_id):
 
 @app.route('/olympiad-<int:olympiad_id>/criteria/add', methods=['POST'])
 def criterion_add(olympiad_id):
-    add_instance(_class=Criterion, _form=CriterionForm, init_args={'olympiad_id': olympiad_id})
+    instance = Criterion()
+    instance.olympiad_id = olympiad_id
+
+    form = CriterionForm(request.form)
+
+    query = db.session.query(Criterion).filter(Criterion.olympiad_id == instance.olympiad_id)
+
+    instance = instance_from_form(instance, form, query)
+    if instance is not None:
+        db.session.add(instance)
+        db.session.commit()
+
     return redirect(url_for('criteria', olympiad_id=olympiad_id))
 
 
-@app.route('/criterion-<id>/edit', methods=['POST'])
-def criterion_edit(id):
-    new_instance = edit_instance(_class=Criterion, _form=CriterionForm, _id=id)
-    return redirect(url_for('criteria', olympiad_id=new_instance.olympiad_id))
+@app.route('/criterion-<int:criterion_id>/edit', methods=['POST'])
+def criterion_edit(criterion_id):
+    # load inst
+    instance = db.session.query(Criterion).get(criterion_id)
+
+    # make query to check other inst form summing balls
+    query = db.session.query(Criterion)\
+        .filter(Criterion.olympiad_id == instance.olympiad_id)\
+        .filter(Criterion.id != criterion_id)
+
+    # create form
+    form = CriterionForm(request.form, Criterion)
+
+    # check for balls and default flashing
+    instance = instance_from_form(instance, form, query)
+
+    # commit changes
+    if instance is not None:
+        db.session.commit()
+
+    return redirect(url_for('criteria', olympiad_id=instance.olympiad_id))
+
+
+def instance_from_form(instance, form, query, maximum_balls=100):
+
+    if request.method == 'POST' and form.validate():
+        received_balls = form.max_balls.data
+        in_ball_range, value = check_instance(query, received_balls, maximum_balls)
+        if in_ball_range:
+            form.populate_obj(instance)
+            flash_edit(instance)
+            return instance
+        else:
+            flash_max_ball(received_balls, value)
+    else:
+        flash_form_errors(form)
+    return None
 
 
 @app.route('/olympiad-<int:olympiad_id>/criterion-<id>/delete', methods=['POST'])
