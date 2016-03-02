@@ -65,31 +65,31 @@
                 {% endfor %}
             </tbody>
             <tfoot>
-                    <tr>
-                        <td>Всего:</td>
-                        <td></td>
-                        <td>
-                            <div class="max_balls">
-                                <span class="current">0</span>
-                                /
-                                <span class="max">{{ criterion_max_balls }}</span>
-                            </div>
-                        </td>
-                        <td></td>
-                    </tr>
-                </tfoot>
+                <tr>
+                    <td></td>
+                    <td class="result-label">Всего:</td>
+                    <td>
+                        <div class="max_balls">
+                            <span class="current">0</span>
+                            /
+                            <span class="max">100</span>
+                        </div>
+                    </td>
+                    <td></td>
+                </tr>
+            </tfoot>
         </table>
         </div>
         <script>
             var get_current_balls = function () {
-                var curent_sum = 0;
+                var current_sum = 0;
                 $('.info>td:nth-child(3)').each(function () {
-                    curent_sum += parseFloat($(this).text());
+                    current_sum += parseFloat($(this).text());
                 });
-                $('div.max_balls>span.current').text(curent_sum);
+                return current_sum;
             };
             $(document).ready(function () {
-                get_current_balls();
+                $('div.max_balls>span.current').text(get_current_balls());
             });
         </script>
     </div>

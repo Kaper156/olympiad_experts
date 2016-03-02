@@ -6,6 +6,14 @@ body {background-image: url("../img/6875A3.png")}
 .table-striped>tbody>tr:nth-child(odd)>td,
 .table-striped>tbody>tr:nth-child(odd)>th {background-color: white}
 
+/*  first column is ID  */
+table.table-striped  th:first-child {width: 35px}
+
+/*  last column with buttons    */
+table.table-striped  th:last-child {width: 140px}
+
+/*  cell with result-label  */
+table.table-striped  td.result-label{min-width: 50px; text-align: right}
+
 /*  modal margin    */
 .modal-body{margin-left: 15px; margin-right: 15px}
-

@@ -72,8 +72,8 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td>Всего:</td>
                         <td></td>
+                        <td class="result-label">Всего:</td>
                         <td>
                             <div class="max_balls">
                                 <span class="current">0</span>
@@ -94,6 +94,7 @@
                 $('.info>td:nth-child(3)').each(function () {
                     curent_sum += parseFloat($(this).text());
                 });
+
                 $('div.max_balls>span.current').text(curent_sum);
             };
             $(document).ready(function () {
