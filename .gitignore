@@ -3,3 +3,4 @@
 /app/__pycache__/
 /.idea/
 app.db
+.fuse_hidden*
