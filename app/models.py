@@ -43,7 +43,7 @@ class MeasurementType(db.Model):
         return self.method(value)
 
 
-# Ссылается на метод вычисления и аспект
+# Хранит набранные баллы участника за определенный аспект
 class Measurement(db.Model):
     __tablename__ = 'Measurement'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)

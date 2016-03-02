@@ -169,12 +169,6 @@ def criterion_del(olympiad_id, id):
     return redirect(url_for('criteria', olympiad_id=olympiad_id))
 
 
-@app.route('/olympiad-<int:olympiad_id>/criterion-<id>/check-<int:value>', methods=['POST', 'GET'])
-def criterion_check(olympiad_id, value, id):
-    query = db.session.query(Criterion).filter(Criterion.olympiad_id == olympiad_id).filter(Criterion.id != id)
-    return check_instance(query=query, value=value)
-
-
 # SubCriterion pages
 @app.route('/criterion-<int:criterion_id>/sub_criteria')
 def sub_criteria(criterion_id):
@@ -206,7 +200,7 @@ def sub_criterion_add(criterion_id):
     return redirect(url_for('sub_criteria', criterion_id=parent.id))
 
 
-@app.route('/sub_criteria-<int:sub_criterion_id>/edit', methods=['POST'])
+@app.route('/sub_criterion-<int:sub_criterion_id>/edit', methods=['POST'])
 def sub_criterion_edit(sub_criterion_id):
     # load inst
     instance = db.session.query(SubCriterion).get(sub_criterion_id)
@@ -233,3 +227,16 @@ def sub_criterion_edit(sub_criterion_id):
 def sub_criterion_del(criterion_id, id):
     del_instance(_class=SubCriterion, _id=id)
     return redirect(url_for('sub_criteria', criterion_id=criterion_id))
+
+
+# Aspect-Measurement pages
+@app.route('/sub_criterion-<int:sub_criterion_id>/aspects')
+def aspects(sub_criterion_id):
+    aspects = db.session.query(Aspect).filter(Aspect.sub_criterion_id == sub_criterion_id)
+    editor, sub_criteria = get_all_instance(_class=SubCriterion, _form=SubCriterionForm, instances=aspects)
+    sub_criterion_max_balls = db.session.query(SubCriterion).get(sub_criterion_id).max_balls
+    return render_template('sub_criterion.html',
+                           sub_criterion_id=sub_criterion_id,
+                           form=editor,
+                           sub_criteria=sub_criteria,
+                           sub_criterion_max_balls=sub_criterion_max_balls)
