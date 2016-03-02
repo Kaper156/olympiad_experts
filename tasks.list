@@ -58,6 +58,7 @@
 
 
 -Olympiad change status to current max_balls of criteria
+-Show parent.max_balls
 
 +Dynamic JS table edit
     Don't need now

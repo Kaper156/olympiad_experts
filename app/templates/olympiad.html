@@ -24,6 +24,7 @@
                 </a>
 
             </div>
+
         </div>
         <div class='flash-list'>
 			{{ show_flashed() }}
@@ -45,6 +46,7 @@
                     </tr>
                 </thead>
                 <tbody>
+
                 {% for olympiad, form in olympiads %}
                     <tr class="info" id="info-{{ olympiad.id }}">
                         <td>{{ olympiad.id }}</td>
@@ -78,7 +80,6 @@
                 {% endfor %}
                 </tbody>
             </table>
-        </div>
     </div>
 
 {% endblock %}

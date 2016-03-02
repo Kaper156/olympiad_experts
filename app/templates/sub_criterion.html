@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
-{% from 'macroses.html' import modal, editor_olympiad as editor, show_flashed, delete_criterion %}
+{% from 'macroses.html' import modal, editor_olympiad as editor, show_flashed, delete_sub_criterion %}
 
-{% set title = title or 'Модули' %}
+{% set title = title or 'ПодМодули' %}
 
 {% block content %}
     <div class="panel panel-default">
@@ -15,62 +15,56 @@
                     <span class="glyphicon glyphicon-plus"></span> Добавить
                 </button>
 
-                <a class="btn btn-default" href="{{ url_for('criteria', olympiad_id=olympiad_id) }}">
+                <a class="btn btn-default" href="{{ url_for('sub_criteria', criterion_id=criterion_id) }}">
                     <span class="glyphicon glyphicon-refresh"></span> Обновить
                 </a>
 
             </div>
         </div>
         <div class='flash-list'>
-			{{ show_flashed() }}
+            {{ show_flashed() }}
         </div>
 
 
         <div class="panel-body">
-			{{ editor(form=form, attr_id='editor-new', link='criterion_add', args={'olympiad_id': olympiad_id}, new=True) }}
+			{{ editor(form=form, attr_id='editor-new', link='sub_criterion_add', args={'criterion_id': criterion_id}, new=True) }}
             <table class="table table-striped" id="objects-table">
-                <tbody>
+            <tbody>
                 <tr>
                     <th>#</th>
                     <th>Название</th>
                     <th>Максимум баллов</th>
                     <th>Действия</th>
                 </tr>
-				{% set curent_balls = 0|float %}
-				{% for criterion, form in criteria %}
-
-
-                    <tr class="info" id="info-{{ criterion.id }}">
-                        <td>{{ criterion.id }}</td>
-                        <td>{{ criterion.name }}</td>
-                        <td>{{ criterion.max_balls }}</td>
-						{% set curent_balls = curent_balls|float + criterion.max_balls|float %}
-
+                {% for sub_criterion, form in sub_criteria %}
+                    <tr class="info" id="info-{{ sub_criterion.id }}">
+                        <td>{{ sub_criterion.id }}</td>
+                        <td>{{ sub_criterion.name }}</td>
+                        <td>{{ sub_criterion.max_balls }}</td>
                         <td>
                             <span class="btn-group">
                                 <button type="button" class="btn btn-primary"
-                                        data-toggle="modal" data-target="#modal-editor-{{ criterion.id }}">
+                                        data-toggle="modal" data-target="#modal-editor-{{ sub_criterion.id }}">
                                     <span class="glyphicon glyphicon-pencil"></span>
                                 </button>
 
-                                <a class="btn btn-primary"
-                                   href="{{ url_for('sub_criteria', **{'criterion_id':criterion.id}) }}">
+                                <a class="btn btn-primary" href="{{ url_for('sub_criteria', **{'criterion_id':criterion_id}) }}">
                                     <span class="glyphicon glyphicon-th-list"></span>
                                 </a>
 
                                 <button type="button" class="btn btn-danger"
-                                        data-toggle="modal" data-target="#modal-delete-{{ criterion.id }}">
+                                        data-toggle="modal" data-target="#modal-delete-{{ sub_criterion.id }}">
                                     <span class="glyphicon glyphicon-remove-circle"></span>
                                 </button>
 
                             </span>
                         </td>
                     </tr>
-					{{ delete_criterion(attr_id=criterion.id, olympiad_id=olympiad_id) }}
-					{{ editor(form, link='criterion_edit', args={'olympiad_id': olympiad_id, 'criterion_id': criterion.id }, attr_id=criterion.id) }}
-				{% endfor %}
-                </tbody>
-                <tfoot>
+                    {{ delete_sub_criterion(attr_id=sub_criterion.id, criterion_id=criterion_id) }}
+                    {{ editor(form, link='sub_criterion_edit', args={'criterion_id': criterion_id, 'sub_criterion_id': sub_criterion.id }, attr_id=sub_criterion.id) }}
+                {% endfor %}
+            </tbody>
+            <tfoot>
                     <tr>
                         <td>Всего:</td>
                         <td></td>
@@ -78,15 +72,13 @@
                             <div class="max_balls">
                                 <span class="current">0</span>
                                 /
-                                <span class="max">100</span>
+                                <span class="max">{{ criterion_max_balls }}</span>
                             </div>
                         </td>
                         <td></td>
                     </tr>
                 </tfoot>
-            </table>
-
-
+        </table>
         </div>
         <script>
             var get_current_balls = function () {
@@ -101,6 +93,5 @@
             });
         </script>
     </div>
-
 
 {% endblock %}

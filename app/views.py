@@ -1,8 +1,8 @@
 from app import render_template, db, app, request, redirect, url_for, jsonify
 from app import breadcrumbs, OBJECT_PER_PAGE
 from app.models import Olympiad, Criterion, SubCriterion, Aspect, Measurement, MeasurementType
+from app.forms import OlympiadForm, CriterionForm, SubCriterionForm, AspectForm, MeasurementForm
 from app.models import User, Role, Privilege
-from app.forms import OlympiadForm, CriterionForm
 from app.flashing import flash, flash_form_errors, flash_error, flash_add, flash_edit, flash_delete, flash_max_ball
 from wtforms.ext.sqlalchemy.orm import model_form
 
@@ -173,3 +173,63 @@ def criterion_del(olympiad_id, id):
 def criterion_check(olympiad_id, value, id):
     query = db.session.query(Criterion).filter(Criterion.olympiad_id == olympiad_id).filter(Criterion.id != id)
     return check_instance(query=query, value=value)
+
+
+# SubCriterion pages
+@app.route('/criterion-<int:criterion_id>/sub_criteria')
+def sub_criteria(criterion_id):
+    instances = db.session.query(SubCriterion).filter(SubCriterion.criterion_id == criterion_id)
+    editor, sub_criteria = get_all_instance(_class=SubCriterion, _form=SubCriterionForm, instances=instances)
+    criterion_max_balls = db.session.query(Criterion).get(criterion_id).max_balls
+    return render_template('sub_criterion.html',
+                           criterion_id=criterion_id,
+                           form=editor,
+                           sub_criteria=sub_criteria,
+                           criterion_max_balls=criterion_max_balls)
+
+
+@app.route('/criterion-<int:criterion_id>/sub_criteria/add', methods=['POST'])
+def sub_criterion_add(criterion_id):
+    instance = SubCriterion()
+    instance.criterion_id = criterion_id
+
+    form = SubCriterionForm(request.form)
+
+    query = db.session.query(SubCriterion).filter(SubCriterion.criterion_id == instance.criterion_id)
+
+    parent = db.session.query(Criterion).get(criterion_id)
+    instance = instance_from_form(instance, form, query, maximum_balls=parent.max_balls)
+    if instance is not None:
+        db.session.add(instance)
+        db.session.commit()
+
+    return redirect(url_for('sub_criteria', criterion_id=parent.id))
+
+
+@app.route('/sub_criteria-<int:sub_criterion_id>/edit', methods=['POST'])
+def sub_criterion_edit(sub_criterion_id):
+    # load inst
+    instance = db.session.query(SubCriterion).get(sub_criterion_id)
+
+    # make query to check other inst form summing balls
+    query = db.session.query(SubCriterion)\
+        .filter(SubCriterion.criterion_id == instance.criterion_id)\
+        .filter(SubCriterion.id != sub_criterion_id)
+
+    # create form
+    form = SubCriterionForm(request.form, SubCriterion)
+
+    # check for balls and default flashing
+    instance = instance_from_form(instance, form, query)
+
+    # commit changes
+    if instance is not None:
+        db.session.commit()
+
+    return redirect(url_for('sub_criteria', criterion_id=instance.criterion_id))
+
+
+@app.route('/criterion-<int:criterion_id>/sub_criterion-<int:id>/delete', methods=['POST'])
+def sub_criterion_del(criterion_id, id):
+    del_instance(_class=SubCriterion, _id=id)
+    return redirect(url_for('sub_criteria', criterion_id=criterion_id))
