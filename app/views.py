@@ -54,6 +54,21 @@ def del_instance(_class, _id):
     db.session.commit()
 
 
+def instance_from_form(instance, form, query, maximum_balls=100):
+    if request.method == 'POST' and form.validate():
+        received_balls = form.max_balls.data
+        in_ball_range, value = check_instance(query, received_balls, maximum_balls)
+        if in_ball_range:
+            form.populate_obj(instance)
+            flash_edit(instance)
+            return instance
+        else:
+            flash_max_ball(received_balls, value)
+    else:
+        flash_form_errors(form)
+    return None
+
+
 def check_instance(query, value, maximum=100.0):
     is_good = True
     _sum = 0.0
@@ -146,22 +161,6 @@ def criterion_edit(criterion_id):
         db.session.commit()
 
     return redirect(url_for('criteria', olympiad_id=instance.olympiad_id))
-
-
-def instance_from_form(instance, form, query, maximum_balls=100):
-
-    if request.method == 'POST' and form.validate():
-        received_balls = form.max_balls.data
-        in_ball_range, value = check_instance(query, received_balls, maximum_balls)
-        if in_ball_range:
-            form.populate_obj(instance)
-            flash_edit(instance)
-            return instance
-        else:
-            flash_max_ball(received_balls, value)
-    else:
-        flash_form_errors(form)
-    return None
 
 
 @app.route('/olympiad-<int:olympiad_id>/criterion-<id>/delete', methods=['POST'])
