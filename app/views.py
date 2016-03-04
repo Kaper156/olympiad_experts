@@ -1,7 +1,7 @@
 from app import render_template, db, app, request, redirect, url_for, jsonify
 from app import breadcrumbs, OBJECT_PER_PAGE
-from app.models import Olympiad, Criterion, SubCriterion, Aspect, Measurement, MeasurementType
-from app.forms import OlympiadForm, CriterionForm, SubCriterionForm, AspectForm, MeasurementForm
+from app.models import Olympiad, Criterion, SubCriterion, Aspect, Measurement, Calculation
+from app.forms import OlympiadForm, CriterionForm, SubCriterionForm, AspectForm, CalculationForm
 from app.models import User, Role, Privilege
 from app.flashing import flash, flash_form_errors, flash_error, flash_add, flash_edit, flash_delete, flash_max_ball
 from wtforms.ext.sqlalchemy.orm import model_form

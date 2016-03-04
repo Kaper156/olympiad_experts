@@ -1,4 +1,4 @@
-from app.models import Olympiad, Criterion, SubCriterion, Aspect, Measurement
+from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, Measurement
 from flask.ext.wtf import Form
 from wtforms_alchemy import model_form_factory
 
@@ -24,6 +24,11 @@ class SubCriterionForm(ModelForm, Form):
 class AspectForm(ModelForm, Form):
     class Meta:
         model = Aspect
+
+
+class CalculationForm(ModelForm, Form):
+    class Meta:
+        model = Calculation
 
 
 class MeasurementForm(ModelForm, Form):

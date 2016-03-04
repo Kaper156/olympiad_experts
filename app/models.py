@@ -22,16 +22,16 @@ class Aspect(OlympiadBase):
     sub_criterion_id = db.Column(db.Integer, db.ForeignKey('SubCriterion.id'))
     sub_criterion = db.relationship('SubCriterion', backref=db.backref('Aspect', lazy='dynamic'))
 
-    measurement_type_id = db.Column(db.Integer, db.ForeignKey('MeasurementType.id'))
-    measurement_type = db.relationship('MeasurementType', backref=db.backref('Aspect', lazy='dynamic'))
+    calculation_id = db.Column(db.Integer, db.ForeignKey('Calculation.id'))
+    Calculation = db.relationship('Calculation', backref=db.backref('Aspect', lazy='dynamic'))
 
     def __str__(self):
         return '<Модуль: "%s" (%s)>' % (self.name, self.max_balls)
 
 
 # Хранит конкретные методы вычисления
-class MeasurementType(db.Model):
-    __tablename__ = 'MeasurementType'
+class Calculation(db.Model):
+    __tablename__ = 'Calculation'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(String)
     description = Column(String)
