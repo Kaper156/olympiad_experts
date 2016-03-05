@@ -18,24 +18,7 @@ def get_all_instance(_class, _form, instances=None):
     return editor, result
 
 
-def get_all_instances(_class):
-    return list(db.session.query(_class).limit(OBJECT_PER_PAGE))
-
-
-def add_instance(_class, _form, init_args={}):
-    instance = _class(**init_args)
-    form = _form(request.form)
-    if form.validate_on_submit():
-        form.populate_obj(instance)
-        db.session.add(instance)
-        db.session.commit()
-        flash_add(instance)
-    else:
-        flash_form_errors(form)
-    return instance
-
-
-def edit_instance(_class, _form, _id, data=None):
+def populate_changes(_class, _form, _id, data=None):
     instance = db.session.query(_class).get(_id)
     form = _form(data or request.form, _class)
     if request.method == 'POST' and form.validate():
@@ -47,7 +30,7 @@ def edit_instance(_class, _form, _id, data=None):
     return instance
 
 
-def del_instance(_class, _id):
+def delete_object(_class, _id):
     instance = db.session.query(_class).get(_id)
     db.session.query(_class).filter(_class.id == _id).delete()
     flash_delete(instance)
@@ -99,19 +82,27 @@ def olympiads():
 
 @app.route('/olympiads/add', methods=['POST'])
 def olympiad_add():
-    add_instance(_class=Olympiad, _form=OlympiadForm)
+    instance = Olympiad()
+    form = OlympiadForm(request.form)
+    if form.validate_on_submit():
+        form.populate_obj(instance)
+        db.session.add(instance)
+        db.session.commit()
+        flash_add(instance)
+    else:
+        flash_form_errors(form)
     return redirect(url_for('olympiads'))
 
 
 @app.route('/olympiad-<int:id>/edit', methods=['POST'])
 def olympiad_edit(id):
-    edit_instance(_class=Olympiad, _form=OlympiadForm, _id=id)
+    populate_changes(_class=Olympiad, _form=OlympiadForm, _id=id)
     return redirect(url_for('olympiads'))
 
 
 @app.route('/olympiad-<int:id>/delete', methods=['POST'])
 def olympiad_del(id):
-    del_instance(_class=Olympiad, _id=id)
+    delete_object(_class=Olympiad, _id=id)
     return redirect(url_for('olympiads'))
 
 
@@ -145,6 +136,8 @@ def criterion_edit(criterion_id):
     # load inst
     instance = db.session.query(Criterion).get(criterion_id)
 
+    parent_id = instance.olympiad_id
+
     # make query to check other inst form summing balls
     query = db.session.query(Criterion)\
         .filter(Criterion.olympiad_id == instance.olympiad_id)\
@@ -160,12 +153,12 @@ def criterion_edit(criterion_id):
     if instance is not None:
         db.session.commit()
 
-    return redirect(url_for('criteria', olympiad_id=instance.olympiad_id))
+    return redirect(url_for('criteria', olympiad_id=parent_id))
 
 
 @app.route('/olympiad-<int:olympiad_id>/criterion-<id>/delete', methods=['POST'])
 def criterion_del(olympiad_id, id):
-    del_instance(_class=Criterion, _id=id)
+    delete_object(_class=Criterion, _id=id)
     return redirect(url_for('criteria', olympiad_id=olympiad_id))
 
 
@@ -197,13 +190,15 @@ def sub_criterion_add(criterion_id):
         db.session.add(instance)
         db.session.commit()
 
-    return redirect(url_for('sub_criteria', criterion_id=parent.id))
+    return redirect(url_for('sub_criteria', criterion_id=criterion_id))
 
 
 @app.route('/sub_criterion-<int:sub_criterion_id>/edit', methods=['POST'])
 def sub_criterion_edit(sub_criterion_id):
     # load inst
     instance = db.session.query(SubCriterion).get(sub_criterion_id)
+
+    parent_id = instance.criterion_id
 
     # make query to check other inst form summing balls
     query = db.session.query(SubCriterion)\
@@ -220,12 +215,12 @@ def sub_criterion_edit(sub_criterion_id):
     if instance is not None:
         db.session.commit()
 
-    return redirect(url_for('sub_criteria', criterion_id=instance.criterion_id))
+    return redirect(url_for('sub_criteria', criterion_id=parent_id))
 
 
 @app.route('/criterion-<int:criterion_id>/sub_criterion-<int:id>/delete', methods=['POST'])
 def sub_criterion_del(criterion_id, id):
-    del_instance(_class=SubCriterion, _id=id)
+    delete_object(_class=SubCriterion, _id=id)
     return redirect(url_for('sub_criteria', criterion_id=criterion_id))
 
 

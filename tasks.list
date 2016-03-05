@@ -38,7 +38,7 @@
 
 +USE WTForms-Alchemy
 
--Init args to add_instance
+-Init args to populate_new
 -Macro for all models
 -Static table fields (buttons)
 -Data = dict(from_ajax) to init model
