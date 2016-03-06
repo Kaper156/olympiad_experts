@@ -15,7 +15,7 @@
                     <span class="glyphicon glyphicon-plus"></span> Добавить
                 </button>
 
-                <a class="btn btn-default" href="{{ url_for('olympiads') }}">
+                <a class="btn btn-default" href="{{ url_for('olympiad_api') }}">
                     <span class="glyphicon glyphicon-refresh"></span> Обновить
                 </a>
 
@@ -32,7 +32,7 @@
 
 
         <div class="panel-body">
-			{{ editor(form=form, attr_id='editor-new', link='olympiad_add', args={}, new=True) }}
+			{{ editor(form=form, attr_id='editor-new', link='olympiad_api', args={}, new=True) }}
 
             <table class="table table-striped" id="objects-table">
                 <thead>
@@ -46,7 +46,7 @@
                 </thead>
                 <tbody>
 
-                {% for olympiad, form in olympiads %}
+                {% for olympiad, form in objects %}
                     <tr class="info" id="info-{{ olympiad.id }}">
                         <td>{{ olympiad.id }}</td>
                         <td>{{ olympiad.name }}</td>
@@ -60,10 +60,10 @@
                                     <span class="glyphicon glyphicon-pencil"></span>
                                 </button>
 
-                                <a class="btn btn-primary"
-                                   href="{{ url_for('criteria', **{'olympiad_id':olympiad.id}) }}">
-                                    <span class="glyphicon glyphicon-th-list"></span>
-                                </a>
+{#                                <a class="btn btn-primary"#}
+{#                                   href="{{ url_for('criteria', **{'olympiad_id':olympiad.id}) }}">#}
+{#                                    <span class="glyphicon glyphicon-th-list"></span>#}
+{#                                </a>#}
 
                                 <button type="button" class="btn btn-danger"
                                         data-toggle="modal" data-target="#modal-delete-{{ olympiad.id }}">
@@ -74,7 +74,7 @@
                         </td>
                     </tr>
                     {{ delete_olympiad(attr_id=olympiad.id) }}
-                    {{ editor(form, link='olympiad_edit', args={'id': olympiad.id}, attr_id=olympiad.id) }}
+                    {{ editor(form, link='olympiad_api', args={'id': olympiad.id}, attr_id=olympiad.id) }}
                 {% endfor %}
                 </tbody>
             </table>

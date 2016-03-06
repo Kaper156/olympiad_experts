@@ -1,8 +1,8 @@
 {#  Macros  #}
 {#  Print modal form for showing with buttons on JS  #}
-{% macro modal(title, body, footer, form=False, attr_id=None, additional_cls='') -%}
+{% macro modal(title, body, footer, form=False, id=None, cls='') -%}
     {# attr_id: id to button data-toggle  #}
-    <div class="modal fade {{ additional_cls }} " tabindex="-1" role="dialog" id="{{ attr_id }}">
+    <div class="modal fade {{ cls }} " tabindex="-1" role="dialog" id="{{ id }}">
         <div class="modal-dialog">
             {{ form|safe }}
             <div class="modal-content">
@@ -26,77 +26,42 @@
     </div>
 {%- endmacro %}
 
-{% macro delete_object(title, body, attr_id, link, args) -%}
-    {# attr_id: id to button data-toggle  #}
-    {# link: string param to url_for #}
-    {# args: dict of param to url_for ({id:1}) #}
-    {% set link = url_for(link, **args) %}
-    {% set form = '<form action="' ~ link ~ '" method="post">' %}
-
-    {% set footer = '<input type="submit" value="Удалить" class="btn btn-danger"/>' %}
-
-{#    {%- endset %}#}
-    {{ modal(title=title, body=body, footer=footer, form=form, attr_id=attr_id) }}
-{%- endmacro %}
-
-{% macro delete_olympiad(attr_id) -%}
-    {# attr_id: only number of object #}
-    {% set link = 'olympiad_del' %}
-    {% set args = {'id':attr_id} %}
-    {% set attr_id = 'modal-delete-'~attr_id %}
-    {% set title = 'Вы действительно хотите удалить эту олимпиаду?' %}
-    {% set body -%}
-        <p>
-            Пути назад нет.
-        </p>
-    {#TODO#}
-    {%- endset %}
-    {{ delete_object(title=title, body=body, attr_id=attr_id, link=link, args=args) }}
-{%- endmacro %}
-
-{% macro delete_criterion(attr_id, olympiad_id) -%}
-    {# attr_id: only number of object #}
-    {% set link = 'criterion_del' %}
-    {% set args = {'id':attr_id, 'olympiad_id': olympiad_id} %}
-    {% set attr_id = 'modal-delete-'~attr_id %}
-    {% set title = 'Вы действительно хотите удалить этот модуль?' %}
-    {% set body -%}
-        <p>
-            Пути назад нет.
-        </p>
-    {#TODO#}
-    {%- endset %}
-    {{ delete_object(title=title, body=body, attr_id=attr_id, link=link, args=args) }}
-{%- endmacro %}
-
-{% macro delete_sub_criterion(attr_id, criterion_id) -%}
-    {# attr_id: only number of object #}
-    {% set link = 'sub_criterion_del' %}
-    {% set args = {'id':attr_id, 'criterion_id': criterion_id} %}
-    {% set attr_id = 'modal-delete-'~attr_id %}
-    {% set title = 'Вы действительно хотите удалить этот подмодуль?' %}
-    {% set body -%}
-        <p>
-            Пути назад нет.
-        </p>
-    {#TODO#}
-    {%- endset %}
-    {{ delete_object(title=title, body=body, attr_id=attr_id, link=link, args=args) }}
-{%- endmacro %}
-
-{% macro editor(form, attr_id, link, args={}, new=None, title_for='объекта') -%}
+{% macro adder(form, attr_id, link, args={}, title_for='объекта') -%}
+    {% set modal_title = 'Добавление ' ~ title_for %}
     {% set modal_form -%}
         <form action="{{ url_for(link, **args) }}" method="post">
     {%- endset %}
 
-    {% if new %}
-        {% set modal_title = 'Добавление ' ~ title_for %}
-        {% set btn_text = 'Добавить' %}
-    {% else %}
+    {% set modal_body -%}
+        <div class="form-horizontal">
+            {% for field in form if field.widget.input_type != 'hidden' %}
+                <div class="form-group">
+                    {{ field.label }}:
+                    {{ field(class="form-control", **kwargs) }}
+                </div>
+            {% endfor %}
+        </div>
+    {%- endset %}
 
-        {% set modal_title = 'Изменение ' ~ title_for %}
-        {% set btn_text = 'Изменить' %}
-    {% endif %}
+    {% set modal_footer -%}
+        {{ form.hidden_tag() }}
+        <input type="submit" value="Добавить" class="btn btn-default"/>
+    {%- endset %}
+
+    {% set attr_id = 'modal-editor-' ~ attr_id %}
+
+    {% set additional_cls='editor' %}
+
+    {{ modal(title=modal_title, body=modal_body, footer=modal_footer, form=modal_form, attr_id=attr_id, additional_cls=additional_cls) }}
+{%- endmacro %}
+
+
+{% macro editor(form, attr_id, link, args={}, new=None, title_for='объекта') -%}
+    {% set modal_title = 'Изменение ' ~ title_for %}
+    {% set btn_text = 'Изменить' %}
+    {% set modal_form -%}
+        <form action="{{ url_for(link, **args) }}" method="PUT">
+    {%- endset %}
 
     {% set modal_body %}
         <div class="form-horizontal">
@@ -120,8 +85,38 @@
 
     {% set additional_cls='editor' %}
 
-    {{ modal(title=modal_title, body=modal_body, footer=modal_footer, form=modal_form, attr_id=attr_id, additional_cls=additional_cls) }}
+    {{ modal(title=modal_title, body=modal_body, footer=modal_footer, form=modal_form, id=attr_id, cls=additional_cls) }}
 {%- endmacro %}
+
+
+{% macro delete_object(title, body, attr_id, link, args) -%}
+    {# attr_id: id to button data-toggle  #}
+    {# link: string param to url_for #}
+    {# args: dict of param to url_for ({id:1}) #}
+    {% set link = url_for(link, **args) %}
+    {% set form = '<form action="' ~ link ~ '" method="delete">' %}
+
+    {% set footer = '<input type="submit" value="Удалить" class="btn btn-danger"/>' %}
+
+{#    {%- endset %}#}
+    {{ modal(title=title, body=body, footer=footer, form=form, id=attr_id) }}
+{%- endmacro %}
+
+{% macro delete_olympiad(attr_id) -%}
+    {# attr_id: only number of object #}
+    {% set link = 'olympiad_api' %}
+    {% set args = {'id':attr_id} %}
+    {% set attr_id = 'modal-delete-'~attr_id %}
+    {% set title = 'Вы действительно хотите удалить эту олимпиаду?' %}
+    {% set body -%}
+        <p>
+            Пути назад нет.
+        </p>
+    {#TODO#}
+    {%- endset %}
+    {{ delete_object(title=title, body=body, attr_id=attr_id, link=link, args=args) }}
+{%- endmacro %}
+
 
 {% macro editor_olympiad(form, attr_id, link, args={}, new=None) %}
     {{ editor(form=form, attr_id=attr_id, link=link, args=args, new=new, title_for='олимпиады') }}

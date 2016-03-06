@@ -6,13 +6,17 @@ from app.flashing import flash_form_errors, flash_error, flash_add, flash_edit, 
 
 
 class BaseView(MethodView):
+    methods = ['GET', 'POST']
 
     def __init__(self, _class, _form, template_name):
         self.cls = _class
         self.form = _form
         self.template = template_name
 
-    def view(self):
+    # def redirect(self):
+    #     return self.get()
+
+    def get(self, id):
         results = list()
         for instance in db.session.query(self.cls).limit(OBJECT_PER_PAGE):
             results.append((instance, self.form(obj=instance)))
@@ -21,7 +25,7 @@ class BaseView(MethodView):
         editor = self.form()
         return render_template(self.template, objects=results, form=editor)
 
-    def edit(self, id):
+    def put(self, id):
         instance = db.session.query(self.cls).get(id)
         form = self.form(request.form, self.cls)
         if form.validate_on_submit():
@@ -30,9 +34,9 @@ class BaseView(MethodView):
             flash_edit(instance)
         else:
             flash_form_errors(form)
-        return self.redirect()
+        # return self.redirect()
 
-    def add(self):
+    def post(self):
         form = self.form(request.form, self.cls)
         instance = self.cls()
         if form.validate_on_submit():
@@ -42,22 +46,14 @@ class BaseView(MethodView):
             flash_add(instance)
         else:
             flash_form_errors(form)
-        return self.redirect()
-
-    def redirect(self):
-        return self.view()
+        # return self.redirect()
 
     def delete(self, id):
         instance = db.session.query(self.cls).get(id)
         db.session.query(self.cls).filter(self.cls.id == id).delete()
         flash_delete(instance)
         db.session.commit()
-        return self.redirect()
-
-
-class OlympiadView(BaseView):
-    def __init__(self):
-        BaseView.__init__(self, Olympiad, OlympiadForm, 'olympiads.html')
+        # return self.redirect()
 
 
 class ChildAPI(BaseView):
@@ -69,7 +65,7 @@ class ChildAPI(BaseView):
         self.query['edit'] = query_check_edit
         # self.have_parent = have_parent
 
-    def edit(self, id, parent_id, maximum_balls=100):
+    def put(self, id, parent_id, maximum_balls=100):
         instance = db.session.query(self.cls).get(id)
         form = self.form(request.form, self.cls)
         if form.validate_on_submit():
@@ -85,7 +81,7 @@ class ChildAPI(BaseView):
             flash_form_errors(form)
         return self.redirect()
 
-    def add(self, parent_id, maximum_balls=100):
+    def post(self, parent_id, maximum_balls=100):
         instance = self.cls()
         form = self.form(request.form, self.cls)
         if form.validate_on_submit():
@@ -119,6 +115,11 @@ class ChildAPI(BaseView):
         return new_value
 
 
+class OlympiadView(BaseView):
+    def __init__(self):
+        BaseView.__init__(self, Olympiad, OlympiadForm, 'olympiad.html')
+
+
 class CriterionView(ChildAPI):
     def __init__(self):
         query_add  = lambda parent_id:db.session.query(Criterion).filter(Criterion.olympiad_id == parent_id)
@@ -131,3 +132,13 @@ class CriterionView(ChildAPI):
                           query_check_add=query_add,
                           query_check_edit=query_edit)
 
+
+def register_api(view, endpoint, url, pk='id', pk_type='int'):
+    view_func = view.as_view(endpoint)
+    app.add_url_rule(url, defaults={pk: None},
+                     view_func=view_func, methods=['GET',])
+    app.add_url_rule(url, view_func=view_func, methods=['POST',])
+    app.add_url_rule('%s<%s:%s>' % (url, pk_type, pk), view_func=view_func,
+                     methods=['GET', 'PUT', 'DELETE'])
+
+register_api(OlympiadView, 'olympiad_api', '/olympiads/')

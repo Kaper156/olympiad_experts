@@ -43,8 +43,7 @@
             </div>
             <ul class="nav navbar-nav navbar-right">
 
-                <li><a class="btn" href="{{ url_for('olympiads') }}">Олимпиады</a></li>
-                <li><a class="btn" href="{{ url_for('criteria', olympiad_id=1) }}">Критерии</a></li>
+                <li><a class="btn" href="{{ url_for('olympiad_api') }}">Олимпиады</a></li>
             </ul>
         </div>
     </nav>
@@ -63,6 +62,7 @@
 		{# Main content block #}
         <div id="content">
 			{% block content %}
+                <li><a class="btn" href="{{ url_for('olympiad_api') }}">Олимпиады</a></li>
                 <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquam consectetur corporis, facilis
                     perspiciatis quis quo voluptate! Ad atque eos ex maxime quae! Consectetur cumque eos esse maxime
                     neque reiciendis tempora!</p>
