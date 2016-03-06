@@ -60,10 +60,10 @@
                                     <span class="glyphicon glyphicon-pencil"></span>
                                 </button>
 
-{#                                <a class="btn btn-primary"#}
-{#                                   href="{{ url_for('criteria', **{'olympiad_id':olympiad.id}) }}">#}
-{#                                    <span class="glyphicon glyphicon-th-list"></span>#}
-{#                                </a>#}
+                                <a class="btn btn-primary"
+                                   href="{{ url_for('criterion', **{'parent_id':olympiad.id}) }}">
+                                    <span class="glyphicon glyphicon-th-list"></span>
+                                </a>
 
                                 <button type="button" class="btn btn-danger"
                                         data-toggle="modal" data-target="#modal-delete-{{ olympiad.id }}">
@@ -73,7 +73,7 @@
                             </span>
                         </td>
                     </tr>
-                    {{ delete_olympiad(attr_id=olympiad.id) }}
+                    {{ delete_olympiad(id=olympiad.id) }}
 	                {{ editor_olympiad(form=form, end_point='olympiad_edit', id=olympiad.id, args={'id': olympiad.id}) }}
                 {% endfor %}
                 </tbody>

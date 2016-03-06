@@ -6,7 +6,6 @@ from app.flashing import flash_form_errors, flash_error, flash_add, flash_edit, 
 
 
 class BaseView:
-    methods = ['GET', 'POST']
 
     def __init__(self, _class, _form, template_name, end_point=''):
         self.cls = _class
@@ -78,20 +77,48 @@ class BaseView:
 
 
 class ChildAPI(BaseView):
-    def __init__(self, _class, _form, template, query_check_add=None, query_check_edit=None):
-        # , have_parent=lambda x: x
-        BaseView.__init__(self, _class, _form, template)
+    def __init__(self, _class, _form, template, end_point,
+                 query_check_add=None, query_check_edit=None, query_maximum=lambda:100):
+        BaseView.__init__(self, _class, _form, template, end_point=end_point)
         self.query = dict()
-        self.query['add'] = query_check_add
+        self.query['all'] = query_check_add
         self.query['edit'] = query_check_edit
-        # self.have_parent = have_parent
+        self.query['maximum_balls'] = query_maximum
 
-    def edit(self, id, parent_id, maximum_balls=100):
+    def init_end_points(self):
+        app.add_url_rule('/%s-of-<int:parent_id>/' % self.endpoint,
+                         endpoint='%s' % self.endpoint,
+                         view_func=self.all,
+                         methods=['GET'])
+        app.add_url_rule('/%s-of-<int:parent_id>/add/' % self.endpoint,
+                         endpoint='%s_add' % self.endpoint,
+                         view_func=self.add,
+                         methods=['POST'])
+        app.add_url_rule('/%s-of-<int:parent_id>/edit/<int:id>' % self.endpoint,
+                         endpoint='%s_edit' % self.endpoint,
+                         view_func=self.edit,
+                         methods=['POST'])
+        app.add_url_rule('/%s-of-<int:parent_id>/delete/<int:id>' % self.endpoint,
+                         endpoint='%s_delete' % self.endpoint,
+                         view_func=self.delete,
+                         methods=['POST'])
+
+    def all(self, parent_id):
+        results = list()
+        for instance in self.query['all'](parent_id):
+            results.append((instance, self.form(obj=instance)))
+
+        # form to add new inst
+        editor = self.form()
+        return render_template(self.template, objects=results, form=editor, parent_id=parent_id)
+
+    def edit(self, id, parent_id):
+
         instance = db.session.query(self.cls).get(id)
         form = self.form(request.form, self.cls)
         if form.validate_on_submit():
             received_balls = form.max_balls.data
-            value = self.check_balls(instance.id, parent_id, received_balls, maximum_balls)
+            value = self.check_balls(instance.id, parent_id, received_balls, self.query['maximum_balls']())
             if value == received_balls:
                 form.populate_obj(instance)
                 db.session.commit()
@@ -102,12 +129,12 @@ class ChildAPI(BaseView):
             flash_form_errors(form)
         return self.redirect()
 
-    def add(self, parent_id, maximum_balls=100):
+    def add(self, parent_id):
         instance = self.cls()
         form = self.form(request.form, self.cls)
         if form.validate_on_submit():
             received_balls = form.max_balls.data
-            value = self.check_balls(None, parent_id, received_balls, maximum_balls)
+            value = self.check_balls(None, parent_id, received_balls, self.query['maximum_balls']())
             if value == received_balls:
                 form.populate_obj(instance)
                 db.session.add(instance)
@@ -125,7 +152,7 @@ class ChildAPI(BaseView):
         if _id:
             query = self.query['edit'](_id, parent_id)
         else:
-            query = self.query['add'](parent_id)
+            query = self.query['all'](parent_id)
 
         for instance in query:
             _sum += instance.max_balls
@@ -149,10 +176,11 @@ class CriterionView(ChildAPI):
         ChildAPI.__init__(self,
                           _class=Criterion,
                           _form=CriterionForm,
+                          end_point='criterion',
                           template='criterion.html',
                           query_check_add=query_add,
                           query_check_edit=query_edit)
 
 
-
 OlympiadView()
+CriterionView()

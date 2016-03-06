@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% from 'macroses.html' import modal, editor_olympiad as editor, show_flashed, delete_criterion %}
+{% from 'macroses.html' import modal, show_flashed, adder_criterion, editor_criterion, delete_criterion %}
 
 {% set title = title or 'Модули' %}
 
@@ -15,19 +15,21 @@
                     <span class="glyphicon glyphicon-plus"></span> Добавить
                 </button>
 
-                <a class="btn btn-default" href="{{ url_for('criteria', olympiad_id=olympiad_id) }}">
+                <a class="btn btn-default" href="{{ url_for('criterion', parent_id=parent_id) }}">
                     <span class="glyphicon glyphicon-refresh"></span> Обновить
                 </a>
 
             </div>
         </div>
-        <div class='flash-list'>
-			{{ show_flashed() }}
-        </div>
 
 
         <div class="panel-body">
-			{{ editor(form=form, attr_id='editor-new', link='criterion_add', args={'olympiad_id': olympiad_id}, new=True) }}
+			{{ adder_criterion(form=form, parent_id=parent_id) }}
+
+            <div class='flash-list'>
+				{{ show_flashed() }}
+	        </div>
+
             <table class="table table-striped" id="objects-table">
                 <tbody>
                 <tr>
@@ -37,7 +39,7 @@
                     <th>Действия</th>
                 </tr>
 				{% set curent_balls = 0|float %}
-				{% for criterion, form in criteria %}
+				{% for criterion, form in objects %}
 
 
                     <tr class="info" id="info-{{ criterion.id }}">
@@ -53,10 +55,10 @@
                                     <span class="glyphicon glyphicon-pencil"></span>
                                 </button>
 
-                                <a class="btn btn-primary"
-                                   href="{{ url_for('sub_criteria', **{'criterion_id':criterion.id}) }}">
-                                    <span class="glyphicon glyphicon-th-list"></span>
-                                </a>
+{#                                <a class="btn btn-primary"#}
+{#                                   href="{{ url_for('sub_criteria', **{'criterion_id':criterion.id}) }}">#}
+{#                                    <span class="glyphicon glyphicon-th-list"></span>#}
+{#                                </a>#}
 
                                 <button type="button" class="btn btn-danger"
                                         data-toggle="modal" data-target="#modal-delete-{{ criterion.id }}">
@@ -66,8 +68,8 @@
                             </span>
                         </td>
                     </tr>
-					{{ delete_criterion(attr_id=criterion.id, olympiad_id=olympiad_id) }}
-					{{ editor(form, link='criterion_edit', args={'olympiad_id': olympiad_id, 'criterion_id': criterion.id }, attr_id=criterion.id) }}
+					{{ delete_criterion(id=criterion.id, parent_id=parent_id) }}
+					{{ editor_criterion(form, end_point='criterion_edit', args={'parent_id': parent_id, 'id': criterion.id }, id=criterion.id) }}
 				{% endfor %}
                 </tbody>
                 <tfoot>
