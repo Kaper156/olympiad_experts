@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, abort, jsonify
 from flask_wtf.csrf import CsrfProtect
+from flask.views import MethodView
 
 app = Flask(__name__)
 app.config.from_object('config.DevelopConfig')

@@ -1,237 +1,133 @@
-from app import render_template, db, app, request, redirect, url_for, jsonify
+from app import render_template, db, app, request, redirect, url_for, MethodView, abort
 from app import breadcrumbs, OBJECT_PER_PAGE
 from app.models import Olympiad, Criterion, SubCriterion, Aspect, Measurement, Calculation
 from app.forms import OlympiadForm, CriterionForm, SubCriterionForm, AspectForm, CalculationForm
-from app.models import User, Role, Privilege
-from app.flashing import flash, flash_form_errors, flash_error, flash_add, flash_edit, flash_delete, flash_max_ball
-from wtforms.ext.sqlalchemy.orm import model_form
+from app.flashing import flash_form_errors, flash_error, flash_add, flash_edit, flash_delete, flash_max_ball
 
 
-# UNIFICATED ADD, DELETE, EDIT instances
-def get_all_instance(_class, _form, instances=None):
-    result = list()
-    for instance in instances or db.session.query(_class).limit(OBJECT_PER_PAGE):
-        result.append((instance, _form(obj=instance)))
+class BaseView(MethodView):
 
-    # form to add new inst
-    editor = _form()
-    return editor, result
+    def __init__(self, _class, _form, template_name):
+        self.cls = _class
+        self.form = _form
+        self.template = template_name
 
+    def view(self):
+        results = list()
+        for instance in db.session.query(self.cls).limit(OBJECT_PER_PAGE):
+            results.append((instance, self.form(obj=instance)))
 
-def populate_changes(_class, _form, _id, data=None):
-    instance = db.session.query(_class).get(_id)
-    form = _form(data or request.form, _class)
-    if request.method == 'POST' and form.validate():
-        form.populate_obj(instance)
-        db.session.commit()
-        flash_edit(instance)
-    else:
-        flash_form_errors(form)
-    return instance
+        # form to add new inst
+        editor = self.form()
+        return render_template(self.template, objects=results, form=editor)
 
-
-def delete_object(_class, _id):
-    instance = db.session.query(_class).get(_id)
-    db.session.query(_class).filter(_class.id == _id).delete()
-    flash_delete(instance)
-    db.session.commit()
-
-
-def instance_from_form(instance, form, query, maximum_balls=100):
-    if request.method == 'POST' and form.validate():
-        received_balls = form.max_balls.data
-        in_ball_range, value = check_instance(query, received_balls, maximum_balls)
-        if in_ball_range:
+    def edit(self, id):
+        instance = db.session.query(self.cls).get(id)
+        form = self.form(request.form, self.cls)
+        if form.validate_on_submit():
             form.populate_obj(instance)
+            db.session.commit()
             flash_edit(instance)
-            return instance
         else:
-            flash_max_ball(received_balls, value)
-    else:
-        flash_form_errors(form)
-    return None
+            flash_form_errors(form)
+        return self.redirect()
 
+    def add(self):
+        form = self.form(request.form, self.cls)
+        instance = self.cls()
+        if form.validate_on_submit():
+            form.populate_obj(instance)
+            db.session.add(instance)
+            db.session.commit()
+            flash_add(instance)
+        else:
+            flash_form_errors(form)
+        return self.redirect()
 
-def check_instance(query, value, maximum=100.0):
-    is_good = True
-    _sum = 0.0
+    def redirect(self):
+        return self.view()
 
-    for instance in query:
-        _sum += instance.max_balls
-    # todo change to reduce
-
-    if _sum + value > maximum:
-        # Если значение преышает допустимый порог баллов
-        # то вернуть максимально возможное количество баллов
-        is_good = False
-        value = maximum - _sum
-    return is_good, value
-
-
-@app.route('/')
-def index():
-    return render_template('base.html', breadcrumbs=breadcrumbs[:1])
-
-
-# Olympiads pages
-@app.route('/olympiads/', methods=['POST', 'GET'])
-def olympiads():
-    editor, instances = get_all_instance(_class=Olympiad, _form=OlympiadForm)
-    return render_template('olympiad.html', breadcrumbs=breadcrumbs[:2], olympiads=instances, form=editor)
-
-
-@app.route('/olympiads/add', methods=['POST'])
-def olympiad_add():
-    instance = Olympiad()
-    form = OlympiadForm(request.form)
-    if form.validate_on_submit():
-        form.populate_obj(instance)
-        db.session.add(instance)
+    def delete(self, id):
+        instance = db.session.query(self.cls).get(id)
+        db.session.query(self.cls).filter(self.cls.id == id).delete()
+        flash_delete(instance)
         db.session.commit()
-        flash_add(instance)
-    else:
-        flash_form_errors(form)
-    return redirect(url_for('olympiads'))
+        return self.redirect()
 
 
-@app.route('/olympiad-<int:id>/edit', methods=['POST'])
-def olympiad_edit(id):
-    populate_changes(_class=Olympiad, _form=OlympiadForm, _id=id)
-    return redirect(url_for('olympiads'))
+class OlympiadView(BaseView):
+    def __init__(self):
+        BaseView.__init__(self, Olympiad, OlympiadForm, 'olympiads.html')
 
 
-@app.route('/olympiad-<int:id>/delete', methods=['POST'])
-def olympiad_del(id):
-    delete_object(_class=Olympiad, _id=id)
-    return redirect(url_for('olympiads'))
+class ChildAPI(BaseView):
+    def __init__(self, _class, _form, template, query_check_add=None, query_check_edit=None):
+        # , have_parent=lambda x: x
+        BaseView.__init__(self, _class, _form, template)
+        self.query = dict()
+        self.query['add'] = query_check_add
+        self.query['edit'] = query_check_edit
+        # self.have_parent = have_parent
+
+    def edit(self, id, parent_id, maximum_balls=100):
+        instance = db.session.query(self.cls).get(id)
+        form = self.form(request.form, self.cls)
+        if form.validate_on_submit():
+            received_balls = form.max_balls.data
+            value = self.check_balls(instance.id, parent_id, received_balls, maximum_balls)
+            if value == received_balls:
+                form.populate_obj(instance)
+                db.session.commit()
+                flash_edit(instance)
+            else:
+                flash_max_ball(received_balls, value)
+        else:
+            flash_form_errors(form)
+        return self.redirect()
+
+    def add(self, parent_id, maximum_balls=100):
+        instance = self.cls()
+        form = self.form(request.form, self.cls)
+        if form.validate_on_submit():
+            received_balls = form.max_balls.data
+            value = self.check_balls(None, parent_id, received_balls, maximum_balls)
+            if value == received_balls:
+                form.populate_obj(instance)
+                db.session.add(instance)
+                db.session.commit()
+                flash_add(instance)
+            else:
+                flash_max_ball(received_balls, value)
+        else:
+            flash_form_errors(form)
+        return self.redirect()
+
+    def check_balls(self, _id, parent_id, new_value, maximum=100.0):
+        _sum = 0.0
+
+        if _id:
+            query = self.query['edit'](_id, parent_id)
+        else:
+            query = self.query['add'](parent_id)
+
+        for instance in query:
+            _sum += instance.max_balls
+        # todo change to reduce
+
+        if _sum + new_value > maximum:
+            new_value = maximum - _sum
+        return new_value
 
 
-# Criterion pages
-@app.route('/olympiad-<int:olympiad_id>/criteria')
-def criteria(olympiad_id):
-    instances = db.session.query(Criterion).filter(Criterion.olympiad_id == olympiad_id)
-    editor, criteria = get_all_instance(_class=Criterion, _form=CriterionForm, instances=instances)
-    return render_template('criterion.html', form=editor, criteria=criteria, olympiad_id=olympiad_id)
+class CriterionView(ChildAPI):
+    def __init__(self):
+        query_add  = lambda parent_id:db.session.query(Criterion).filter(Criterion.olympiad_id == parent_id)
+        query_edit = lambda id, parent_id:db.session.query(Criterion).filter(Criterion.olympiad_id == parent_id).filter(Criterion.id != id)
 
+        ChildAPI.__init__(self,
+                          _class=Criterion,
+                          _form=CriterionForm,
+                          template='criterion.html',
+                          query_check_add=query_add,
+                          query_check_edit=query_edit)
 
-@app.route('/olympiad-<int:olympiad_id>/criteria/add', methods=['POST'])
-def criterion_add(olympiad_id):
-    instance = Criterion()
-    instance.olympiad_id = olympiad_id
-
-    form = CriterionForm(request.form)
-
-    query = db.session.query(Criterion).filter(Criterion.olympiad_id == instance.olympiad_id)
-
-    instance = instance_from_form(instance, form, query)
-    if instance is not None:
-        db.session.add(instance)
-        db.session.commit()
-
-    return redirect(url_for('criteria', olympiad_id=olympiad_id))
-
-
-@app.route('/criterion-<int:criterion_id>/edit', methods=['POST'])
-def criterion_edit(criterion_id):
-    # load inst
-    instance = db.session.query(Criterion).get(criterion_id)
-
-    parent_id = instance.olympiad_id
-
-    # make query to check other inst form summing balls
-    query = db.session.query(Criterion)\
-        .filter(Criterion.olympiad_id == instance.olympiad_id)\
-        .filter(Criterion.id != criterion_id)
-
-    # create form
-    form = CriterionForm(request.form, Criterion)
-
-    # check for balls and default flashing
-    instance = instance_from_form(instance, form, query)
-
-    # commit changes
-    if instance is not None:
-        db.session.commit()
-
-    return redirect(url_for('criteria', olympiad_id=parent_id))
-
-
-@app.route('/olympiad-<int:olympiad_id>/criterion-<id>/delete', methods=['POST'])
-def criterion_del(olympiad_id, id):
-    delete_object(_class=Criterion, _id=id)
-    return redirect(url_for('criteria', olympiad_id=olympiad_id))
-
-
-# SubCriterion pages
-@app.route('/criterion-<int:criterion_id>/sub_criteria')
-def sub_criteria(criterion_id):
-    instances = db.session.query(SubCriterion).filter(SubCriterion.criterion_id == criterion_id)
-    editor, sub_criteria = get_all_instance(_class=SubCriterion, _form=SubCriterionForm, instances=instances)
-    criterion_max_balls = db.session.query(Criterion).get(criterion_id).max_balls
-    return render_template('sub_criterion.html',
-                           criterion_id=criterion_id,
-                           form=editor,
-                           sub_criteria=sub_criteria,
-                           criterion_max_balls=criterion_max_balls)
-
-
-@app.route('/criterion-<int:criterion_id>/sub_criteria/add', methods=['POST'])
-def sub_criterion_add(criterion_id):
-    instance = SubCriterion()
-    instance.criterion_id = criterion_id
-
-    form = SubCriterionForm(request.form)
-
-    query = db.session.query(SubCriterion).filter(SubCriterion.criterion_id == instance.criterion_id)
-
-    parent = db.session.query(Criterion).get(criterion_id)
-    instance = instance_from_form(instance, form, query, maximum_balls=parent.max_balls)
-    if instance is not None:
-        db.session.add(instance)
-        db.session.commit()
-
-    return redirect(url_for('sub_criteria', criterion_id=criterion_id))
-
-
-@app.route('/sub_criterion-<int:sub_criterion_id>/edit', methods=['POST'])
-def sub_criterion_edit(sub_criterion_id):
-    # load inst
-    instance = db.session.query(SubCriterion).get(sub_criterion_id)
-
-    parent_id = instance.criterion_id
-
-    # make query to check other inst form summing balls
-    query = db.session.query(SubCriterion)\
-        .filter(SubCriterion.criterion_id == instance.criterion_id)\
-        .filter(SubCriterion.id != sub_criterion_id)
-
-    # create form
-    form = SubCriterionForm(request.form, SubCriterion)
-
-    # check for balls and default flashing
-    instance = instance_from_form(instance, form, query)
-
-    # commit changes
-    if instance is not None:
-        db.session.commit()
-
-    return redirect(url_for('sub_criteria', criterion_id=parent_id))
-
-
-@app.route('/criterion-<int:criterion_id>/sub_criterion-<int:id>/delete', methods=['POST'])
-def sub_criterion_del(criterion_id, id):
-    delete_object(_class=SubCriterion, _id=id)
-    return redirect(url_for('sub_criteria', criterion_id=criterion_id))
-
-
-# Aspect-Measurement pages
-@app.route('/sub_criterion-<int:sub_criterion_id>/aspects')
-def aspects(sub_criterion_id):
-    aspects = db.session.query(Aspect).filter(Aspect.sub_criterion_id == sub_criterion_id)
-    editor, sub_criteria = get_all_instance(_class=SubCriterion, _form=SubCriterionForm, instances=aspects)
-    sub_criterion_max_balls = db.session.query(SubCriterion).get(sub_criterion_id).max_balls
-    return render_template('sub_criterion.html',
-                           sub_criterion_id=sub_criterion_id,
-                           form=editor,
-                           sub_criteria=sub_criteria,
-                           sub_criterion_max_balls=sub_criterion_max_balls)
