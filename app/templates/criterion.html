@@ -3,7 +3,7 @@
 {% set title = title or 'Модули' %}
 
 {% macro adder_criterion(form, args) %}
-	{{ editor(form=form, end_point='criterion_add', args=args, title_for='Добавление модуля') }}
+	{{ editor(form=form, end_point='criterion_add', args=args, title='Добавление модуля') }}
 {% endmacro %}
 
 {% macro editor_criterion(form, args) %}

@@ -3,7 +3,7 @@
 {% set title = title or 'Подмодули' %}
 
 {% macro adder_sub_criterion(form, args) %}
-	{{ editor(form=form, end_point='sub_criterion_add', args=args, title_for='Добавление подмодуля') }}
+	{{ editor(form=form, end_point='sub_criterion_add', args=args, title='Добавление подмодуля') }}
 {% endmacro %}
 
 {% macro editor_sub_criterion(form, args) %}
@@ -33,7 +33,7 @@
 {% endmacro %}
 {#sub_end_point='sub_criterion',#}
 {% block content %}
-	{{ content(end_point='sub_criterion', form=form, parent_id=parent_id,
+	{{ content(end_point='sub_criterion', form=form, parent_id=parent_id, sub_end_point='aspect',
 			   macro_add=adder_sub_criterion,
 			   macro_edit=editor_sub_criterion,
 			   macro_delete=delete_sub_criterion,

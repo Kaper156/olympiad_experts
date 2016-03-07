@@ -118,7 +118,7 @@ class ChildAPI(BaseView):
         form = self.form(request.form, self.cls)
         if form.validate_on_submit():
             received_balls = form.max_balls.data
-            value = self.check_balls(instance.id, parent_id, received_balls, self.query['maximum_balls']())
+            value = self.check_balls(instance.id, parent_id, received_balls, self.query['maximum_balls'](parent_id))
             if value == received_balls:
                 form.populate_obj(instance)
                 db.session.commit()
@@ -134,11 +134,12 @@ class ChildAPI(BaseView):
         form = self.form(request.form, self.cls)
         if form.validate_on_submit():
             received_balls = form.max_balls.data
-            value = self.check_balls(None, parent_id, received_balls, self.query['maximum_balls']())
+            value = self.check_balls(None, parent_id, received_balls, self.query['maximum_balls'](parent_id))
             if value == received_balls:
                 form.populate_obj(instance)
                 db.session.add(instance)
                 db.session.commit()
+                print(instance.id)
                 flash_add(instance)
             else:
                 flash_max_ball(received_balls, value)
@@ -170,8 +171,8 @@ class OlympiadView(BaseView):
 
 class CriterionView(ChildAPI):
     def __init__(self):
-        query_add  = lambda parent_id:db.session.query(Criterion).filter(Criterion.olympiad_id == parent_id)
-        query_edit = lambda id, parent_id:db.session.query(Criterion).filter(Criterion.olympiad_id == parent_id).filter(Criterion.id != id)
+        query_add  = lambda parent_id: db.session.query(Criterion).filter(Criterion.olympiad_id == parent_id)
+        query_edit = lambda id, parent_id: db.session.query(Criterion).filter(Criterion.olympiad_id == parent_id).filter(Criterion.id != id)
 
         ChildAPI.__init__(self,
                           _class=Criterion,
@@ -198,6 +199,23 @@ class SubCriterionView(ChildAPI):
                           query_check_edit=query_edit)
 
 
+class AspectView(ChildAPI):
+    def __init__(self):
+        query_add  = lambda parent_id: db.session.query(Aspect).filter(Aspect.sub_criterion_id == parent_id)
+        query_edit = lambda id, parent_id: db.session.query(Aspect).filter(Aspect.sub_criterion_id == parent_id).filter(Aspect.id != id)
+        query_max  = lambda parent_id: db.session.query(SubCriterion).get(parent_id).max_balls
+
+        ChildAPI.__init__(self,
+                          _class=Aspect,
+                          _form=AspectForm,
+                          end_point='aspect',
+                          template='aspect.html',
+                          query_check_add=query_add,
+                          query_maximum=query_max,
+                          query_check_edit=query_edit)
+
+
 OlympiadView()
 CriterionView()
 SubCriterionView()
+AspectView()

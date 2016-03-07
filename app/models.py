@@ -17,7 +17,6 @@ class OlympiadBase(db.Model):
 class Aspect(OlympiadBase):
     __tablename__ = 'Aspect'
     description = Column(Text, label='Описание')
-    max_balls = Column(Float, nullable=False)
 
     sub_criterion_id = db.Column(db.Integer, db.ForeignKey('SubCriterion.id'))
     sub_criterion = db.relationship('SubCriterion', backref=db.backref('Aspect', lazy='dynamic'))
