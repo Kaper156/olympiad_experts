@@ -78,7 +78,7 @@ class BaseView:
 
 class ChildAPI(BaseView):
     def __init__(self, _class, _form, template, end_point,
-                 query_check_add=None, query_check_edit=None, query_maximum=lambda:100):
+                 query_check_add=None, query_check_edit=None, query_maximum=lambda x:100):
         BaseView.__init__(self, _class, _form, template, end_point=end_point)
         self.query = dict()
         self.query['all'] = query_check_add
@@ -107,10 +107,10 @@ class ChildAPI(BaseView):
         results = list()
         for instance in self.query['all'](parent_id):
             results.append((instance, self.form(obj=instance)))
-
+        maximum_balls = self.query['maximum_balls'](parent_id)
         # form to add new inst
         editor = self.form()
-        return render_template(self.template, objects=results, form=editor, parent_id=parent_id)
+        return render_template(self.template, objects=results, form=editor, parent_id=parent_id, maximum_balls=maximum_balls)
 
     def edit(self, id, parent_id):
 
@@ -182,5 +182,22 @@ class CriterionView(ChildAPI):
                           query_check_edit=query_edit)
 
 
+class SubCriterionView(ChildAPI):
+    def __init__(self):
+        query_add  = lambda parent_id: db.session.query(SubCriterion).filter(SubCriterion.criterion_id == parent_id)
+        query_edit = lambda id, parent_id: db.session.query(SubCriterion).filter(SubCriterion.criterion_id == parent_id).filter(SubCriterion.id != id)
+        query_max  = lambda parent_id: db.session.query(Criterion).get(parent_id).max_balls
+
+        ChildAPI.__init__(self,
+                          _class=Criterion,
+                          _form=CriterionForm,
+                          end_point='sub_criterion',
+                          template='sub_criterion.html',
+                          query_check_add=query_add,
+                          query_maximum=query_max,
+                          query_check_edit=query_edit)
+
+
 OlympiadView()
 CriterionView()
+SubCriterionView()

@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% from 'macroses.html' import modal, show_flashed, editor, delete_object %}
+{% set args={'id':id, 'parent_id': parent_id} %}
+
+{% macro content(end_point, form, parent_id, sub_end_point, macro_add, macro_edit, macro_delete, macro_table_head, macro_row_object, maximum_balls) -%}
+	{% set args={'parent_id':parent_id} %}
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h4 class="">Управление</h4>
+
+			<div class="btn-group">
+
+				{# Форма добавления элемента #}
+				{{ macro_add(form=form, args=args) }}
+				<button type="button" class="btn btn-default"
+				        data-toggle="modal" data-target="#editor-new">
+					<span class="glyphicon glyphicon-plus"></span> Добавить
+				</button>
+
+				<a class="btn btn-default" href="{{ url_for(end_point, parent_id=parent_id) }}">
+					<span class="glyphicon glyphicon-refresh"></span> Обновить
+				</a>
+
+			</div>
+		</div>
+
+		<div class="panel-body">
+
+			{# Показать сообщения #}
+			<div class='flash-list'>
+				{{ show_flashed() }}
+			</div>
+
+			{# Если есть объекты из бд, то вывести в таблицу #}
+			{% if objects %}
+				<table class="table table-striped" id="objects-table">
+
+					{# Шапка состоящая из меток полей объекта #}
+					<thead>
+					<tr>
+						{{ macro_table_head() }}
+						<th>Управление</th>
+					</tr>
+					</thead>
+
+					<tbody>
+
+					{# Аккумулирует баллы элементов для вывода в подвале таблицы #}
+					{% set curent_balls = 0|float %}
+
+					{# Перебор всех элементов #}
+					{% for object, form in objects %}
+						{% set args = {'id':object.id, 'parent_id':parent_id }%}
+						<tr class="info" id="info-{{ object.id }}">
+
+							{# Вывод всех полей объекта #}
+							{{ macro_row_object(object) }}
+
+							{% set curent_balls = curent_balls|float + object.max_balls|float %}
+
+							{# Элементы управления элементом #}
+							<td>
+		                        <span class="btn-group">
+		                            <button type="button" class="btn btn-primary"
+		                                    data-toggle="modal" data-target="#modal-editor-{{ object.id }}">
+			                            <span class="glyphicon glyphicon-pencil"></span>
+		                            </button>
+
+									{# Если есть потомки, то создать ссылку на них #}
+			                        {% if sub_end_point %}
+		                                <a class="btn btn-primary"
+		                                   href="{{ url_for(sub_end_point, **{'parent_id':object.id}) }}">
+		                                    <span class="glyphicon glyphicon-th-list"></span>
+		                                </a>
+			                        {% endif %}
+		                            <button type="button" class="btn btn-danger"
+		                                    data-toggle="modal" data-target="#modal-delete-{{ object.id }}">
+			                            <span class="glyphicon glyphicon-remove-circle"></span>
+		                            </button>
+
+		                        </span>
+							</td>
+						</tr>
+						{#	Тут находятся модальные окна для каждого элемента #}
+						{{ macro_delete(args=args) }}
+						{{ macro_edit(form, args=args) }}
+					{% endfor %}
+					</tbody>
+					{% if maximum_balls %}
+						<tfoot>
+							<tr>
+								<td></td>
+								<td class="result-label">Всего:</td>
+								<td>
+									<div class="max_balls">
+										<span class="current">0</span>
+										/
+										<span class="max">{{ maximum_balls }}</span>
+									</div>
+								</td>
+								<td></td>
+							</tr>
+						</tfoot>
+					{% endif %}
+					<script>
+						var get_current_balls = function () {
+							var curent_sum = 0;
+							$('.info>td:nth-child(3)').each(function () {
+								curent_sum += parseFloat($(this).text());
+							});
+
+							$('div.max_balls>span.current').text(curent_sum);
+						};
+						$(document).ready(function () {
+							get_current_balls();
+						});
+					</script>
+				</table>
+			{% else %}
+				<p>Объектов ещё нет!</p>
+			{% endif %}
+		</div>
+	</div>
+{%- endmacro %}
