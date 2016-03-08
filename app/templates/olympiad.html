@@ -34,6 +34,7 @@
 			<div class='flash-list'>
 				{{ show_flashed() }}
 	        </div>
+        {% if objects %}
             <table class="table table-striped" id="objects-table">
                 <thead>
                     <tr>
@@ -78,6 +79,10 @@
                 {% endfor %}
                 </tbody>
             </table>
+        {% else %}
+	        <p>Объектов ещё нет!</p>
+        {% endif %}
+
     </div>
 
 {% endblock %}
