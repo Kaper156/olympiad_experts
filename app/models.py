@@ -1,5 +1,5 @@
 from app import db
-from sqlalchemy import Integer, String, Text, Float, Date
+from sqlalchemy import Integer, String, Text, Float, Date, Boolean
 from sqlalchemy_defaults import make_lazy_configured, Column
 
 make_lazy_configured(db.mapper)
@@ -63,6 +63,15 @@ class Aspect(OlympiadBase):
     def __str__(self):
         return '<Модуль: "%s" (%s)>' % (self.name, self.max_balls)
 
+subjective_methods = [
+    ('Шкала 10', 'x: 1')
+]
+objective_methods = [
+    ('Наличие', 'x: bool(x)'),
+    ('Диапозон-5', 'x: x//5'),
+    ('Диапозон-10', 'x: x//10'),
+]
+
 
 # Хранит конкретные методы вычисления
 # Например: диапозон, точно значение, да\нет и т.д.
@@ -72,16 +81,71 @@ class Calculation(db.Model):
     name = Column(String, label='Название', nullable=False)
     description = Column(String, label='Описание', nullable=True)
     # TODO хранить текст лямбда функций?+
-    method = Column(Text, nullable=False)
+    method_text = Column(Integer, nullable=False)
+    is_subjective = Column(Boolean, nullable=False, default=True)
 
-    def calc(self, value):
-        method = eval(self.method)
-        return method(value)
+    # Получает категорию и идентификатор метода
+    # Сохраняет в объект текст лямбда-функции
+    def __init__(self, is_subjective, method_id=0, description=None):
+        self.is_subjective = is_subjective
+        if is_subjective:
+            self.name, self.method_text = subjective_methods[method_id]
+            self.name = 'Субъективный:%s' % self.name
+        else:
+            self.name, self.method_text = objective_methods[method_id]
+            self.name = 'Объективный:%s' % self.name
+        if description:
+            self.description = description
+
+    def calc(self, assessment, max_ball):
+        method = eval('lambda %s' % self.method_text)
+        return method(assessment)*max_ball
 
     def __str__(self):
         if self.description:
-            return '<Метод: "%s" [%s] (%s)>' % (self.name, self.method, self.description)
-        return '<Метод: "%s" [%s]>' % (self.name, self.method)
+            return '<Метод: "%s" [%s] (%s)>' % (self.name, self.method_text, self.description)
+        return '<Метод: "%s" [%s]>' % (self.name, self.method_text)
+
+
+class Member(db.Model):
+    __tablename__ = 'Member'
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    name = Column(Text, nullable=False, default="Участник")
+
+    olympiad_id = db.Column(db.Integer, db.ForeignKey('Olympiad.id'))
+    olympiad = db.relationship('Olympiad', backref=db.backref('Member', lazy='dynamic'))
+
+    def __init__(self, olympiad_id):
+        self.olympiad_id = olympiad_id
+        self.name = "Участник #%d" % self.id
+
+
+class MemberAssessment(db.Model):
+    __tablename__ = 'MemberAssessment'
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+
+    member_id = db.Column(db.Integer, db.ForeignKey('Member.id'))
+    member = db.relationship('Member', backref=db.backref('MemberAssessment', lazy='dynamic'))
+    ball = Column(Integer, nullable=False)
+
+    def calc(self):
+        """
+        Расчитывает балл участника за конкретный критерий
+        :return:
+        """
+        pass
+
+
+class ExpertAssessment(db.Model):
+    __tablename__ = 'ExpertAssessment'
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    role_id = db.Column(db.Integer, db.ForeignKey('Role.id'))
+    role = db.relationship('Role', backref=db.backref('ExpertAssessment', lazy='dynamic'))
+
+    assessment = Column(Integer, nullable=True)
+
+    # def __init__(self, user_id):
+
 
 
 # Хранит набранные баллы участника за определенный аспект
@@ -94,11 +158,7 @@ class Assessment(db.Model):
     aspect_id = db.Column(db.Integer, db.ForeignKey('Aspect.id'))
     aspect = db.relationship('Aspect', backref=db.backref('Assessment', lazy='dynamic'))
 
-    member_id = db.Column(Integer, db.ForeignKey(''))
-    member = db.relationship('', backref=db.backref('Assessment', lazy='dynamic'))
 
-    member_id = db.Column(Integer, db.ForeignKey(''))
-    member = db.relationship('', backref=db.backref('Assessment', lazy='dynamic'))
 
 
 
