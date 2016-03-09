@@ -20,6 +20,23 @@ from app import models
 
 db.create_all()
 
+# Create calculations from models.lists-of-methods
+from app.models import Calculation, objective_methods, subjective_methods
+if db.session.query(Calculation).count() == 0:
+    for name, content in objective_methods:
+        instance = Calculation(is_subjective=False,
+                               content=content,
+                               name=name)
+        db.session.add(instance)
+    for name, content in subjective_methods:
+        instance = Calculation(is_subjective=True,
+                               content=content,
+                               name=name)
+        db.session.add(instance)
+    db.session.commit()
+
+
+
 
 # Forms
 from app import forms

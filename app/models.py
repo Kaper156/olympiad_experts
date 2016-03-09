@@ -64,12 +64,12 @@ class Aspect(OlympiadBase):
         return '<Модуль: "%s" (%s)>' % (self.name, self.max_balls)
 
 subjective_methods = [
-    ('Шкала 10', 'x: 1')
+    ('Шкала 10', 'lambda x: 1')
 ]
 objective_methods = [
-    ('Наличие', 'x: bool(x)'),
-    ('Диапозон-5', 'x: x//5'),
-    ('Диапозон-10', 'x: x//10'),
+    ('Наличие', 'lambda x: bool(x)'),
+    ('Диапозон-5', 'lambda x: x//5'),
+    ('Диапозон-10', 'lambda x: x//10'),
 ]
 
 
@@ -81,30 +81,30 @@ class Calculation(db.Model):
     name = Column(String, label='Название', nullable=False)
     description = Column(String, label='Описание', nullable=True)
     # TODO хранить текст лямбда функций?+
-    method_text = Column(Integer, nullable=False)
+    content = Column(Text, nullable=False)
     is_subjective = Column(Boolean, nullable=False, default=True)
 
     # Получает категорию и идентификатор метода
     # Сохраняет в объект текст лямбда-функции
-    def __init__(self, is_subjective, method_id=0, description=None):
+    def __init__(self, is_subjective, content, name, description=None):
+        self.content = content
+        self.name = name
         self.is_subjective = is_subjective
         if is_subjective:
-            self.name, self.method_text = subjective_methods[method_id]
             self.name = 'Субъективный:%s' % self.name
         else:
-            self.name, self.method_text = objective_methods[method_id]
             self.name = 'Объективный:%s' % self.name
         if description:
             self.description = description
 
     def calc(self, assessment, max_ball):
-        method = eval('lambda %s' % self.method_text)
+        method = eval(self.content)
         return method(assessment)*max_ball
 
     def __str__(self):
         if self.description:
-            return '<Метод: "%s" [%s] (%s)>' % (self.name, self.method_text, self.description)
-        return '<Метод: "%s" [%s]>' % (self.name, self.method_text)
+            return '<Метод: "%s" [%s] (%s)>' % (self.name, self.content, self.description)
+        return '<Метод: "%s" [%s]>' % (self.name, self.content)
 
 
 # Участник, связь всех оценок за аспекты и олимпиады

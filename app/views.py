@@ -1,6 +1,6 @@
 from app import render_template, db, app, request, redirect, url_for, MethodView, abort
 from app import breadcrumbs, OBJECT_PER_PAGE
-from app.models import Olympiad, Criterion, SubCriterion, Aspect, Measurement, Calculation
+from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation
 from app.forms import OlympiadForm, CriterionForm, SubCriterionForm, AspectForm, CalculationForm
 from app.flashing import flash_form_errors, flash_error, flash_add, flash_edit, flash_delete, flash_max_ball
 
@@ -164,60 +164,15 @@ class ChildView(BaseView):
             new_value = maximum - _sum
         return new_value
 
-
-    def delete(self, id):
+    def delete(self, id, parent_id):
         instance = db.session.query(self.cls).get(id)
-        parent_id = instance.parent_id
+        # parent_id = instance.parent_id
         db.session.query(self.cls).filter(self.cls.id == id).delete()
         flash_delete(instance)
         db.session.commit()
         return self.redirect(parent_id=parent_id)
 
 
-class OlympiadView(BaseView):
-    def __init__(self):
-        BaseView.__init__(self, Olympiad, OlympiadForm, 'olympiad.html', end_point='olympiad')
-
-
-class CriterionView(ChildView):
-    def __init__(self):
-        ChildView.__init__(self,
-                           _class=Criterion,
-                           _form=CriterionForm,
-                           end_point='criterion',
-                           template_name='criterion.html', )
-
-
-class SubCriterionView(ChildView):
-    def __init__(self):
-        query_max  = lambda parent_id: db.session.query(Criterion).get(parent_id).max_balls
-
-        ChildView.__init__(self,
-                           _class=Criterion,
-                           _form=CriterionForm,
-                           end_point='sub_criterion',
-                           template_name='sub_criterion.html',
-                           query_maximum=query_max)
-
-
-class AspectView(ChildView):
-    def __init__(self):
-        query_add  = lambda parent_id: db.session.query(Aspect).filter(Aspect.sub_criterion_id == parent_id)
-        query_edit = lambda id, parent_id: db.session.query(Aspect).filter(Aspect.sub_criterion_id == parent_id).filter(Aspect.id != id)
-        query_max  = lambda parent_id: db.session.query(SubCriterion).get(parent_id).max_balls
-
-        ChildView.__init__(self,
-                           _class=Aspect,
-                           _form=AspectForm,
-                           end_point='aspect',
-                           template_name='aspect.html',
-                           query_maximum=query_max, )
-
-
-# OlympiadView()
-# CriterionView()
-# SubCriterionView()
-# AspectView()
 
 olympiad_view = BaseView(_class=Olympiad,
                          _form=OlympiadForm,

@@ -22,12 +22,14 @@ class SubCriterionForm(ModelForm, Form):
         model = SubCriterion
 
 
+class CalculationForm(ModelForm, Form):
+    class Meta:
+        model = Calculation
+
+
 class AspectForm(ModelForm, Form):
     class Meta:
         model = Aspect
     calculations = ModelFieldList(FormField(CalculationForm))
 
 
-class CalculationForm(ModelForm, Form):
-    class Meta:
-        model = Calculation

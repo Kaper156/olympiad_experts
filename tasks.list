@@ -63,5 +63,7 @@
 +Dynamic JS table edit
     Don't need now
 
+Add parent object to template child, because you didn't understood, which child edits now?
+
 -Additional: breadcrumbs to normal (classes and other)
 -Additional: Flask-Migrate
