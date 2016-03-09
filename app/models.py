@@ -58,7 +58,7 @@ class Aspect(OlympiadBase):
     sub_criterion = db.relationship('SubCriterion', backref=db.backref('Aspect', lazy='dynamic'))
 
     calculation_id = db.Column(db.Integer, db.ForeignKey('Calculation.id'))
-    Calculation = db.relationship('Calculation', backref=db.backref('Aspect', lazy='dynamic'))
+    calculation = db.relationship('Calculation', backref=db.backref('Aspect', lazy='dynamic'))
 
     def __str__(self):
         return '<Модуль: "%s" (%s)>' % (self.name, self.max_balls)
@@ -107,6 +107,7 @@ class Calculation(db.Model):
         return '<Метод: "%s" [%s]>' % (self.name, self.method_text)
 
 
+# Участник, связь всех оценок за аспекты и олимпиады
 class Member(db.Model):
     __tablename__ = 'Member'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
@@ -119,7 +120,22 @@ class Member(db.Model):
         self.olympiad_id = olympiad_id
         self.name = "Участник #%d" % self.id
 
+    def get_results(self):
+        result = []
 
+        assessments = db.session.query(MemberAssessment).filter(MemberAssessment.member_id == self.id)
+        for assessment in assessments:
+            # TODO (если не собран балл за аспект)
+            if not assessment.ball:
+                assessment.calc()
+                db.session.commit()
+
+            aspect = db.session.query(Aspect).get(assessment.aspect_id)
+            result.append((aspect, assessment))
+        return result
+
+
+# Балл за конкретный аспект, вычисленная из оценок экспертов
 class MemberAssessment(db.Model):
     __tablename__ = 'MemberAssessment'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
@@ -128,42 +144,33 @@ class MemberAssessment(db.Model):
     member = db.relationship('Member', backref=db.backref('MemberAssessment', lazy='dynamic'))
     ball = Column(Integer, nullable=False)
 
+    aspect_id = db.Column(db.Integer, db.ForeignKey('Aspect.id'))
+    aspect = db.relationship('Aspect', backref=db.backref('MemberAssessment', lazy='dynamic'))
+
     def calc(self):
         """
         Расчитывает балл участника за конкретный критерий
         :return:
         """
-        pass
+        result = []
+        expert_assessments = db.session.query(ExpertAssessment).filter(ExpertAssessment.member_assessment_id == self.id)
+        for assessment in expert_assessments:
+            result.append(assessment.ball)
+        self.ball = self.aspect.calculation.calc(result)
+        return self.ball
 
 
+# Оценка эксперта за аспект
 class ExpertAssessment(db.Model):
     __tablename__ = 'ExpertAssessment'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    assessment = Column(Float, label='Оценка', nullable=False)
+
     role_id = db.Column(db.Integer, db.ForeignKey('Role.id'))
     role = db.relationship('Role', backref=db.backref('ExpertAssessment', lazy='dynamic'))
 
-    assessment = Column(Integer, nullable=True)
-
-    # def __init__(self, user_id):
-
-
-
-# Хранит набранные баллы участника за определенный аспект
-# Выставленные баллы конкретным экспертом, конкретному человеку
-class Assessment(db.Model):
-    __tablename__ = 'Assessment'
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    value = Column(Float, nullable=False)
-
-    aspect_id = db.Column(db.Integer, db.ForeignKey('Aspect.id'))
-    aspect = db.relationship('Aspect', backref=db.backref('Assessment', lazy='dynamic'))
-
-
-
-
-
-
-
+    member_assessment_id = db.Column(db.Integer, db.ForeignKey('MemberAssessment.id'))
+    member_assessment = db.relationship('MemberAssessment', backref=db.backref('ExpertAssessment', lazy='dynamic'))
 
 
 # Этап олимпиады 
