@@ -6,7 +6,6 @@ from app.flashing import flash_form_errors, flash_error, flash_add, flash_edit, 
 
 
 class BaseView:
-
     def __init__(self, _class, _form, template_name, end_point=''):
         self.cls = _class
         self.form = _form
@@ -77,11 +76,13 @@ class BaseView:
 
 
 class ChildView(BaseView):
-    def __init__(self, _class, _form, template_name, end_point, query_maximum=lambda x: 100):
+    def __init__(self, _class, _form, template_name, end_point, parent_cls, query_maximum=lambda x: 100):
         BaseView.__init__(self, _class, _form, template_name, end_point=end_point)
+        self.parent_cls = parent_cls
         self.query = dict()
         self.query['all'] = lambda parent_id: db.session.query(self.cls).filter(self.cls.parent_id == parent_id)
-        self.query['edit'] = lambda id, parent_id: db.session.query(self.cls).filter(self.cls.parent_id == parent_id).filter(self.cls.id != id)
+        self.query['edit'] = lambda id, parent_id: db.session.query(self.cls).filter(
+            self.cls.parent_id == parent_id).filter(self.cls.id != id)
         self.query['maximum_balls'] = query_maximum
 
     def init_end_points(self):
@@ -109,7 +110,14 @@ class ChildView(BaseView):
         maximum_balls = self.query['maximum_balls'](parent_id)
         # form to add new inst
         editor = self.form()
-        return render_template(self.template, objects=results, form=editor, parent_id=parent_id, maximum_balls=maximum_balls)
+
+        parent = db.session.query(self.parent_cls).get(parent_id)
+        return render_template(self.template,
+                               objects=results,
+                               form=editor,
+                               parent_id=parent_id,
+                               # maximum_balls=maximum_balls,
+                               parent=parent)
 
     def edit(self, id, parent_id):
 
@@ -181,19 +189,22 @@ olympiad_view = BaseView(_class=Olympiad,
 criterion_view = ChildView(_class=Criterion,
                            _form=CriterionForm,
                            template_name='criterion.html',
-                           end_point='criterion')
+                           end_point='criterion',
+                           parent_cls=Olympiad)
 
 sub_criterion_view = ChildView(_class=SubCriterion,
                                _form=SubCriterionForm,
                                template_name='sub_criterion.html',
                                end_point='sub_criterion',
-                               query_maximum=lambda parent_id: db.session.query(Criterion).get(parent_id).max_balls)
+                               query_maximum=lambda parent_id: db.session.query(Criterion).get(parent_id).max_balls,
+                               parent_cls=Criterion)
 
 aspect_view = ChildView(_class=Aspect,
                         _form=AspectForm,
                         template_name='aspect.html',
                         end_point='aspect',
-                        query_maximum=lambda parent_id: db.session.query(SubCriterion).get(parent_id).max_balls)
+                        query_maximum=lambda parent_id: db.session.query(SubCriterion).get(parent_id).max_balls,
+                        parent_cls=SubCriterion)
 
 
 @app.route('/')

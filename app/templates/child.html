@@ -2,8 +2,8 @@
 {% from 'macroses.html' import modal, show_flashed, editor, delete_object %}
 {% set args={'id':id, 'parent_id': parent_id} %}
 
-{% macro content(end_point, form, parent_id, sub_end_point, macro_add, macro_edit, macro_delete, macro_table_head, macro_row_object, maximum_balls) -%}
-	{% set args={'parent_id':parent_id} %}
+{% macro content(end_point, form, parent, sub_end_point, macro_add, macro_edit, macro_delete, macro_table_head, macro_row_object, maximum_balls) -%}
+	{% set args={'parent_id':parent.id} %}
 	<div class="panel panel-default">
 		<div class="panel-heading">
 			<h4 class="">Управление</h4>
@@ -17,7 +17,7 @@
 					<span class="glyphicon glyphicon-plus"></span> Добавить
 				</button>
 
-				<a class="btn btn-default" href="{{ url_for(end_point, parent_id=parent_id) }}">
+				<a class="btn btn-default" href="{{ url_for(end_point, parent_id=parent.id) }}">
 					<span class="glyphicon glyphicon-refresh"></span> Обновить
 				</a>
 
@@ -50,7 +50,7 @@
 
 					{# Перебор всех элементов #}
 					{% for object, form in objects %}
-						{% set args = {'id':object.id, 'parent_id':parent_id }%}
+						{% set args = {'id':object.id, 'parent_id':parent.id }%}
 						<tr class="info" id="info-{{ object.id }}">
 
 							{# Вывод всех полей объекта #}
@@ -86,7 +86,7 @@
 						{{ macro_edit(form, args=args) }}
 					{% endfor %}
 					</tbody>
-					{% if maximum_balls %}
+					{% if maximum_balls or parent.max_balls %}
 						<tfoot>
 							<tr>
 								<td></td>
@@ -95,7 +95,7 @@
 									<div class="max_balls">
 										<span class="current">0</span>
 										/
-										<span class="max">{{ maximum_balls }}</span>
+										<span class="max">{{ maximum_balls or parent.max_balls }}</span>
 									</div>
 								</td>
 								<td></td>
@@ -118,6 +118,7 @@
 				</table>
 			{% else %}
 				<p>Объектов ещё нет!</p>
+				<i>Максимум баллов: {{ maximum_balls or parent.max_balls }}</i>
 			{% endif %}
 		</div>
 	</div>

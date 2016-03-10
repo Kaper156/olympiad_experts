@@ -33,7 +33,7 @@
 {% endmacro %}
 {#sub_end_point='sub_criterion',#}
 {% block content %}
-	{{ content(end_point='criterion', form=form, parent_id=parent_id, sub_end_point='sub_criterion',
+	{{ content(end_point='criterion', form=form, parent=parent, sub_end_point='sub_criterion',
 			   macro_add=adder_criterion,
 			   macro_edit=editor_criterion,
 			   macro_delete=delete_criterion,
