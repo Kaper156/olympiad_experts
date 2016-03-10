@@ -107,7 +107,6 @@ class ChildView(BaseView):
         results = list()
         for instance in self.query['all'](parent_id):
             results.append((instance, self.form(obj=instance)))
-        maximum_balls = self.query['maximum_balls'](parent_id)
         # form to add new inst
         editor = self.form()
 
@@ -116,7 +115,6 @@ class ChildView(BaseView):
                                objects=results,
                                form=editor,
                                parent_id=parent_id,
-                               # maximum_balls=maximum_balls,
                                parent=parent)
 
     def edit(self, id, parent_id):

@@ -61,7 +61,7 @@ class Aspect(OlympiadBase):
     calculation = db.relationship('Calculation', backref=db.backref('Aspect', lazy='dynamic'))
 
     def __str__(self):
-        return '<Модуль: "%s" (%s)>' % (self.name, self.max_balls)
+        return '<Критерий: "%s" (%s)>' % (self.name, self.max_balls)
 
 subjective_methods = [
     ('Шкала 10', 'lambda x: 1')
