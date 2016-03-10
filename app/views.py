@@ -103,6 +103,9 @@ class ChildView(BaseView):
                          view_func=self.delete,
                          methods=['POST'])
 
+    def create_form(self):
+        return self.form(request.form, self.cls)
+
     def all(self, parent_id):
         results = list()
         for instance in self.query['all'](parent_id):
@@ -120,7 +123,7 @@ class ChildView(BaseView):
     def edit(self, id, parent_id):
 
         instance = db.session.query(self.cls).get(id)
-        form = self.form(request.form, self.cls)
+        form = self.create_form()
         if form.validate_on_submit():
             received_balls = form.max_balls.data
             value = self.check_balls(instance.id, parent_id, received_balls, self.query['maximum_balls'](parent_id))
@@ -137,7 +140,7 @@ class ChildView(BaseView):
 
     def add(self, parent_id):
         instance = self.cls()
-        form = self.form(request.form, self.cls)
+        form = self.create_form()
         if form.validate_on_submit():
             received_balls = form.max_balls.data
             value = self.check_balls(None, parent_id, received_balls, self.query['maximum_balls'](parent_id))
@@ -197,12 +200,14 @@ sub_criterion_view = ChildView(_class=SubCriterion,
                                query_maximum=lambda parent_id: db.session.query(Criterion).get(parent_id).max_balls,
                                parent_cls=Criterion)
 
+
 aspect_view = ChildView(_class=Aspect,
                         _form=AspectForm,
                         template_name='aspect.html',
                         end_point='aspect',
                         query_maximum=lambda parent_id: db.session.query(SubCriterion).get(parent_id).max_balls,
                         parent_cls=SubCriterion)
+
 
 
 @app.route('/')

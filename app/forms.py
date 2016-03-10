@@ -1,7 +1,8 @@
 from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation
 from flask.ext.wtf import Form
-from wtforms import FormField, FieldList
+from wtforms import SelectField, FormField
 from wtforms_alchemy import model_form_factory, ModelFieldList
+from app import db
 
 ModelForm = model_form_factory(Form)
 
@@ -30,6 +31,10 @@ class CalculationForm(ModelForm, Form):
 class AspectForm(ModelForm, Form):
     class Meta:
         model = Aspect
-    calculations = ModelFieldList(FormField(CalculationForm))
 
+    calculations = SelectField('Метод вычисления')
 
+    def __init__(self, *args, **kwargs):
+        super(AspectForm, self).__init__(*args, **kwargs)
+        query = db.session.query(Calculation).all()
+        self.calculations.choices = [(c.id, c.name) for c in query]

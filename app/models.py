@@ -57,7 +57,7 @@ class Aspect(OlympiadBase):
     parent_id = db.Column(db.Integer, db.ForeignKey('SubCriterion.id'))
     sub_criterion = db.relationship('SubCriterion', backref=db.backref('Aspect', lazy='dynamic'))
 
-    calculation_id = db.Column(db.Integer, db.ForeignKey('Calculation.id'))
+    calculation_id = Column(db.Integer, db.ForeignKey('Calculation.id'), label='Метод')
     calculation = db.relationship('Calculation', backref=db.backref('Aspect', lazy='dynamic'))
 
     def __str__(self):
