@@ -47,32 +47,6 @@ class SubCriterion(OlympiadBase):
         return '<Подмодуль: "%s" (%s)>' % (self.name, self.max_balls)
 
 
-# Конкретное задание: Установить ОС Windows Xp
-# Может быть объективным - по факту наличия и др.
-# Или субъективным, оценки экспертов могут быть различными
-class Aspect(OlympiadBase):
-    __tablename__ = 'Aspect'
-    description = Column(Text, label='Описание')
-
-    parent_id = db.Column(db.Integer, db.ForeignKey('SubCriterion.id'))
-    sub_criterion = db.relationship('SubCriterion', backref=db.backref('Aspect', lazy='dynamic'))
-
-    calculation_id = Column(db.Integer, db.ForeignKey('Calculation.id'), label='Метод')
-    calculation = db.relationship('Calculation', backref=db.backref('Aspect', lazy='dynamic'))
-
-    def __str__(self):
-        return '<Критерий: "%s" (%s)>' % (self.name, self.max_balls)
-
-subjective_methods = [
-    ('Шкала 10', 'lambda x: 1')
-]
-objective_methods = [
-    ('Наличие', 'lambda x: bool(x)'),
-    ('Диапозон-5', 'lambda x: x//5'),
-    ('Диапозон-10', 'lambda x: x//10'),
-]
-
-
 # Хранит конкретные методы вычисления
 # Например: диапозон, точно значение, да\нет и т.д.
 class Calculation(db.Model):
@@ -105,6 +79,35 @@ class Calculation(db.Model):
         if self.description:
             return '<Метод: "%s" [%s] (%s)>' % (self.name, self.content, self.description)
         return '<Метод: "%s" [%s]>' % (self.name, self.content)
+
+
+# Конкретное задание: Установить ОС Windows Xp
+# Может быть объективным - по факту наличия и др.
+# Или субъективным, оценки экспертов могут быть различными
+class Aspect(OlympiadBase):
+    __tablename__ = 'Aspect'
+    description = Column(Text, label='Описание')
+
+    parent_id = db.Column(db.Integer, db.ForeignKey('SubCriterion.id'))
+    sub_criterion = db.relationship('SubCriterion', backref=db.backref('Aspect', lazy='dynamic'))
+
+    calculation_id = Column(db.Integer,
+                            db.ForeignKey('Calculation.id'),
+                            label='Метод',
+                            info={'choices': [(c.id, c.name) for c in db.session.query(Calculation).all()]})
+    calculation = db.relationship('Calculation', backref=db.backref('Aspect', lazy='dynamic'))
+
+    def __str__(self):
+        return '<Критерий: "%s" (%s)>' % (self.name, self.max_balls)
+
+subjective_methods = [
+    ('Шкала 10', 'lambda x: 1')
+]
+objective_methods = [
+    ('Наличие', 'lambda x: bool(x)'),
+    ('Диапозон-5', 'lambda x: x//5'),
+    ('Диапозон-10', 'lambda x: x//10'),
+]
 
 
 # Участник, связь всех оценок за аспекты и олимпиады

@@ -31,10 +31,4 @@ class CalculationForm(ModelForm, Form):
 class AspectForm(ModelForm, Form):
     class Meta:
         model = Aspect
-
-    calculations = SelectField('Метод вычисления')
-
-    def __init__(self, *args, **kwargs):
-        super(AspectForm, self).__init__(*args, **kwargs)
-        query = db.session.query(Calculation).all()
-        self.calculations.choices = [(c.id, c.name) for c in query]
+        include = ['calculation_id']
