@@ -2,16 +2,22 @@
 {% from 'macroses.html' import modal, show_flashed, editor, delete_object %}
 {% set args={'id':id, 'parent_id': parent_id} %}
 
-{% macro content(end_point, form, parent, sub_end_point, macro_add, macro_edit, macro_delete, macro_table_head, macro_row_object, maximum_balls) -%}
+{% macro content(end_point, title_for, macro_table_head, macro_row_object, parent_end_point, sub_end_point=None) -%}
+
 	{% set args={'parent_id':parent.id} %}
+	
 	<div class="panel panel-default">
 		<div class="panel-heading">
+			{# Page title #}
+	        <h2 class="title text-center">{{ title }}</h2>
+
 			<h4 class="">Управление</h4>
 
 			<div class="btn-group">
 
 				{# Форма добавления элемента #}
-				{{ macro_add(form=form, args=args) }}
+{#				{{ macro_add(form=form, args=args) }}#}
+				{{ editor(form=form, end_point=end_point ~ '_add', args=args, title='Добавление '~ title_for) }}
 				<button type="button" class="btn btn-default"
 				        data-toggle="modal" data-target="#editor-new">
 					<span class="glyphicon glyphicon-plus"></span> Добавить
@@ -82,8 +88,22 @@
 							</td>
 						</tr>
 						{#	Тут находятся модальные окна для каждого элемента #}
-						{{ macro_delete(args=args) }}
-						{{ macro_edit(form, args=args) }}
+
+						{% set delete_body = '<p>После удаления, этот объект невозможно будет вернуть, вы действительно хотите это сделать?</p>' -%}
+
+						{{ delete_object(
+						title='Подтвердить удаление ' ~ title_for,
+						body=delete_body,
+						attr_id='modal-delete-'~args['id'],
+						link=end_point ~ '_delete',
+						args=args) }}
+
+						{{ editor(form=form,
+						title='Изменение ' ~ title_for,
+						id='modal-editor-' ~ args['id'],
+						end_point= end_point ~ '_edit',
+						args=args,
+						btn_text='Изменить') }}
 					{% endfor %}
 					</tbody>
 					{% if maximum_balls or parent.max_balls %}
@@ -118,7 +138,7 @@
 				</table>
 			{% else %}
 				<p>Объектов ещё нет!</p>
-				<i>Максимум баллов: {{ maximum_balls or parent.max_balls }}</i>
+				<b>Максимум баллов: {{ maximum_balls or parent.max_balls }}</b>
 			{% endif %}
 		</div>
 	</div>

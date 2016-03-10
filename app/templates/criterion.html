@@ -2,42 +2,23 @@
 
 {% set title = title or 'Модули' %}
 
-{% macro adder_criterion(form, args) %}
-	{{ editor(form=form, end_point='criterion_add', args=args, title='Добавление модуля') }}
-{% endmacro %}
-
-{% macro editor_criterion(form, args) %}
-	{{ editor(form=form, end_point='criterion_edit', args=args, id='modal-editor-' ~ args['id'],
-	          title='Изменение модуля', btn_text='Изменить') }}
-{% endmacro %}
-
-{% macro delete_criterion(args) -%}
-	{% set link = 'criterion_delete' %}
-{#	{% set args = {'id':id, 'parent_id':parent_id} %}#}
-	{% set attr_id = 'modal-delete-'~args['id'] %}
-	{% set title = 'Вы действительно хотите удалить этот модуль?' %}
-	{% set body = '<p>Пути назад нет.</p>' -%}
-	{{ delete_object(title=title, body=body, attr_id=attr_id, link=link, args=args) }}
-{%- endmacro %}
-
 {% macro iter_head() -%}
 	<th>#</th>
 	<th>Название</th>
 	<th>Максимум баллов</th>
 {%- endmacro %}
 
-{% macro iter_criterion(criterion) %}
+{% macro iter_object(criterion) %}
 	<td>{{ criterion.id }}</td>
 	<td>{{ criterion.name }}</td>
 	<td>{{ criterion.max_balls }}</td>
 {% endmacro %}
-{#sub_end_point='sub_criterion',#}
+
 {% block content %}
-	{{ content(end_point='criterion', form=form, parent=parent, sub_end_point='sub_criterion',
-			   macro_add=adder_criterion,
-			   macro_edit=editor_criterion,
-			   macro_delete=delete_criterion,
-			   macro_table_head=iter_head,
-			   macro_row_object=iter_criterion,
-			   maximum_balls=maximum_balls) }}
+	{{ content(end_point='criterion',
+	title_for='модуля',
+	macro_table_head=iter_head,
+	macro_row_object=iter_object,
+	parent_end_point='olympiad',
+	sub_end_point='sub_criterion') }}
 {% endblock %}
