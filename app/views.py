@@ -173,7 +173,6 @@ class ChildView(BaseView):
         return self.redirect(parent_id=parent_id)
 
 
-
 olympiad_view = BaseView(_class=Olympiad,
                          _form=OlympiadForm,
                          template_name='olympiad.html',
@@ -195,3 +194,8 @@ aspect_view = ChildView(_class=Aspect,
                         template_name='aspect.html',
                         end_point='aspect',
                         query_maximum=lambda parent_id: db.session.query(SubCriterion).get(parent_id).max_balls)
+
+
+@app.route('/')
+def index():
+    return redirect('olympiad')
