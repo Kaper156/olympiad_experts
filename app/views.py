@@ -209,7 +209,6 @@ aspect_view = ChildView(_class=Aspect,
                         parent_cls=SubCriterion)
 
 
-
 @app.route('/')
 def index():
     return redirect('olympiad')

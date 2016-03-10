@@ -1,5 +1,5 @@
 from app import db
-from sqlalchemy import Integer, String, Text, Float, Date, Boolean
+# from sqlalchemy import Integer, String, Text, Float, Date, Boolean
 from sqlalchemy_defaults import make_lazy_configured, Column
 
 make_lazy_configured(db.mapper)
@@ -8,18 +8,18 @@ make_lazy_configured(db.mapper)
 # Абстрактный класс, хранит поля требуемые компонентам олимпиады
 class OlympiadBase(db.Model):
     __abstract__ = True
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(String, label='Название', nullable=False)
-    max_balls = Column(Float, label='Максимум баллов', nullable=False)
+    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    name = Column(db.String, label='Название', nullable=False)
+    max_balls = Column(db.Float, label='Максимум баллов', nullable=False)
 
 
 # Мероприятие
 class Olympiad(db.Model):
     __tablename__ = 'Olympiad'
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(String, label='Название', nullable=False)
-    date = Column(Date, label='Дата', nullable=False)
-    description = Column(String, label='Описание')
+    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    name = Column(db.String, label='Название', nullable=False)
+    date = Column(db.Date, label='Дата', nullable=False)
+    description = Column(db.String, label='Описание')
     # Status?
 
     def __str__(self):
@@ -29,9 +29,8 @@ class Olympiad(db.Model):
 # Часть олимпиады: Настройка сетевого оборудования, etc
 class Criterion(OlympiadBase):
     __tablename__ = 'Criterion'
-    parent_id = db.Column(db.Integer, db.ForeignKey('Olympiad.id'))
+    parent_id = Column(db.Integer, db.ForeignKey('Olympiad.id'))
     olympiad = db.relationship('Olympiad', backref=db.backref('Criterion', lazy='dynamic'))
-    # max_balls = Column('Максимум баллов', Integer, )
 
     def __str__(self):
         return '<Модуль: "%s" (%s)>' % (self.name, self.max_balls)
@@ -40,7 +39,7 @@ class Criterion(OlympiadBase):
 # Часть привязанная к конкретной области: ОС Linux, Программирование на Python
 class SubCriterion(OlympiadBase):
     __tablename__ = 'SubCriterion'
-    parent_id = db.Column(db.Integer, db.ForeignKey('Criterion.id'))
+    parent_id = Column(db.Integer, db.ForeignKey('Criterion.id'))
     criterion = db.relationship('Criterion', backref=db.backref('SubCriterion', lazy='dynamic'))
 
     def __str__(self):
@@ -51,12 +50,11 @@ class SubCriterion(OlympiadBase):
 # Например: диапозон, точно значение, да\нет и т.д.
 class Calculation(db.Model):
     __tablename__ = 'Calculation'
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(String, label='Название', nullable=False)
-    description = Column(String, label='Описание', nullable=True)
-    # TODO хранить текст лямбда функций?+
-    content = Column(Text, nullable=False)
-    is_subjective = Column(Boolean, nullable=False, default=True)
+    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    name = Column(db.String, label='Название', nullable=False)
+    description = Column(db.String, label='Описание', nullable=True)
+    content = Column(db.Text, nullable=False)
+    is_subjective = Column(db.Boolean, nullable=False, default=True)
 
     # Получает категорию и идентификатор метода
     # Сохраняет в объект текст лямбда-функции
@@ -86,7 +84,7 @@ class Calculation(db.Model):
 # Или субъективным, оценки экспертов могут быть различными
 class Aspect(OlympiadBase):
     __tablename__ = 'Aspect'
-    description = Column(Text, label='Описание')
+    description = Column(db.Text, label='Описание')
 
     parent_id = db.Column(db.Integer, db.ForeignKey('SubCriterion.id'))
     sub_criterion = db.relationship('SubCriterion', backref=db.backref('Aspect', lazy='dynamic'))
@@ -113,8 +111,8 @@ objective_methods = [
 # Участник, связь всех оценок за аспекты и олимпиады
 class Member(db.Model):
     __tablename__ = 'Member'
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(Text, nullable=False, default="Участник")
+    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    name = Column(db.Text, nullable=False, default="Участник")
 
     olympiad_id = db.Column(db.Integer, db.ForeignKey('Olympiad.id'))
     olympiad = db.relationship('Olympiad', backref=db.backref('Member', lazy='dynamic'))
@@ -141,11 +139,11 @@ class Member(db.Model):
 # Балл за конкретный аспект, вычисленная из оценок экспертов
 class MemberAssessment(db.Model):
     __tablename__ = 'MemberAssessment'
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
 
     member_id = db.Column(db.Integer, db.ForeignKey('Member.id'))
     member = db.relationship('Member', backref=db.backref('MemberAssessment', lazy='dynamic'))
-    ball = Column(Integer, nullable=False)
+    ball = Column(db.Integer, nullable=False)
 
     aspect_id = db.Column(db.Integer, db.ForeignKey('Aspect.id'))
     aspect = db.relationship('Aspect', backref=db.backref('MemberAssessment', lazy='dynamic'))
@@ -166,13 +164,13 @@ class MemberAssessment(db.Model):
 # Оценка эксперта за аспект
 class ExpertAssessment(db.Model):
     __tablename__ = 'ExpertAssessment'
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    assessment = Column(Float, label='Оценка', nullable=False)
+    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    assessment = Column(db.Float, label='Оценка', nullable=False)
 
-    role_id = db.Column(db.Integer, db.ForeignKey('Role.id'))
+    role_id = Column(db.Integer, db.ForeignKey('Role.id'))
     role = db.relationship('Role', backref=db.backref('ExpertAssessment', lazy='dynamic'))
 
-    member_assessment_id = db.Column(db.Integer, db.ForeignKey('MemberAssessment.id'))
+    member_assessment_id = Column(db.Integer, db.ForeignKey('MemberAssessment.id'))
     member_assessment = db.relationship('MemberAssessment', backref=db.backref('ExpertAssessment', lazy='dynamic'))
 
 
@@ -180,30 +178,30 @@ class ExpertAssessment(db.Model):
 class Status(db.Model):
     # рано
     __tablename__ = 'Status'
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(String, nullable=False)
+    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    name = Column(db.String, nullable=False)
 
 
 # Права
 class Privilege(db.Model):
     __tablename__ = 'Privilege'
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(String, nullable=False)
-    rights = Column('Уровень', Integer, nullable=False)
+    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    name = Column(db.String, nullable=False)
+    rights = Column('Уровень', db.Integer, nullable=False)
 
 
 # Пользователь системы
 class User(db.Model):
     __tablename__ = 'User'
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    login = Column('Логин', String, nullable=False)
-    password = Column('Пароль', String, nullable=False)
+    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    login = Column('Логин', db.String, nullable=False)
+    password = Column('Пароль', db.String, nullable=False)
 
 
 # Связь между пользователем, правами и олимпиадой
 class Role(db.Model):
     __tablename__ = 'Role'
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
 
     olympiad_id = db.Column(db.Integer, db.ForeignKey('Olympiad.id'))
     olympiad = db.relationship('Olympiad', backref=db.backref('Role', lazy='dynamic'))
