@@ -17,3 +17,10 @@ table.table-striped  td.result-label{min-width: 50px; text-align: right}
 
 /*  modal margin    */
 .modal-body{margin-left: 15px; margin-right: 15px}
+
+/*view_olympiad*/
+.media > .pull-left {
+    background-color: #2a6496;
+    padding: 10px;
+    margin: 5px;
+}

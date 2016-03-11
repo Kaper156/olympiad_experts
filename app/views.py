@@ -1,5 +1,5 @@
 from app import render_template, db, app, request, redirect, url_for, MethodView, abort
-from app import breadcrumbs, OBJECT_PER_PAGE
+from app import breadcrumbs, OBJECT_PER_PAGE, jsonify
 from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation
 from app.forms import OlympiadForm, CriterionForm, SubCriterionForm, AspectForm, CalculationForm
 from app.flashing import flash_form_errors, flash_error, flash_add, flash_edit, flash_delete, flash_max_ball
@@ -214,6 +214,31 @@ def index():
     return redirect('olympiad')
 
 
-@app.route('/view_olympiads')
+@app.route('/view_olympiads/')
 def view_olympiads():
-    pass
+    # hierarchy = dict()
+    # query = db.session.query(Olympiad).all()
+    # classes = [Criterion, SubCriterion, Aspect]
+    # for olympiad in query:
+    #     hierarchy[olympiad] = recursive_hierarchy(classes, olympiad.id)
+    return render_template('view_olympiad.html', hierarchy=hierarchy)
+
+
+def recursive_hierarchy(classes, parent_id):
+    result = dict()
+    try:
+        cls = classes.pop(0)
+        query = db.session.query(cls).filter(cls.parent_id == parent_id).all()
+        for instance in query or []:
+            result[instance] = dict(recursive_hierarchy(classes, instance.id))
+        return result
+    except IndexError:
+        return result
+    except TypeError:
+        return result
+
+hierarchy = dict()
+query = db.session.query(Olympiad).all()
+classes = [Criterion, SubCriterion, Aspect]
+for olympiad in query:
+    hierarchy[olympiad] = recursive_hierarchy(classes, olympiad.id)

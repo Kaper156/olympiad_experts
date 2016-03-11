@@ -4,41 +4,80 @@
 
 {% set title = title or 'Олимпиады' %}
 
+{% macro elements(hierarchy, level=1) -%}
+	{% if hierarchy is mapping %}
+		{% if level == 1 %}
+			{% set container='li' %}
+		{% else %}
+			{% set container='div' %}
+		{% endif %}
+		{% for element in hierarchy.keys() %}
+			<{{ container }} class="media">
+				<span class="pull-left text-center img-thumbnail">
+					{% if level==1 %}
+						<span class="glyphicon glyphicon-calendar"></span>
+					{% else %}
+						<span class="glyphicon glyphicon-info-sign"></span>
+					{% endif %}
+					<br>
+					{{ element.max_balls or element.date }}
+				</span>
+				<div class="media-body">
+					<div class="media-heading">
+						<h4>{{ element.name }}</h4>
+					</div>
+					{% if element.description %}
+						<span class="description">{{ element.description }}</span>
+					{% endif %}
+					{% if hierarchy[element] is mapping %}
+						<hr>
+						<div class="children">
+							{{ elements(hierarchy[element], level=1+level) }}
+						</div>
+					{% endif %}
+				</div>
+			</{{ container }}>
+		{% endfor %}
+	{% endif %}
+{%- endmacro %}
+
+
 {% block content %}
 	<h2 class="title text-center">{{ title }}</h2>
-    <div class="panel panel-default">
-        <div class="panel-heading">
-	        {# Page title #}
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			{# Page title #}
 
-	        <h4 class="">Управление</h4>
-            <div class="btn-group">
+			<h4 class="">Управление</h4>
+			<div class="btn-group">
 
-	            <a class="btn btn-default" href="{{ url_for('olympiad') }}">
-		            <span class="glyphicon glyphicon-refresh"></span> Обновить
-	            </a>
+				<a class="btn btn-default" href="{{ url_for('olympiad') }}">
+					<span class="glyphicon glyphicon-refresh"></span> Обновить
+				</a>
 
-                <a class="btn btn-default" href="/">
-                    <span class="glyphicon glyphicon-bed"></span> Выставить результаты
-                </a>
+				<a class="btn btn-default" href="/">
+					<span class="glyphicon glyphicon-bed"></span> Выставить результаты
+				</a>
 				{#	            TO EDITOR#}
 
-            </div>
+			</div>
 
-        </div>
+		</div>
 
 
-
-        <div class="panel-body">
+		<div class="panel-body">
 
 			<div class='flash-list'>
 				{{ show_flashed() }}
-	        </div>
-        {% if objects %}
-            PRWE:K
-        {% else %}
-	        <p>Объектов ещё нет!</p>
-        {% endif %}
+			</div>
+			{% if hierarchy %}
+				<ul class="media-list">
+					{{ elements(hierarchy) }}
+				</ul>
+			{% else %}
+				<p>Объектов ещё нет!</p>
+			{% endif %}
 
-    </div>
+		</div>
 
 {% endblock %}
