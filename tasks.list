@@ -65,6 +65,8 @@
 
 +Add parent object to template child, because you didn't understood, which child edits now?
 +Something like cache for olympiads-view
++Flask-Login
++Form assessment
 
 -Additional: breadcrumbs to normal (classes and other)
 -Additional: Flask-Migrate
