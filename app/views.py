@@ -184,18 +184,18 @@ class ChildView(BaseView):
 
 olympiad_view = BaseView(_class=Olympiad,
                          _form=OlympiadForm,
-                         template_name='olympiad.html',
+                         template_name='editors/olympiad.html',
                          end_point='olympiad')
 
 criterion_view = ChildView(_class=Criterion,
                            _form=CriterionForm,
-                           template_name='criterion.html',
+                           template_name='editors/criterion.html',
                            end_point='criterion',
                            parent_cls=Olympiad)
 
 sub_criterion_view = ChildView(_class=SubCriterion,
                                _form=SubCriterionForm,
-                               template_name='sub_criterion.html',
+                               template_name='editors/sub_criterion.html',
                                end_point='sub_criterion',
                                query_maximum=lambda parent_id: db.session.query(Criterion).get(parent_id).max_balls,
                                parent_cls=Criterion)
@@ -203,13 +203,17 @@ sub_criterion_view = ChildView(_class=SubCriterion,
 
 aspect_view = ChildView(_class=Aspect,
                         _form=AspectForm,
-                        template_name='aspect.html',
+                        template_name='editors/aspect.html',
                         end_point='aspect',
                         query_maximum=lambda parent_id: db.session.query(SubCriterion).get(parent_id).max_balls,
                         parent_cls=SubCriterion)
 
 
-
 @app.route('/')
 def index():
     return redirect('olympiad')
+
+
+@app.route('/view_olympiads')
+def view_olympiads():
+    pass

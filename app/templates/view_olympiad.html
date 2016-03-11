@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% from 'macroses.html' import modal, show_flashed %}
+
+{% set title = title or 'Олимпиады' %}
+
+{% block content %}
+	<h2 class="title text-center">{{ title }}</h2>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+	        {# Page title #}
+
+	        <h4 class="">Управление</h4>
+            <div class="btn-group">
+
+	            <a class="btn btn-default" href="{{ url_for('olympiad') }}">
+		            <span class="glyphicon glyphicon-refresh"></span> Обновить
+	            </a>
+
+                <a class="btn btn-default" href="/">
+                    <span class="glyphicon glyphicon-bed"></span> Выставить результаты
+                </a>
+				{#	            TO EDITOR#}
+
+            </div>
+
+        </div>
+
+
+
+        <div class="panel-body">
+
+			<div class='flash-list'>
+				{{ show_flashed() }}
+	        </div>
+        {% if objects %}
+            PRWE:K
+        {% else %}
+	        <p>Объектов ещё нет!</p>
+        {% endif %}
+
+    </div>
+
+{% endblock %}
