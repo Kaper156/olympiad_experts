@@ -5,27 +5,37 @@
 {% macro content(end_point, title_for, macro_table_head, macro_row_object, parent_end_point, sub_end_point=None) -%}
 
 	{% set args={'parent_id':parent.id} %}
-
+{# Page title #}
+			<h2 class="title text-center">
+		        {{ parent.name }}
+		        <hr>
+		        {{ title }}
+	        </h2>
 	<div class="panel panel-default">
+
 		<div class="panel-heading">
-			{# Page title #}
-	        <h2 class="title text-center">{{ title }}</h2>
+
 
 			<h4 class="">Управление</h4>
 
 			<div class="btn-group">
 
-				{# Форма добавления элемента #}
-{#				{{ macro_add(form=form, args=args) }}#}
-				{{ editor(form=form, end_point=end_point ~ '_add', args=args, title='Добавление '~ title_for) }}
+				<a class="btn btn-default" href="{{ url_for(parent_end_point, id=parent.id, parent_id=parent.parent_id) }}">
+					<span class=" glyphicon glyphicon-arrow-up"></span> Выше
+				</a>
+
+				<a class="btn btn-default" href="{{ url_for(end_point, parent_id=parent.id) }}">
+					<span class="glyphicon glyphicon-refresh"></span> Обновить
+				</a>
+
 				<button type="button" class="btn btn-default"
 				        data-toggle="modal" data-target="#editor-new">
 					<span class="glyphicon glyphicon-plus"></span> Добавить
 				</button>
 
-				<a class="btn btn-default" href="{{ url_for(end_point, parent_id=parent.id) }}">
-					<span class="glyphicon glyphicon-refresh"></span> Обновить
-				</a>
+				{# Форма добавления элемента #}
+				{{ editor(form=form, end_point=end_point ~ '_add', args=args, title='Добавление '~ title_for) }}
+
 
 			</div>
 		</div>
