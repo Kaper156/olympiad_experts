@@ -22,7 +22,8 @@ db.create_all()
 
 # Create calculations from models.lists-of-methods
 from app.models import Calculation, objective_methods, subjective_methods
-if db.session.query(Calculation).count() == 0:
+
+def load_calculations():
     for name, content in objective_methods:
         instance = Calculation(is_subjective=False,
                                content=content,
@@ -35,14 +36,13 @@ if db.session.query(Calculation).count() == 0:
         db.session.add(instance)
     db.session.commit()
 
+if db.session.query(Calculation).count() == 0:
+    load_calculations()
 
 
 
 # Forms
 from app import forms
-import wtforms_json
-
-wtforms_json.init()
 
 # Routing
 from app import flashing

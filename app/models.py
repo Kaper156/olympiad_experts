@@ -92,7 +92,8 @@ class Aspect(OlympiadBase):
     calculation_id = Column(db.Integer,
                             db.ForeignKey('Calculation.id'),
                             label='Метод',
-                            info={'choices': [(c.id, c.name) for c in db.session.query(Calculation).all()]})
+                            info={'choices': [(c.id, c.name) for c in db.session.query(Calculation).all()]}
+                            )
     calculation = db.relationship('Calculation', backref=db.backref('Aspect', lazy='dynamic'))
 
     def __str__(self):
