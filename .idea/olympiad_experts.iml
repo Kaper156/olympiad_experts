@@ -2,7 +2,7 @@
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$" />
-    <orderEntry type="jdk" jdkName="Python 3.5.0+ virtualenv at ~/olympiad/olympiad_experts/env" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.5.1 virtualenv at /mnt/exe/Text/Python/olympiad_experts/env (1)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TemplatesService">

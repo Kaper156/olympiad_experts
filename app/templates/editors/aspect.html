@@ -7,6 +7,7 @@
 	<th>Название</th>
 	<th>Максимум баллов</th>
 	<th>Описание</th>
+	<th>Метод</th>
 {%- endmacro %}
 
 {% macro iter_object(aspect) %}
@@ -14,6 +15,7 @@
 	<td>{{ aspect.name }}</td>
 	<td>{{ aspect.max_balls }}</td>
 	<td>{{ aspect.description }}</td>
+	<td>{{ aspect.calculation.name }}</td>
 {% endmacro %}
 
 {% block content %}
