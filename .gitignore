@@ -5,3 +5,4 @@
 app.db
 .fuse_hidden*
 env/
+.idea/
