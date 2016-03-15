@@ -21,25 +21,13 @@ from app import models
 db.create_all()
 
 # Create calculations from models.lists-of-methods
-from app.models import Calculation, objective_methods, subjective_methods
-
-def load_calculations():
-    for name, content in objective_methods:
-        instance = Calculation(is_subjective=False,
-                               content=content,
-                               name=name)
-        db.session.add(instance)
-    for name, content in subjective_methods:
-        instance = Calculation(is_subjective=True,
-                               content=content,
-                               name=name)
-        db.session.add(instance)
-    db.session.commit()
-
-if db.session.query(Calculation).count() == 0:
-    load_calculations()
+models.load_calculations()
 
 
+# Authenticate module
+from flask_login import LoginManager
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 # Forms
 from app import forms

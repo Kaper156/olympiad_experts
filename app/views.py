@@ -1,8 +1,9 @@
-from app import render_template, db, app, request, redirect, url_for, MethodView, abort
+from app import render_template, db, app, request, redirect, url_for, MethodView, abort, login_manager
 from app import breadcrumbs, OBJECT_PER_PAGE, jsonify
-from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation
-from app.forms import OlympiadForm, CriterionForm, SubCriterionForm, AspectForm, CalculationForm
-from app.flashing import flash_form_errors, flash_error, flash_add, flash_edit, flash_delete, flash_max_ball
+from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User
+from app.forms import OlympiadForm, CriterionForm, SubCriterionForm, AspectForm, CalculationForm, LoginForm
+from app.flashing import flash_form_errors, flash_add, flash_edit, flash_delete, flash_max_ball, \
+                         flash_message, flash_error
 
 
 class BaseView:
@@ -242,3 +243,43 @@ query = db.session.query(Olympiad).all()
 classes = [Criterion, SubCriterion, Aspect]
 for olympiad in query:
     hierarchy[olympiad] = recursive_hierarchy(classes, olympiad.id)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    user_id = int(user_id)
+    return db.session.query(User).get(user_id) or None
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    # Here we use a class of some kind to represent and validate our
+    # client-side form data. For example, WTForms is a library that will
+    # handle this for us, and we use a custom LoginForm to validate.
+    form = LoginForm()
+    if form.validate_on_submit():
+        # Login and validate the user.
+        # user should be an instance of your `User` class
+        user = User()
+        form.populate_object(user)
+        if login_user(user):
+            flash_message('Вы успешно вошли.')
+
+            next = request.args.get('next')
+            # next_is_valid should check if the user has valid
+            # permission to access the `next` url
+            # if not next_is_valid(next):
+            #     return flask.abort(400)
+
+            return redirect(next or url_for('index'))
+        else:
+            flash_error('Логин или пароль не подходит')
+    return render_template('login.html', form=form)
+
+
+def login_user(user):
+    query = db.session.query(User).filter(User.login == user.login)
+    # TODO Add to session
+    if query.count() > 0 and query.password == user.password:
+        return True
+    return False

@@ -1,4 +1,4 @@
-from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation
+from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User
 from flask.ext.wtf import Form
 from wtforms import SelectField, FormField
 from wtforms_alchemy import model_form_factory, ModelFieldList
@@ -32,3 +32,8 @@ class AspectForm(ModelForm, Form):
     class Meta:
         model = Aspect
         include = ['calculation_id']
+
+
+class LoginForm(ModelForm, Form):
+    class Meta:
+        model = User

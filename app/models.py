@@ -79,6 +79,24 @@ class Calculation(db.Model):
         return '<Метод: "%s" [%s]>' % (self.name, self.content)
 
 
+# Загрузить методы вычисления
+def load_calculations():
+    if db.session.query(Calculation).count() == 0:
+        for name, content in objective_methods:
+            instance = Calculation(is_subjective=False,
+                                   content=content,
+                                   name=name)
+            db.session.add(instance)
+        for name, content in subjective_methods:
+            instance = Calculation(is_subjective=True,
+                                   content=content,
+                                   name=name)
+            db.session.add(instance)
+        db.session.commit()
+
+load_calculations()
+
+
 # Конкретное задание: Установить ОС Windows Xp
 # Может быть объективным - по факту наличия и др.
 # Или субъективным, оценки экспертов могут быть различными
@@ -175,20 +193,32 @@ class ExpertAssessment(db.Model):
     member_assessment = db.relationship('MemberAssessment', backref=db.backref('ExpertAssessment', lazy='dynamic'))
 
 
-# Этап олимпиады 
-class Status(db.Model):
-    # рано
-    __tablename__ = 'Status'
-    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(db.String, nullable=False)
-
-
 # Права
 class Privilege(db.Model):
     __tablename__ = 'Privilege'
     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(db.String, nullable=False)
     rights = Column('Уровень', db.Integer, nullable=False)
+
+
+R_ADMIN = 2
+R_EXPERT = 1
+R_GUEST = 0
+
+
+def load_privilege():
+    if db.session.query(Privilege).count() == 0:
+        for name, rights in [('Гость', R_GUEST),
+                             ('Эксперт', R_EXPERT),
+                             ('Администратор', R_ADMIN)]:
+            privilege = Privilege()
+            privilege.name = name
+            privilege.rights = rights
+            db.session.add(privilege)
+        db.session.commit()
+
+
+load_privilege()
 
 
 # Пользователь системы
@@ -198,17 +228,45 @@ class User(db.Model):
     login = Column('Логин', db.String, nullable=False)
     password = Column('Пароль', db.String, nullable=False)
 
-
-# Связь между пользователем, правами и олимпиадой
-class Role(db.Model):
-    __tablename__ = 'Role'
-    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-
-    olympiad_id = db.Column(db.Integer, db.ForeignKey('Olympiad.id'))
-    olympiad = db.relationship('Olympiad', backref=db.backref('Role', lazy='dynamic'))
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.id'))
-    user = db.relationship('User', backref=db.backref('Role', lazy='dynamic'))
-
     privilege_id = db.Column(db.Integer, db.ForeignKey('Privilege.id'))
-    privilege = db.relationship('Privilege', backref=db.backref('Role', lazy='dynamic'))
+    privilege = db.relationship('Privilege', backref=db.backref('User', lazy='dynamic'))
+
+
+def load_users():
+    query = db.session.query(Privilege).all()
+    privilege_admin = query.filter(Privilege.rights == R_ADMIN)
+    privilege_expert = query.filter(Privilege.rights == R_EXPERT)
+    users = [('Expert1', privilege_expert),
+             ('Expert2', privilege_expert),
+             ('Expert3', privilege_expert),
+             ('Expert4', privilege_expert),
+             ('Expert5', privilege_expert),
+             ('Admin', privilege_admin)]
+
+    for login, privilege in users:
+        user = User()
+        user.login = login
+        user.privilege_id = privilege.id
+        db.session.add(user)
+    db.session.commit()
+
+
+load_users()
+
+
+def reload_users():
+    from os import urandom
+    query = db.session.query(User).all()
+    for user in query:
+        # user = User()
+        if user.privilege.rights < R_ADMIN:
+            user.password = urandom(9)
+    db.session.commit()
+
+
+def write_users_credential():
+    query = db.session.query(User).all()
+    for user in query:
+        if user.privilege.rights < R_ADMIN:
+            with open('%s-%s.txt' % (user.privilege.rights, user.name), 'wt') as file:
+                file.write('%s\n%s\n%s\n' % (user.privilege.name, user.name, user.password))
