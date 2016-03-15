@@ -104,8 +104,16 @@ class ChildView(BaseView):
                          view_func=self.delete,
                          methods=['POST'])
 
-    def create_form(self):
-        return self.form(request.form, self.cls)
+    def populate(self, form, instance, parent_id, add=False):
+        form.populate_obj(instance)
+        instance.parent_id = parent_id
+        if add:
+            db.session.add(instance)
+            flash_add(instance)
+        else:
+            flash_edit(instance)
+        db.session.commit()
+        return instance
 
     def all(self, parent_id):
         results = list()
@@ -124,15 +132,16 @@ class ChildView(BaseView):
     def edit(self, id, parent_id):
 
         instance = db.session.query(self.cls).get(id)
-        form = self.create_form()
+        form = self.form(request.form, self.cls)
         if form.validate_on_submit():
             received_balls = form.max_balls.data
             value = self.check_balls(instance.id, parent_id, received_balls, self.query['maximum_balls'](parent_id))
             if value == received_balls:
-                instance.parent_id = parent_id
-                form.populate_obj(instance)
-                db.session.commit()
-                flash_edit(instance)
+                # instance.parent_id = parent_id
+                # form.populate_obj(instance)
+                # db.session.commit()
+                # flash_edit(instance)
+                self.populate(form, instance, parent_id)
             else:
                 flash_max_ball(received_balls, value)
         else:
@@ -141,17 +150,18 @@ class ChildView(BaseView):
 
     def add(self, parent_id):
         instance = self.cls()
-        form = self.create_form()
+        form = self.form(request.form, self.cls)
         if form.validate_on_submit():
             received_balls = form.max_balls.data
             value = self.check_balls(None, parent_id, received_balls, self.query['maximum_balls'](parent_id))
             if value == received_balls:
-                form.populate_obj(instance)
-                db.session.add(instance)
-                instance.parent_id = parent_id
-                db.session.commit()
-                print(instance.id)
-                flash_add(instance)
+                # form.populate_obj(instance)
+                # db.session.add(instance)
+                # instance.parent_id = parent_id
+                # db.session.commit()
+                # print(instance.id)
+                # flash_add(instance)
+                self.populate(form, instance, parent_id, True)
             else:
                 flash_max_ball(received_balls, value)
         else:
@@ -201,7 +211,22 @@ sub_criterion_view = ChildView(_class=SubCriterion,
                                query_maximum=lambda parent_id: db.session.query(Criterion).get(parent_id).max_balls,
                                parent_cls=Criterion)
 
+#
+# class AspectView(ChildView):
+#     def __init__(self):
+#         ChildView.__init__(self,
+#                            _class=Aspect,
+#                            _form=AspectForm,
+#                            template_name='editors/aspect.html',
+#                            end_point='aspect',
+#                            query_maximum=lambda parent_id: db.session.query(SubCriterion).get(parent_id).max_balls,
+#                            parent_cls=SubCriterion)
+#
+#     def populate(self, form, instance, parent_id, add=False):
+#         instance.calculation_id = form.calculation_id.data
+#         return ChildView.populate(self, form, instance, parent_id, add)
 
+# aspect_view = AspectView()
 aspect_view = ChildView(_class=Aspect,
                         _form=AspectForm,
                         template_name='editors/aspect.html',

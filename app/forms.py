@@ -32,6 +32,12 @@ class AspectForm(ModelForm, Form):
     class Meta:
         model = Aspect
         include = ['calculation_id']
+    calculation_id = SelectField(label='Метод вычисления', coerce=int)
+
+    def __init__(self, *args, **kwargs):
+        ModelForm.__init__(self, *args, **kwargs)
+        Form.__init__(self, *args, **kwargs)
+        self.calculation_id.choices = [(c.id, c.name) for c in db.session.query(Calculation).all()]
 
 
 class LoginForm(ModelForm, Form):
