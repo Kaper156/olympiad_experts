@@ -64,22 +64,24 @@ class User(db.Model):
 
 
 def load_users():
-    query = db.session.query(Privilege).all()
-    privilege_admin = query.filter(Privilege.rights == R_ADMIN)
-    privilege_expert = query.filter(Privilege.rights == R_EXPERT)
-    users = [('Expert1', privilege_expert),
-             ('Expert2', privilege_expert),
-             ('Expert3', privilege_expert),
-             ('Expert4', privilege_expert),
-             ('Expert5', privilege_expert),
-             ('Admin', privilege_admin)]
-
-    for login, privilege in users:
-        user = User()
-        user.login = login
-        user.privilege_id = privilege.id
-        db.session.add(user)
-    db.session.commit()
+    if db.session.query(User).count() == 0:
+        query = db.session.query(Privilege)
+        privilege_admin = query.filter(Privilege.rights == R_ADMIN).first()
+        privilege_expert = query.filter(Privilege.rights == R_EXPERT).first()
+        users = [('Expert1', privilege_expert),
+                 ('Expert2', privilege_expert),
+                 ('Expert3', privilege_expert),
+                 ('Expert4', privilege_expert),
+                 ('Expert5', privilege_expert),
+                 ('Admin', privilege_admin)]
+        from os import urandom
+        for login, privilege in users:
+            user = User()
+            user.login = login
+            user.password = login
+            user.privilege_id = privilege.id
+            db.session.add(user)
+        db.session.commit()
 
 
 def reload_users():

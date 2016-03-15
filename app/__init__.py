@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, abort, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, abort, jsonify, Response
 from flask_wtf.csrf import CsrfProtect
 from flask.views import MethodView
 
@@ -22,14 +22,14 @@ db.create_all()
 
 # Create calculations from models.lists-of-methods
 models.load_calculations()
+# Create privileges
+models.load_privilege()
+# Create users
+models.load_users()
 
 
-# Authenticate module
-from flask_login import LoginManager
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_message_category = "info"
-
+# Auth
+from app import auth
 
 # Forms
 from app import forms
