@@ -4,6 +4,21 @@ from sqlalchemy_defaults import make_lazy_configured, Column
 
 make_lazy_configured(db.mapper)
 
+# Списки методов
+subjective_methods = [
+    ('Шкала 10', 'lambda x: 1')
+]
+objective_methods = [
+    ('Наличие', 'lambda x: bool(x)'),
+    ('Диапозон-5', 'lambda x: x//5'),
+    ('Диапозон-10', 'lambda x: x//10'),
+]
+
+# Константы прав, используются для создания пользователей
+R_ADMIN = 2
+R_EXPERT = 1
+R_GUEST = 0
+
 
 # Права
 class Privilege(db.Model):
@@ -11,11 +26,6 @@ class Privilege(db.Model):
     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(db.String, nullable=False)
     rights = Column('Уровень доступа', db.Integer, nullable=False)
-
-
-R_ADMIN = 2
-R_EXPERT = 1
-R_GUEST = 0
 
 
 def load_privilege():
@@ -28,9 +38,6 @@ def load_privilege():
             privilege.rights = rights
             db.session.add(privilege)
         db.session.commit()
-
-
-load_privilege()
 
 
 # Пользователь системы
@@ -73,9 +80,6 @@ def load_users():
         user.privilege_id = privilege.id
         db.session.add(user)
     db.session.commit()
-
-
-load_users()
 
 
 def reload_users():
@@ -185,8 +189,6 @@ def load_calculations():
             db.session.add(instance)
         db.session.commit()
 
-load_calculations()
-
 
 # Конкретное задание: Установить ОС Windows Xp
 # Может быть объективным - по факту наличия и др.
@@ -201,22 +203,13 @@ class Aspect(OlympiadBase):
     calculation_id = Column(db.Integer,
                             db.ForeignKey('Calculation.id'),
                             label='Метод',
-                            info={'choices': [(c.id, c.name) for c in db.session.query(Calculation).all()]}
+                            # info={'choices': [(c.id, c.name) for c in db.session.query(Calculation).all()]}
                             # TODO
                             )
     calculation = db.relationship('Calculation', backref=db.backref('Aspect', lazy='dynamic'))
 
     def __str__(self):
         return '<Критерий: "%s" (%s)>' % (self.name, self.max_balls)
-
-subjective_methods = [
-    ('Шкала 10', 'lambda x: 1')
-]
-objective_methods = [
-    ('Наличие', 'lambda x: bool(x)'),
-    ('Диапозон-5', 'lambda x: x//5'),
-    ('Диапозон-10', 'lambda x: x//10'),
-]
 
 
 # Участник, связь всех оценок за аспекты и олимпиады
@@ -283,4 +276,3 @@ class ExpertAssessment(db.Model):
 
     member_assessment_id = Column(db.Integer, db.ForeignKey('MemberAssessment.id'))
     member_assessment = db.relationship('MemberAssessment', backref=db.backref('ExpertAssessment', lazy='dynamic'))
-
