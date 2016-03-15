@@ -5,6 +5,97 @@ from sqlalchemy_defaults import make_lazy_configured, Column
 make_lazy_configured(db.mapper)
 
 
+# Права
+class Privilege(db.Model):
+    __tablename__ = 'Privilege'
+    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    name = Column(db.String, nullable=False)
+    rights = Column('Уровень доступа', db.Integer, nullable=False)
+
+
+R_ADMIN = 2
+R_EXPERT = 1
+R_GUEST = 0
+
+
+def load_privilege():
+    if db.session.query(Privilege).count() == 0:
+        for name, rights in [('Гость', R_GUEST),
+                             ('Эксперт', R_EXPERT),
+                             ('Администратор', R_ADMIN)]:
+            privilege = Privilege()
+            privilege.name = name
+            privilege.rights = rights
+            db.session.add(privilege)
+        db.session.commit()
+
+
+load_privilege()
+
+
+# Пользователь системы
+class User(db.Model):
+    __tablename__ = 'User'
+    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    login = Column('Логин', db.String, nullable=False)
+    password = Column('Пароль', db.String, nullable=False)
+
+    privilege_id = db.Column(db.Integer, db.ForeignKey('Privilege.id'))
+    privilege = db.relationship('Privilege', backref=db.backref('User', lazy='dynamic'))
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.login
+
+
+def load_users():
+    query = db.session.query(Privilege).all()
+    privilege_admin = query.filter(Privilege.rights == R_ADMIN)
+    privilege_expert = query.filter(Privilege.rights == R_EXPERT)
+    users = [('Expert1', privilege_expert),
+             ('Expert2', privilege_expert),
+             ('Expert3', privilege_expert),
+             ('Expert4', privilege_expert),
+             ('Expert5', privilege_expert),
+             ('Admin', privilege_admin)]
+
+    for login, privilege in users:
+        user = User()
+        user.login = login
+        user.privilege_id = privilege.id
+        db.session.add(user)
+    db.session.commit()
+
+
+load_users()
+
+
+def reload_users():
+    from os import urandom
+    query = db.session.query(User).all()
+    for user in query:
+        # user = User()
+        if user.privilege.rights < R_ADMIN:
+            user.password = urandom(9)
+    db.session.commit()
+
+
+def write_users_credential():
+    query = db.session.query(User).all()
+    for user in query:
+        if user.privilege.rights < R_ADMIN:
+            with open('%s-%s.txt' % (user.privilege.rights, user.name), 'wt') as file:
+                file.write('%s\n%s\n%s\n' % (user.privilege.name, user.name, user.password))
+
+
 # Абстрактный класс, хранит поля требуемые компонентам олимпиады
 class OlympiadBase(db.Model):
     __abstract__ = True
@@ -111,6 +202,7 @@ class Aspect(OlympiadBase):
                             db.ForeignKey('Calculation.id'),
                             label='Метод',
                             info={'choices': [(c.id, c.name) for c in db.session.query(Calculation).all()]}
+                            # TODO
                             )
     calculation = db.relationship('Calculation', backref=db.backref('Aspect', lazy='dynamic'))
 
@@ -186,87 +278,9 @@ class ExpertAssessment(db.Model):
     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     assessment = Column(db.Float, label='Оценка', nullable=False)
 
-    role_id = Column(db.Integer, db.ForeignKey('Role.id'))
-    role = db.relationship('Role', backref=db.backref('ExpertAssessment', lazy='dynamic'))
+    user_id = Column(db.Integer, db.ForeignKey('User.id'))
+    user = db.relationship('User', backref=db.backref('ExpertAssessment', lazy='dynamic'))
 
     member_assessment_id = Column(db.Integer, db.ForeignKey('MemberAssessment.id'))
     member_assessment = db.relationship('MemberAssessment', backref=db.backref('ExpertAssessment', lazy='dynamic'))
 
-
-# Права
-class Privilege(db.Model):
-    __tablename__ = 'Privilege'
-    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(db.String, nullable=False)
-    rights = Column('Уровень', db.Integer, nullable=False)
-
-
-R_ADMIN = 2
-R_EXPERT = 1
-R_GUEST = 0
-
-
-def load_privilege():
-    if db.session.query(Privilege).count() == 0:
-        for name, rights in [('Гость', R_GUEST),
-                             ('Эксперт', R_EXPERT),
-                             ('Администратор', R_ADMIN)]:
-            privilege = Privilege()
-            privilege.name = name
-            privilege.rights = rights
-            db.session.add(privilege)
-        db.session.commit()
-
-
-load_privilege()
-
-
-# Пользователь системы
-class User(db.Model):
-    __tablename__ = 'User'
-    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    login = Column('Логин', db.String, nullable=False)
-    password = Column('Пароль', db.String, nullable=False)
-
-    privilege_id = db.Column(db.Integer, db.ForeignKey('Privilege.id'))
-    privilege = db.relationship('Privilege', backref=db.backref('User', lazy='dynamic'))
-
-
-def load_users():
-    query = db.session.query(Privilege).all()
-    privilege_admin = query.filter(Privilege.rights == R_ADMIN)
-    privilege_expert = query.filter(Privilege.rights == R_EXPERT)
-    users = [('Expert1', privilege_expert),
-             ('Expert2', privilege_expert),
-             ('Expert3', privilege_expert),
-             ('Expert4', privilege_expert),
-             ('Expert5', privilege_expert),
-             ('Admin', privilege_admin)]
-
-    for login, privilege in users:
-        user = User()
-        user.login = login
-        user.privilege_id = privilege.id
-        db.session.add(user)
-    db.session.commit()
-
-
-load_users()
-
-
-def reload_users():
-    from os import urandom
-    query = db.session.query(User).all()
-    for user in query:
-        # user = User()
-        if user.privilege.rights < R_ADMIN:
-            user.password = urandom(9)
-    db.session.commit()
-
-
-def write_users_credential():
-    query = db.session.query(User).all()
-    for user in query:
-        if user.privilege.rights < R_ADMIN:
-            with open('%s-%s.txt' % (user.privilege.rights, user.name), 'wt') as file:
-                file.write('%s\n%s\n%s\n' % (user.privilege.name, user.name, user.password))

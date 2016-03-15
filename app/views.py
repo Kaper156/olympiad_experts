@@ -238,6 +238,7 @@ def recursive_hierarchy(classes, parent_id):
     except TypeError:
         return result
 
+# todo  create cache
 hierarchy = dict()
 query = db.session.query(Olympiad).all()
 classes = [Criterion, SubCriterion, Aspect]
@@ -246,20 +247,14 @@ for olympiad in query:
 
 
 @login_manager.user_loader
-def load_user(user_id):
-    user_id = int(user_id)
-    return db.session.query(User).get(user_id) or None
+def load_user(login):
+    return db.session.query(User).filter(User.login == login) or None
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Here we use a class of some kind to represent and validate our
-    # client-side form data. For example, WTForms is a library that will
-    # handle this for us, and we use a custom LoginForm to validate.
     form = LoginForm()
     if form.validate_on_submit():
-        # Login and validate the user.
-        # user should be an instance of your `User` class
         user = User()
         form.populate_object(user)
         if login_user(user):
