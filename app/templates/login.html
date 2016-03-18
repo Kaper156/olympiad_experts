@@ -1,12 +1,16 @@
 {% extends 'base.html' %}
+{% from 'macroses.html' import show_flashed %}
 {% block content %}
+	{{show_flashed()}}
 	<form action="{{ url_for('login') }}" method="post">
 		<div class="form-control">
-			Login:{{ form.login }}
+			Login:{{ form.login() }}
 		</div>
 		<div class="form-control">
-			Password:{{ form.password }}
+			Password:{{ form.password() }}
 		</div>
+		{{ form.hidden_tag() }}
 	<button type="submit">Войти</button>
 	</form>
+	<a href="{{ url_for('logout') }}">Выйти</a>
 {% endblock %}

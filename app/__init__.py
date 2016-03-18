@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, abort, jsonify, Response
+from flask import Flask, render_template, request, redirect, url_for, flash, abort, jsonify, Response, session
 from flask_wtf.csrf import CsrfProtect
 from flask.views import MethodView
 
