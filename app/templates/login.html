@@ -1,4 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
-
+	<form action="{{ url_for('login') }}" method="post">
+		<div class="form-control">
+			Login:{{ form.login }}
+		</div>
+		<div class="form-control">
+			Password:{{ form.password }}
+		</div>
+	<button type="submit">Войти</button>
+	</form>
 {% endblock %}

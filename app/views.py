@@ -1,10 +1,10 @@
 from app import render_template, db, app, request, redirect, url_for, OBJECT_PER_PAGE
 # from app import breadcrumbs
-from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User
+from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User, Privilege
 from app.forms import OlympiadForm, CriterionForm, SubCriterionForm, AspectForm, CalculationForm, LoginForm
 from app.flashing import flash_form_errors, flash_add, flash_edit, flash_delete, flash_max_ball, \
                          flash_message, flash_error
-from app.auth import requires_auth
+from app.auth import requires_user, require_admin
 
 
 class BaseView:
@@ -90,19 +90,19 @@ class ChildView(BaseView):
     def init_end_points(self):
         app.add_url_rule('/%s-of-<int:parent_id>/' % self.endpoint,
                          endpoint='%s' % self.endpoint,
-                         view_func=self.all,
+                         view_func=requires_user(self.all),
                          methods=['GET'])
         app.add_url_rule('/%s-of-<int:parent_id>/add/' % self.endpoint,
                          endpoint='%s_add' % self.endpoint,
-                         view_func=self.add,
+                         view_func=requires_user(self.add),
                          methods=['POST'])
         app.add_url_rule('/%s-of-<int:parent_id>/edit/<int:id>' % self.endpoint,
                          endpoint='%s_edit' % self.endpoint,
-                         view_func=self.edit,
+                         view_func=requires_user(self.edit),
                          methods=['POST'])
         app.add_url_rule('/%s-of-<int:parent_id>/delete/<int:id>' % self.endpoint,
                          endpoint='%s_delete' % self.endpoint,
-                         view_func=self.delete,
+                         view_func=requires_user(self.delete),
                          methods=['POST'])
 
     def populate(self, form, instance, parent_id, add=False):
@@ -221,13 +221,11 @@ aspect_view = ChildView(_class=Aspect,
 
 
 @app.route('/')
-@requires_auth
 def index():
     return redirect('olympiad')
 
 
 @app.route('/view_olympiads/')
-@requires_auth
 def view_olympiads():
     # hierarchy = dict()
     # query = db.session.query(Olympiad).all()
