@@ -24,3 +24,5 @@ table.table-striped  td.result-label{min-width: 50px; text-align: right}
     padding: 10px;
     margin: 5px;
 }
+/*bottom margin*/
+#content{margin-bottom: 15px;}

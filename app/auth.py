@@ -53,9 +53,9 @@ def requires_user(f, privilege=privilege_expert):
     def decorated(*args, **kwargs):
         session['privilege'] = privilege.id
         session['next_url'] = request.url
-        return f(*args, **kwargs)
         if not check_auth():
             return redirect(url_for('login'))
+        return f(*args, **kwargs)
 
     return decorated
 

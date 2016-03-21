@@ -44,23 +44,12 @@ def load_privilege():
 class User(db.Model):
     __tablename__ = 'User'
     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    login = Column('Логин', db.String, nullable=False)
-    password = Column('Пароль', db.String, nullable=False)
+    login = Column(db.String, label='Логин', nullable=False)
+    password = Column(db.String, label='Пароль', nullable=False)
 
     privilege_id = db.Column(db.Integer, db.ForeignKey('Privilege.id'))
     privilege = db.relationship('Privilege', backref=db.backref('User', lazy='dynamic'))
 
-    def is_authenticated(self):
-        return True
-
-    def is_active(self):
-        return True
-
-    def is_anonymous(self):
-        return False
-
-    def get_id(self):
-        return self.login
 
 
 def load_users():
