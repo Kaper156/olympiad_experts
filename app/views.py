@@ -90,7 +90,7 @@ class ChildView(BaseView):
     def init_end_points(self):
         app.add_url_rule('/%s-of-<int:parent_id>/' % self.endpoint,
                          endpoint='%s' % self.endpoint,
-                         view_func=requires_user(self.all),
+                         view_func=require_admin(self.all),
                          methods=['GET'])
         app.add_url_rule('/%s-of-<int:parent_id>/add/' % self.endpoint,
                          endpoint='%s_add' % self.endpoint,

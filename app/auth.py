@@ -8,38 +8,38 @@ privilege_admin = db.session.query(Privilege).filter(Privilege.rights == R_ADMIN
 privilege_expert = db.session.query(Privilege).filter(Privilege.rights == R_EXPERT).first()
 
 
-def check_auth():
-    privilege = session.pop('privilege', default=None)
-    auth = LoginForm(request.form, User)
-    if auth.validate_on_submit():
-        new_user = User()
-        if session.get('user'):
-            new_user.login, new_user.password = session['user_login'], session['user_password']
-        else:
-            auth.populate_obj(new_user)
-        user = db.session.query(User).filter(User.login == new_user.login).first()
-        print(new_user)
-        print(user)
-        if user.password == new_user.password:
-            if privilege is None:
-                privilege = privilege_expert
-            if user.privilege.rights >= privilege.rights:
-                session['user_login'], session['user_password'] = user.login, user.password
-                return True
-            else:
-                abort(401)
-
-    flash_form_errors(auth)
-    return False
-
-
+# Показывать форму пока не залогинишься
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
     form = LoginForm(request.form, User)
-    if check_auth():
-        next_url = session.pop('next_url', '/')
-        return redirect(next_url)
+    if form.is_submitted():
+        incoming = User()
+        form.populate_obj(incoming)
+        validation = validate(incoming)
+
+        # Вход
+        if validation:
+            # Проверка прав доступа к ресурсу
+            if validation > 0:
+                next_url = session.pop('next_url', '/')
+            else:
+                next_url = '/'
+            return redirect(next_url)
     return render_template('login.html', form=form)
+
+
+def validate(incoming):
+    # incoming = User()
+    # form.populate_obj(incoming)
+    user = db.session.query(User).filter(User.login == incoming.login).first()
+    if user and user.password == incoming.password:
+        privilege = db.session.query(Privilege).get(session.get('privilege'))
+        session['user'] = user.id
+        if user.privilege.rights >= privilege.rights:
+            return 1
+        else:
+            return -1
+    return 0
 
 
 @app.route('/logout/')
@@ -48,14 +48,22 @@ def logout():
     return redirect('/')
 
 
+# Проверить наличие в сессии
+# Если нету- послать в логин форм
+# Если есть- проверить права доступа
 def requires_user(f, privilege=privilege_expert):
     @wraps(f)
     def decorated(*args, **kwargs):
-        session['privilege'] = privilege.id
-        session['next_url'] = request.url
-        if not check_auth():
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
+        if session.get('user'):
+            user = db.session.query(User).get(session['user'])
+            if user.privilege.rights >= privilege.rights:
+                return f(*args, **kwargs)
+            else:
+                abort(502)
+        else:
+            session['privilege'] = privilege.id
+            session['next_url'] = request.url
+        return redirect(url_for('login'))
 
     return decorated
 
