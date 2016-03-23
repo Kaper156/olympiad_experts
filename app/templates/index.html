@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% set title=title or 'Главная страница' %}
+    <h2 class="text-center">{{ title }}</h2>
+    Это главная страница системы "Экспертной оценки олимпиад". Здесь вы можете:
+    <ul>
+        <li>
+            <a href="{{ url_for('olympiad') }}">Создавать новую олимпиаду,
+            либо изменить шаблоны существеющих</a>
+        </li>
+
+        <li>
+            <a href="#">Выставить оценки текущей олимпиаде</a>
+        </li>
+
+        <li>
+            <a href="{{ url_for('view_olympiads') }}">Посмотреть структуры олимпиад</a>
+        </li>
+    </ul>
+    {% if session.user %}
+        {#TODO        #}
+    {% else %}
+        Но для начала войдите в систему.
+        <br>
+        <a class="btn" href="{{ url_for('login') }}">К форме входа</a>
+    {% endif %}
+{% endblock %}

@@ -1,7 +1,8 @@
 from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User
 from flask.ext.wtf import Form
-from wtforms import SelectField, FormField
+from wtforms import SelectField, FormField, PasswordField
 from wtforms_alchemy import model_form_factory, ModelFieldList
+from wtforms.validators import DataRequired
 from app import db
 
 ModelForm = model_form_factory(Form)
@@ -43,3 +44,4 @@ class AspectForm(ModelForm, Form):
 class LoginForm(ModelForm, Form):
     class Meta:
         model = User
+    password = PasswordField(label='Пароль')

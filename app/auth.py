@@ -11,58 +11,53 @@ privilege_expert = db.session.query(Privilege).filter(Privilege.rights == R_EXPE
 # Показывать форму пока не залогинишься
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
-    form = LoginForm(request.form, User)
+    form = LoginForm(request.form, User())
     if form.is_submitted():
         incoming = User()
         form.populate_obj(incoming)
-        validation = validate(incoming)
-
-        # Вход
-        if validation:
-            # Проверка прав доступа к ресурсу
-            if validation > 0:
-                next_url = session.pop('next_url', '/')
-            else:
-                next_url = '/'
-            return redirect(next_url)
+        authenticate(incoming)
+        if authorize():
+            next_url = session.pop('next_url', '/')
+        else:
+            next_url = '/'
+        return redirect(next_url)
+    flash_form_errors(form)
     return render_template('login.html', form=form)
 
 
-def validate(incoming):
-    # incoming = User()
-    # form.populate_obj(incoming)
+def authenticate(incoming):
     user = db.session.query(User).filter(User.login == incoming.login).first()
     if user and user.password == incoming.password:
-        privilege = db.session.query(Privilege).get(session.get('privilege'))
         session['user'] = user.id
+        session['user_login'] = user.login
+        return True
+    return redirect(url_for('login'))
+
+
+def authorize():
+    if session.get('user') and session.get('privilege'):
+        privilege = db.session.query(Privilege).get(session.get('privilege'))
+        user = db.session.query(User).get(session['user'])
         if user.privilege.rights >= privilege.rights:
-            return 1
-        else:
-            return -1
-    return 0
+            return True
+        abort(502)
+    return False
 
 
 @app.route('/logout/')
 def logout():
     session.pop('user', None)
+    session.pop('user_login', None)
     return redirect('/')
 
 
-# Проверить наличие в сессии
-# Если нету- послать в логин форм
-# Если есть- проверить права доступа
 def requires_user(f, privilege=privilege_expert):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if session.get('user'):
-            user = db.session.query(User).get(session['user'])
-            if user.privilege.rights >= privilege.rights:
-                return f(*args, **kwargs)
-            else:
-                abort(502)
-        else:
-            session['privilege'] = privilege.id
-            session['next_url'] = request.url
+        if authorize():
+            return f(*args, **kwargs)
+        session['privilege'] = privilege.id
+        session['next_url'] = request.url
         return redirect(url_for('login'))
 
     return decorated

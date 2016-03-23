@@ -42,9 +42,19 @@
                 {% endif %}
             </div>
             <ul class="nav navbar-nav navbar-right">
+                {% if session.user %}
 
-                <li><a class="btn" href="{{ url_for('olympiad') }}">Олимпиады</a></li>
-	            <li><a class="btn" href="{{ url_for('logout') }}">Выйти</a></li>
+                    <li>
+                        <p class="navbar-text">Вы вошли как: <mark>{{ session.user_login }}</mark></p>
+                    </li>
+                    <li>
+                        <a class="btn" href="{{ url_for('logout') }}">Выйти</a>
+                    </li>
+                {% else %}
+                    <li><a class="btn" href="{{ url_for('login') }}">Войти</a></li>
+                {% endif %}
+                <li><a class="btn" href="{{ url_for('olympiad') }}">Редактор шбалона</a></li>
+
             </ul>
         </div>
     </nav>

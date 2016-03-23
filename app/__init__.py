@@ -9,8 +9,13 @@ app.config.from_object('config.DevelopConfig')
 
 # Error handlers
 @app.errorhandler(404)
-def not_found(error):
+def error_not_found(error):
     return render_template('404.html'), 404
+
+
+@app.errorhandler(502)
+def error_low_rights(error):
+    return render_template('502.html'), 502
 
 # DataBase
 from flask.ext.sqlalchemy import SQLAlchemy

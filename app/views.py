@@ -19,19 +19,19 @@ class BaseView:
     def init_end_points(self):
         app.add_url_rule('/%s/' % self.endpoint,
                          endpoint='%s' % self.endpoint,
-                         view_func=self.all,
+                         view_func=require_admin(self.all),
                          methods=['GET'])
         app.add_url_rule('/%s/add/' % self.endpoint,
                          endpoint='%s_add' % self.endpoint,
-                         view_func=self.add,
+                         view_func=require_admin(self.add),
                          methods=['POST'])
         app.add_url_rule('/%s/edit/<int:id>' % self.endpoint,
                          endpoint='%s_edit' % self.endpoint,
-                         view_func=self.edit,
+                         view_func=require_admin(self.edit),
                          methods=['POST'])
         app.add_url_rule('/%s/delete/<int:id>' % self.endpoint,
                          endpoint='%s_delete' % self.endpoint,
-                         view_func=self.delete,
+                         view_func=require_admin(self.delete),
                          methods=['POST'])
 
     def redirect(self, **kwargs):
@@ -94,15 +94,15 @@ class ChildView(BaseView):
                          methods=['GET'])
         app.add_url_rule('/%s-of-<int:parent_id>/add/' % self.endpoint,
                          endpoint='%s_add' % self.endpoint,
-                         view_func=requires_user(self.add),
+                         view_func=require_admin(self.add),
                          methods=['POST'])
         app.add_url_rule('/%s-of-<int:parent_id>/edit/<int:id>' % self.endpoint,
                          endpoint='%s_edit' % self.endpoint,
-                         view_func=requires_user(self.edit),
+                         view_func=require_admin(self.edit),
                          methods=['POST'])
         app.add_url_rule('/%s-of-<int:parent_id>/delete/<int:id>' % self.endpoint,
                          endpoint='%s_delete' % self.endpoint,
-                         view_func=requires_user(self.delete),
+                         view_func=require_admin(self.delete),
                          methods=['POST'])
 
     def populate(self, form, instance, parent_id, add=False):
@@ -222,10 +222,11 @@ aspect_view = ChildView(_class=Aspect,
 
 @app.route('/')
 def index():
-    return redirect('olympiad')
+    return render_template('index.html')
 
 
 @app.route('/view_olympiads/')
+@requires_user
 def view_olympiads():
     # hierarchy = dict()
     # query = db.session.query(Olympiad).all()

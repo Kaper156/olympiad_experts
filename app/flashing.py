@@ -2,12 +2,15 @@ from app import flash
 
 
 def flash_form_errors(form):
-    result = '<span>Ошибки при заполнении формы:</span><ul>'
+    field_errors = []
     for field, errors in form.errors.items():
         for error in errors:
-            result += "\n<li>Ошибка в поле %s - %s</li>" % (getattr(form, field).label.text, error)
-    result += '\n</ul>'
-    flash(result, 'danger')
+            field_errors += "\n<li>Ошибка в поле %s - %s</li>" % (getattr(form, field).label.text, error)
+    if len(field_errors):
+        result = '<span>Ошибки при заполнении формы:</span><ul>'
+        result += ''.join(field_errors)
+        result += '\n</ul>'
+        flash(result, 'danger')
 
 
 def flash_add(instance):

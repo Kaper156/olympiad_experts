@@ -45,11 +45,10 @@ class User(db.Model):
     __tablename__ = 'User'
     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     login = Column(db.String, label='Логин', nullable=False)
-    password = Column(db.String, label='Пароль', nullable=False)
+    password = Column(db.String, label='Пароль', nullable=False, info={'trim': False})
 
     privilege_id = db.Column(db.Integer, db.ForeignKey('Privilege.id'))
     privilege = db.relationship('Privilege', backref=db.backref('User', lazy='dynamic'))
-
 
 
 def load_users():
