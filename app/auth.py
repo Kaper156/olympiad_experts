@@ -2,7 +2,7 @@ from functools import wraps
 from app import request, db, abort, render_template, app, redirect, session, request, url_for
 from app.models import User, Privilege, R_ADMIN, R_EXPERT
 from app.forms import LoginForm
-from app.flashing import flash_form_errors
+from app.flashing import flash_form_errors, flash_error
 
 privilege_admin = db.session.query(Privilege).filter(Privilege.rights == R_ADMIN).first()
 privilege_expert = db.session.query(Privilege).filter(Privilege.rights == R_EXPERT).first()
@@ -15,13 +15,11 @@ def login():
     if form.is_submitted():
         incoming = User()
         form.populate_obj(incoming)
-        authenticate(incoming)
-        if authorize():
-            next_url = session.pop('next_url', '/')
-        else:
+        if authenticate(incoming):
             next_url = '/'
-        return redirect(next_url)
-    flash_form_errors(form)
+            if authorize():
+                next_url = session.pop('next_url', '/')
+            return redirect(next_url)
     return render_template('login.html', form=form)
 
 
@@ -31,7 +29,9 @@ def authenticate(incoming):
         session['user'] = user.id
         session['user_login'] = user.login
         return True
-    return redirect(url_for('login'))
+    else:
+        flash_error('Неверный Логин\\Пароль!')
+    return False
 
 
 def authorize():
