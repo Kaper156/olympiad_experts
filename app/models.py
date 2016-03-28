@@ -1,5 +1,4 @@
 from app import db
-# from sqlalchemy import Integer, String, Text, Float, Date, Boolean
 from sqlalchemy_defaults import make_lazy_configured, Column
 
 make_lazy_configured(db.mapper)
@@ -76,7 +75,6 @@ def reload_users():
     from os import urandom
     query = db.session.query(User).all()
     for user in query:
-        # user = User()
         if user.privilege.rights < R_ADMIN:
             user.password = urandom(9)
     db.session.commit()
@@ -98,6 +96,17 @@ class OlympiadBase(db.Model):
     max_balls = Column(db.Float, label='Максимум баллов', nullable=False)
 
 
+# # Статус олимпиады
+# class Status(db.Model):
+#     __tablename__ = 'Status'
+#     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+#
+#     # 1-start, 5-end, etc
+#     order_number = Column(db.SmallInteger, nullable=False)
+#     name = Column(db.String, label='Название', nullable=False)
+#     description = Column(db.Text, label='Описание')
+
+
 # Мероприятие
 class Olympiad(db.Model):
     __tablename__ = 'Olympiad'
@@ -105,7 +114,9 @@ class Olympiad(db.Model):
     name = Column(db.String, label='Название', nullable=False)
     date = Column(db.Date, label='Дата', nullable=False)
     description = Column(db.String, label='Описание')
-    # Status?
+    # status = Column(db.SmallInteger, label='Статус', nullable=False, default=0)
+    status_id = Column(db.Integer, db.ForeignKey('Status.id'))
+    # status = db.relationship('Status', backref=db.backref('Olympiad', lazy='dynamic'))
 
     def __str__(self):
         return '<Олимпиада: "%s" от [%s]>' % (self.name, self.date)
@@ -242,10 +253,6 @@ class MemberAssessment(db.Model):
     aspect = db.relationship('Aspect', backref=db.backref('MemberAssessment', lazy='dynamic'))
 
     def calc(self):
-        """
-        Расчитывает балл участника за конкретный критерий
-        :return:
-        """
         result = []
         expert_assessments = db.session.query(ExpertAssessment).filter(ExpertAssessment.member_assessment_id == self.id)
         for assessment in expert_assessments:
