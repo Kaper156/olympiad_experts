@@ -96,17 +96,6 @@ class OlympiadBase(db.Model):
     max_balls = Column(db.Float, label='Максимум баллов', nullable=False)
 
 
-# # Статус олимпиады
-# class Status(db.Model):
-#     __tablename__ = 'Status'
-#     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-#
-#     # 1-start, 5-end, etc
-#     order_number = Column(db.SmallInteger, nullable=False)
-#     name = Column(db.String, label='Название', nullable=False)
-#     description = Column(db.Text, label='Описание')
-
-
 # Мероприятие
 class Olympiad(db.Model):
     __tablename__ = 'Olympiad'
@@ -114,9 +103,7 @@ class Olympiad(db.Model):
     name = Column(db.String, label='Название', nullable=False)
     date = Column(db.Date, label='Дата', nullable=False)
     description = Column(db.String, label='Описание')
-    # status = Column(db.SmallInteger, label='Статус', nullable=False, default=0)
-    status_id = Column(db.Integer, db.ForeignKey('Status.id'))
-    # status = db.relationship('Status', backref=db.backref('Olympiad', lazy='dynamic'))
+    status = Column(db.SmallInteger, label='Статус', nullable=False, default=0)
 
     def __str__(self):
         return '<Олимпиада: "%s" от [%s]>' % (self.name, self.date)
