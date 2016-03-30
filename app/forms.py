@@ -1,4 +1,4 @@
-from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User
+from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User, ExpertAssessment
 from flask.ext.wtf import Form
 from wtforms import SelectField, FormField, PasswordField
 from wtforms_alchemy import model_form_factory, ModelFieldList
@@ -45,3 +45,8 @@ class LoginForm(ModelForm, Form):
     class Meta:
         model = User
     password = PasswordField(label='Пароль')
+
+
+class ExpertAssessmentForm:
+    class Meta:
+        model = ExpertAssessment

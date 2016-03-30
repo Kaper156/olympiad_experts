@@ -225,6 +225,14 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/assessment_olympiad-<int:id>')
+def assessment_olympiad(id):
+    # Должен вернуть:
+    # Иерархию, с критериями
+    # для ввода- эксперт ассессмент.
+    return 502
+
+
 @app.route('/view_olympiads/')
 @requires_user
 def view_olympiads():
@@ -242,7 +250,7 @@ def recursive_hierarchy(classes, parent_id):
         cls = classes.pop(0)
         query = db.session.query(cls).filter(cls.parent_id == parent_id).all()
         for instance in query or []:
-            result[instance] = dict(recursive_hierarchy(classes, instance.id))
+            result[instance] = dict(recursive_hierarchy(classes, instance))
         return result
     except IndexError:
         return result
