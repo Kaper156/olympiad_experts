@@ -50,3 +50,4 @@ class LoginForm(ModelForm, Form):
 class ExpertAssessmentForm:
     class Meta:
         model = ExpertAssessment
+        include = ['member_assessment_id']
