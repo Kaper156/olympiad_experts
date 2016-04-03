@@ -5,41 +5,36 @@
 {% set title = title or 'Олимпиады' %}
 
 {% block content %}
-	<h2 class="title text-center">{{ title }}</h2>
+    <h2 class="title text-center">{{ title }}</h2>
     <div class="panel panel-default">
         <div class="panel-heading">
-	        {# Page title #}
+            {# Page title #}
 
-	        <h4 class="">Управление</h4>
+            <h4 class="">Управление</h4>
             <div class="btn-group">
 
-	            <a class="btn btn-default" href="{{ url_for('olympiad') }}">
-		            <span class="glyphicon glyphicon-refresh"></span> Обновить
-	            </a>
-
-	            <button type="button" class="btn btn-default"
-	                    data-toggle="modal" data-target="#editor-new">
-		            <span class="glyphicon glyphicon-plus"></span> Добавить
-	            </button>
-
-                <a class="btn btn-default" href="/">
-                    <span class="glyphicon glyphicon-bed"></span> Выставить результаты
+                <a class="btn btn-default" href="{{ url_for('olympiad') }}">
+                    <span class="glyphicon glyphicon-refresh"></span> Обновить
                 </a>
+
+                <button type="button" class="btn btn-default"
+                        data-toggle="modal" data-target="#editor-new">
+                    <span class="glyphicon glyphicon-plus"></span> Добавить
+                </button>
 
             </div>
 
         </div>
 
 
-
         <div class="panel-body">
-			{{ adder_olympiad(form=form) }}
-			<div class='flash-list'>
-				{{ show_flashed() }}
-	        </div>
-        {% if objects %}
-            <table class="table table-striped" id="objects-table">
-                <thead>
+            {{ adder_olympiad(form=form) }}
+            <div class='flash-list'>
+                {{ show_flashed() }}
+            </div>
+            {% if objects %}
+                <table class="table table-striped" id="objects-table">
+                    <thead>
                     <tr>
                         <th>#</th>
                         <th>Название</th>
@@ -47,16 +42,16 @@
                         <th>Описание</th>
                         <th>Действия</th>
                     </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
 
-                {% for olympiad, form in objects %}
-                    <tr class="info" id="info-{{ olympiad.id }}">
-                        <td>{{ olympiad.id }}</td>
-                        <td>{{ olympiad.name }}</td>
-                        <td>{{ olympiad.date }}</td>
-                        <td>{{ olympiad.description }}</td>
-                        <td>
+                    {% for olympiad, form in objects %}
+                        <tr class="info" id="info-{{ olympiad.id }}">
+                            <td>{{ olympiad.id }}</td>
+                            <td>{{ olympiad.name }}</td>
+                            <td>{{ olympiad.date }}</td>
+                            <td>{{ olympiad.description }}</td>
+                            <td>
                             <span class="btn-group">
 
                                 <button type="button" class="btn btn-primary"
@@ -74,18 +69,23 @@
                                     <span class="glyphicon glyphicon-remove-circle"></span>
                                 </button>
 
-                            </span>
-                        </td>
-                    </tr>
-                    {{ delete_olympiad(id=olympiad.id) }}
-	                {{ editor_olympiad(form=form, end_point='olympiad_edit', id=olympiad.id, args={'id': olympiad.id}) }}
-                {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-	        <p>Объектов ещё нет!</p>
-        {% endif %}
+                                <a class="btn btn-primary"
+                                   href="{{ url_for('expert_assessment', id=olympiad.id) }}">
+                                    <span class="glyphicon glyphicon-bookmark"></span>
+                                </a>
 
-    </div>
+                            </span>
+                            </td>
+                        </tr>
+                        {{ delete_olympiad(id=olympiad.id) }}
+                        {{ editor_olympiad(form=form, end_point='olympiad_edit', id=olympiad.id, args={'id': olympiad.id}) }}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Объектов ещё нет!</p>
+            {% endif %}
+
+        </div>
 
 {% endblock %}

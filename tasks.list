@@ -1,4 +1,5 @@
 !Init base functions
+in editor add width for 4 olympiad-button
 
 -Additional: breadcrumbs to normal (classes and other)
 -Additional: Flask-Migrate

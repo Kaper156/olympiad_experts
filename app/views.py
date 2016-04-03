@@ -222,7 +222,7 @@ def index():
 @app.route('/expert_assessment-<int:id>', methods=['GET', 'POST'])
 def expert_assessment(id):
     if request.method == 'POST':
-        print('POST')
+
         pass
     olympiad = db.session.query(Olympiad).get(id)
     return render_template('expert_assessment.html', olympiad=olympiad)
