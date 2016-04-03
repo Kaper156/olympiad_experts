@@ -230,6 +230,11 @@ def assessment_olympiad(id):
     # Должен вернуть:
     # Иерархию, с критериями
     # для ввода- эксперт ассессмент.
+    q_child = lambda cls, p_id: db.session.query(cls).filter(cls.parent_id == p_id)
+    olympiad = db.session.query(Olympiad).get(id)
+
+    for criterion in q_child(Criterion, id):
+        pass
     return 502
 
 
