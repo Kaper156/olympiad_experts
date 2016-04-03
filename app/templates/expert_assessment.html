@@ -1,25 +1,28 @@
 {% extends 'base.html' %}
 {% block content %}
-    <table>
-        <thead>
-        <th>Элемент</th>
-        {% for member in members %}
-            <th>{{ member.name }}</th>
-        {% endfor %}
-
-        </thead>
-        <tbody>
-        {% for object in hierarchy %}
-            <tr>
-                <td>{{ object.name }}</td>
-                {% if  object.__class__ == 'Aspect' %}
+    {% for criterion in olympiad.children %}
+        {{ criterion.name }}
+    {% endfor %}
+{#    <table>#}
+{#        <thead>#}
+{#        <th>Элемент</th>#}
+{#        {% for member in members %}#}
+{#            <th>{{ member.name }}</th>#}
+{#        {% endfor %}#}
+{##}
+{#        </thead>#}
+{#        <tbody>#}
+{#        {% for object in hierarchy %}#}
+{#            <tr>#}
+{#                <td>{{ object.name }}</td>#}
+{#                {% if  object.__class__ == 'Aspect' %}#}
                 {# todo #}
                 {# add here logic of assessment #}
-                {% endif %}
-            </tr>
-        {% endfor %}
-
-        <tr></tr>
-        </tbody>
-    </table>
+{#                {% endif %}#}
+{#            </tr>#}
+{#        {% endfor %}#}
+{##}
+{#        <tr></tr>#}
+{#        </tbody>#}
+{#    </table>#}
 {% endblock %}

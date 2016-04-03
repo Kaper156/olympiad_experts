@@ -3,7 +3,7 @@ from app import render_template, db, app, request, redirect, url_for, OBJECT_PER
 from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User, Privilege
 from app.forms import OlympiadForm, CriterionForm, SubCriterionForm, AspectForm, CalculationForm, LoginForm
 from app.flashing import flash_form_errors, flash_add, flash_edit, flash_delete, flash_max_ball, \
-                         flash_message, flash_error
+    flash_message, flash_error
 from app.auth import requires_user, require_admin
 
 
@@ -81,10 +81,11 @@ class ChildView(BaseView):
     def __init__(self, _class, _form, template_name, end_point, parent_cls, query_maximum=lambda x: 100):
         BaseView.__init__(self, _class, _form, template_name, end_point=end_point)
         self.parent_cls = parent_cls
+
         self.query = dict()
-        self.query['all'] = lambda parent_id: db.session.query(self.cls).filter(self.cls.parent_id == parent_id)
-        self.query['edit'] = lambda id, parent_id: db.session.query(self.cls).filter(
-            self.cls.parent_id == parent_id).filter(self.cls.id != id)
+        self.query['all'] = lambda parent_id: db.session.query(self.parent_cls).get(parent_id).children
+        self.query['edit'] = lambda id, parent_id: db.session.query(self.parent_cls).get(parent_id) \
+            .children.filter(self.cls.id != id)
         self.query['maximum_balls'] = query_maximum
 
     def init_end_points(self):
@@ -156,12 +157,6 @@ class ChildView(BaseView):
             received_balls = form.max_balls.data
             value = self.check_balls(None, parent_id, received_balls, self.query['maximum_balls'](parent_id))
             if value == received_balls:
-                # form.populate_obj(instance)
-                # db.session.add(instance)
-                # instance.parent_id = parent_id
-                # db.session.commit()
-                # print(instance.id)
-                # flash_add(instance)
                 self.populate(form, instance, parent_id, True)
             else:
                 flash_max_ball(received_balls, value)
@@ -187,8 +182,7 @@ class ChildView(BaseView):
 
     def delete(self, id, parent_id):
         instance = db.session.query(self.cls).get(id)
-        # parent_id = instance.parent_id
-        db.session.query(self.cls).filter(self.cls.id == id).delete()
+        db.session.query(self.cls).get(id).delete()
         flash_delete(instance)
         db.session.commit()
         return self.redirect(parent_id=parent_id)
@@ -225,46 +219,16 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/assessment_olympiad-<int:id>')
-def assessment_olympiad(id):
-    # Должен вернуть:
-    # Иерархию, с критериями
-    # для ввода- эксперт ассессмент.
-    q_child = lambda cls, p_id: db.session.query(cls).filter(cls.parent_id == p_id)
-    olympiad = db.session.query(Olympiad).get(id)
-
-    for criterion in q_child(Criterion, id):
+@app.route('/expert_assessment-<int:id>', methods=['GET', 'POST'])
+def expert_assessment(id):
+    if request.method == 'POST':
+        print('POST')
         pass
-    return 502
+    olympiad = db.session.query(Olympiad).get(id)
+    return render_template('expert_assessment.html', olympiad=olympiad)
 
 
 @app.route('/view_olympiads/')
 @requires_user
 def view_olympiads():
-    # hierarchy = dict()
-    # query = db.session.query(Olympiad).all()
-    # classes = [Criterion, SubCriterion, Aspect]
-    # for olympiad in query:
-    #     hierarchy[olympiad] = recursive_hierarchy(classes, olympiad.id)
-    return render_template('view_olympiad.html', hierarchy=hierarchy)
-
-
-def recursive_hierarchy(classes, parent_id):
-    result = dict()
-    try:
-        cls = classes.pop(0)
-        query = db.session.query(cls).filter(cls.parent_id == parent_id).all()
-        for instance in query or []:
-            result[instance] = dict(recursive_hierarchy(classes, instance))
-        return result
-    except IndexError:
-        return result
-    except TypeError:
-        return result
-
-# todo  create cache
-hierarchy = dict()
-query = db.session.query(Olympiad).all()
-classes = [Criterion, SubCriterion, Aspect]
-for olympiad in query:
-    hierarchy[olympiad] = recursive_hierarchy(classes, olympiad.id)
+    return render_template('view_olympiad.html')
