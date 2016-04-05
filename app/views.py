@@ -229,5 +229,6 @@ def expert_assessment(id):
 @app.route('/view_olympiads')
 @requires_user
 def view_olympiads():
+
     return render_template('view_olympiad.html')
 

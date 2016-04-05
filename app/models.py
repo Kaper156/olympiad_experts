@@ -51,6 +51,19 @@ class User(db.Model):
     privilege = db.relationship('Privilege', backref=db.backref('User', lazy='dynamic'))
 
 
+class Role(db.Model):
+    __tablename__ = 'Role'
+    id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.id'))
+    user = db.relationship('User', backref=db.backref('Role', lazy='dynamic'))
+
+    privilege_id = db.Column(db.Integer, db.ForeignKey('Privilege.id'))
+    privilege = db.relationship('Privilege', backref=db.backref('Role', lazy='dynamic'))
+
+    olympiad_id = db.Column(db.Integer, db.ForeignKey('Olympiad.id'))
+
+
 def load_users():
     if db.session.query(User).count() == 0:
         query = db.session.query(Privilege)
@@ -119,9 +132,9 @@ class Olympiad(db.Model):
 
     # TODO
     # один (в будущем- роль)
-    chief_expert = db.relationship('User')
+    chief_expert = db.relationship('Role')
     # обычно 5
-    experts = db.relationship('User')
+    experts = db.relationship('Role')
     members = db.relationship('Member')
     status = Column(db.Integer, label='Статус', nullable=False)
 
