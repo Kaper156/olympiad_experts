@@ -1,4 +1,5 @@
 from app import db
+# from flask_sqlalchemy import
 from sqlalchemy_defaults import make_lazy_configured, Column
 
 make_lazy_configured(db.mapper)
@@ -96,14 +97,16 @@ class OlympiadBase(db.Model):
     max_balls = Column(db.Float, label='Максимум баллов', nullable=False)
     
     def get_olympiad(self):
+        # Иерархичный список элементов олимпиады
         clsasses = [Olympiad, Criterion, SubCriterion, Aspect]
+
+        # Ограничение списка до текущего
         clsasses = clsasses[:clsasses.index(self.__class__)]
         obj = self
         while clsasses:
             next_cls = clsasses.pop()
             obj = db.session.query(next_cls).get(obj.parent_id)
         return obj
-
 
 
 # Мероприятие
@@ -114,10 +117,34 @@ class Olympiad(db.Model):
     date = Column(db.Date, label='Дата', nullable=False)
     description = Column(db.String, label='Описание')
 
+    # TODO
+    # один (в будущем- роль)
+    chief_expert = db.relationship('User')
+    # обычно 5
+    experts = db.relationship('User')
+    members = db.relationship('Member')
+    status = Column(db.Integer, label='Статус', nullable=False)
+
     children = db.relationship('Criterion')
 
     def __str__(self):
         return '<Олимпиада: "%s" от [%s]>' % (self.name, self.date)
+
+    @db.reconstructor
+    def open(self):
+        # Todo можно изменять шаблон
+        print('Создано %s ' % self.__str__())
+        self.status = 0
+
+    def start(self):
+        # todo можно выставлять оценки
+        print('Начата %s ' % self.__str__())
+        self.status = 1
+
+    def close(self):
+        # todo подсчет результатов доступен
+        print('Завершена %s ' % self.__str__())
+        self.status = 3
 
 
 # Часть олимпиады: Настройка сетевого оборудования, etc
@@ -214,14 +241,10 @@ class Aspect(OlympiadBase):
 class Member(db.Model):
     __tablename__ = 'Member'
     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(db.Text, nullable=False, default="Участник")
+    order_number = Column(db.Integer, nullable=False)
+    name = Column(db.Text, nullable=False, default="Инкогнито")
 
     olympiad_id = db.Column(db.Integer, db.ForeignKey('Olympiad.id'))
-    olympiad = db.relationship('Olympiad', backref=db.backref('Member', lazy='dynamic'))
-
-    def __init__(self, olympiad_id):
-        self.olympiad_id = olympiad_id
-        self.name = "Участник #%d" % self.id
 
     def get_results(self):
         result = []
