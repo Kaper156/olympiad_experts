@@ -45,7 +45,7 @@ class User(db.Model):
     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     login = Column(db.String, label='Логин', nullable=False)
     password = Column(db.String, label='Пароль', nullable=False, info={'trim': False})
-
+    
     privilege_id = db.Column(db.Integer, db.ForeignKey('Privilege.id'))
     privilege = db.relationship('Privilege', backref=db.backref('User', lazy='dynamic'))
 
@@ -94,6 +94,16 @@ class OlympiadBase(db.Model):
     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(db.String, label='Название', nullable=False)
     max_balls = Column(db.Float, label='Максимум баллов', nullable=False)
+    
+    def get_olympiad(self):
+        clsasses = [Olympiad, Criterion, SubCriterion, Aspect]
+        clsasses = clsasses[:clsasses.index(self.__class__)]
+        obj = self
+        while clsasses:
+            next_cls = clsasses.pop()
+            obj = db.session.query(next_cls).get(obj.parent_id)
+        return obj
+
 
 
 # Мероприятие
@@ -103,8 +113,8 @@ class Olympiad(db.Model):
     name = Column(db.String, label='Название', nullable=False)
     date = Column(db.Date, label='Дата', nullable=False)
     description = Column(db.String, label='Описание')
-    status = Column(db.SmallInteger, label='Статус', nullable=False, default=0)
-    children = db.relationship("Criterion")
+
+    children = db.relationship('Criterion')
 
     def __str__(self):
         return '<Олимпиада: "%s" от [%s]>' % (self.name, self.date)
@@ -124,7 +134,7 @@ class Criterion(OlympiadBase):
 class SubCriterion(OlympiadBase):
     __tablename__ = 'SubCriterion'
     parent_id = Column(db.Integer, db.ForeignKey('Criterion.id'))
-    children = db.relationship("Aspect")
+    children = db.relationship('Aspect')
 
     def __str__(self):
         return '<Подмодуль: "%s" (%s)>' % (self.name, self.max_balls)
@@ -140,6 +150,8 @@ class Calculation(db.Model):
     content = Column(db.Text, nullable=False)
     is_subjective = Column(db.Boolean, nullable=False, default=True)
 
+    # Получает категорию и идентификатор метода
+    # Сохраняет в объект текст лямбда-функции
     def __init__(self, is_subjective, content, name, description=None):
         self.content = content
         self.name = name
@@ -183,7 +195,7 @@ def load_calculations():
 class Aspect(OlympiadBase):
     __tablename__ = 'Aspect'
     description = Column(db.Text, label='Описание')
-
+    
     parent_id = db.Column(db.Integer, db.ForeignKey('SubCriterion.id'))
 
     calculation_id = Column(db.Integer,
