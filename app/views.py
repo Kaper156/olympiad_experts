@@ -1,6 +1,6 @@
 from app import render_template, db, app, request, redirect, url_for, OBJECT_PER_PAGE
 # from app import breadcrumbs
-from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User, Privilege
+from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User, Privilege, Member
 from app.forms import OlympiadForm, CriterionForm, SubCriterionForm, AspectForm, CalculationForm, LoginForm
 from app.flashing import flash_form_errors, flash_add, flash_edit, flash_delete, flash_max_ball, \
     flash_message, flash_error
@@ -215,13 +215,15 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/expert_assessment-<int:id>', methods=['GET', 'POST'])
+@app.route('/expert_assessment-<int:id>', methods=['GET', 'POST'], defaults={'id': 1})
 def expert_assessment(id):
     if request.method == 'POST':
-
         pass
+        # Занесение оценок
+    # Выдача форм для внесения оценок
     olympiad = db.session.query(Olympiad).get(id)
-    return render_template('expert_assessment.html', olympiad=olympiad)
+    members = db.session.query(Member).filter(Member.olympiad_id == id)
+    return render_template('expert_assessment.html', olympiad=olympiad, members=members)
 
 
 @app.route('/view_olympiads')
