@@ -14,7 +14,8 @@ objective_methods = [
 ]
 
 # Константы прав, используются для создания пользователей
-R_ADMIN = 2
+R_ADMIN = 3
+R_MAIN_EXPERT = 2
 R_EXPERT = 1
 R_GUEST = 0
 
@@ -31,6 +32,7 @@ def load_privilege():
     if db.session.query(Privilege).count() == 0:
         for name, rights in [('Гость', R_GUEST),
                              ('Эксперт', R_EXPERT),
+                             ('Старший Эксперт', R_MAIN_EXPERT),
                              ('Администратор', R_ADMIN)]:
             privilege = Privilege()
             privilege.name = name
@@ -39,15 +41,29 @@ def load_privilege():
         db.session.commit()
 
 
+# Роль, связывает пользователя и олимпиаду
+class Role(db.Model):
+	__tablename__ = 'Role'
+	id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    
+    privilege_id = db.Column(db.Integer, db.ForeignKey('Privilege.id'))
+    privilege = db.relationship('Privilege', backref=db.backref('Role', lazy='dynamic'))
+    
+    user_id = db.Column(db.Integer, db.ForeignKey('User.id'))
+    user = db.relationship('User', backref=db.backref('Role', lazy='dynamic'))
+    
+    olympiad_id = Column(Integer, ForeignKey('Olympiad.id'))
+
+
 # Пользователь системы
 class User(db.Model):
     __tablename__ = 'User'
     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     login = Column(db.String, label='Логин', nullable=False)
     password = Column(db.String, label='Пароль', nullable=False, info={'trim': False})
+    FIO = Column(db.String, label='ФИО', nullable=True)
 
-    privilege_id = db.Column(db.Integer, db.ForeignKey('Privilege.id'))
-    privilege = db.relationship('Privilege', backref=db.backref('User', lazy='dynamic'))
+    
 
 
 def load_users():
