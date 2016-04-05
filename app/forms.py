@@ -18,19 +18,27 @@ def generate_members_forms(count):
         yield ModelFormField(label='Участник #%s' % str(count+2), form_class=MemberForm)
 
 
-class OlympiadForm(ModelForm, Form):
+class OlympiadAddForm(ModelForm, Form):
+    class Meta:
+        model = Olympiad
+        date_format = '%d.%m.%Y'
+        only = ['name', 'date', 'description', 'member_count']
+
+
+class OlympiadEditForm(ModelForm, Form):
     class Meta:
         model = Olympiad
         date_format = '%d.%m.%Y'
         # хак, для правильного порядка
-        include = ['name', 'date', 'description']
+        only = ['name', 'date', 'description']
 
     members = ModelFieldList(label='Участники', unbound_field=FormField(label='Участник #1', form_class=MemberForm))
 
-    # def __init__(self, *args, **kwargs):
-    #     ModelForm.__init__(self, *args, **kwargs)
-    #     Form.__init__(self, *args, **kwargs)
-    #     self.members.unbound_field.creation_counter=5
+    def __init__(self, *args, **kwargs):
+        ModelForm.__init__(self, *args, **kwargs)
+        Form.__init__(self, *args, **kwargs)
+        # TODO здесь можеть быть ошибка!
+        self.members.entries = generate_members_forms(self.data['member_count'])
 
 
 class CriterionForm(ModelForm, Form):

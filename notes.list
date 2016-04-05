@@ -68,14 +68,14 @@ def index():
 # Olympiads pages
 @app.route('/olympiads/', methods=['POST', 'GET'])
 def olympiads():
-    editor, instances = get_all_instance(_class=Olympiad, _form=OlympiadForm)
+    editor, instances = get_all_instance(_class=Olympiad, _form=OlympiadAddForm)
     return render_template('olympiad.html', breadcrumbs=breadcrumbs[:2], olympiads=instances, form=editor)
 
 
 @app.route('/olympiads/add', methods=['POST'])
 def olympiad_add():
     instance = Olympiad()
-    form = OlympiadForm(request.form)
+    form = OlympiadAddForm(request.form)
     if form.validate_on_submit():
         form.populate_obj(instance)
         db.session.add(instance)
@@ -88,7 +88,7 @@ def olympiad_add():
 
 @app.route('/olympiad-<int:id>/edit', methods=['POST'])
 def olympiad_edit(id):
-    populate_changes(_class=Olympiad, _form=OlympiadForm, _id=id)
+    populate_changes(_class=Olympiad, _form=OlympiadAddForm, _id=id)
     return redirect(url_for('olympiads'))
 
 

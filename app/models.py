@@ -137,17 +137,25 @@ class Olympiad(db.Model):
     chief_expert = db.relationship('Role', uselist=False, back_populates="olympiad_chief_experts")
     # обычно 5
     experts = db.relationship('Role', back_populates="olympiad_experts")
+    member_count = Column(db.Integer, label='Количество участников', default=2)
     members = db.relationship('Member', back_populates="olympiad")
-    status = Column(db.Integer, label='Статус', nullable=False)
+    status = Column(db.Integer, label='Статус', default=0)
 
     children = db.relationship('Criterion')
 
     def __str__(self):
         return '<Олимпиада: "%s" от [%s]>' % (self.name, self.date)
 
-    @db.reconstructor
+    # TODO
+    # Повесить на событие
     def open(self):
-        # Todo можно изменять шаблон
+        # Todo можно изменять шаблон а создаются участники (от количества)
+        for index in self.member_count:
+            member = Member()
+            member.olympiad_id = self.id
+            member.order_number = index
+            db.session.add(member)
+        db.session.commit()
         print('Создано %s ' % self.__str__())
         self.status = 0
 

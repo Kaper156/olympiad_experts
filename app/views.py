@@ -1,7 +1,7 @@
 from app import render_template, db, app, request, redirect, url_for, OBJECT_PER_PAGE
 # from app import breadcrumbs
 from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User, Privilege, Member
-from app.forms import OlympiadForm, CriterionForm, SubCriterionForm, AspectForm, CalculationForm, LoginForm
+from app.forms import OlympiadAddForm, CriterionForm, SubCriterionForm, AspectForm, CalculationForm, LoginForm
 from app.flashing import flash_form_errors, flash_add, flash_edit, flash_delete, flash_max_ball, \
     flash_message, flash_error
 from app.auth import requires_user, require_admin
@@ -185,7 +185,7 @@ class ChildView(BaseView):
 
 
 olympiad_view = BaseView(_class=Olympiad,
-                         _form=OlympiadForm,
+                         _form=OlympiadAddForm,
                          template_name='editors/olympiad.html',
                          end_point='olympiad')
 
@@ -212,7 +212,7 @@ aspect_view = ChildView(_class=Aspect,
 
 @app.route('/')
 def index():
-    # a = OlympiadForm()
+    # a = OlympiadAddForm()
     # for field in a:
     #     if field.type == 'ModelFieldList':
     #         print(field.type)
