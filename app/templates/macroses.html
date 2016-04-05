@@ -41,15 +41,38 @@
 
 {# Print modal window-form #}
 {# by default get ready to add-form #}
+{% macro draw_fields(form) %}
+    {% for field in form if field.widget.input_type != 'hidden' and field.type != 'ModelFieldList' %}
+        <div class="form-group">
+                {{ field.label }}:
+                {{ field(class="form-control", **kwargs) }}
+        </div>
+
+    {% endfor %}
+    {% for fieldlist in form if fieldlist.type == 'ModelFieldList' %}
+        <hr>
+        {{ fieldlist.label }}
+        <table>
+            {% for field in fieldlist %}
+                {{ draw_fields(field) }}
+            {% endfor %}
+        </table>
+        <hr>
+    {% endfor %}
+
+{% endmacro %}
+
 {% macro editor(form, end_point, args={}, id='editor-new', title='Добавление объекта', btn_text='Добавить') -%}
 	{% set body -%}
 		<div class="form-horizontal">
-			{% for field in form if field.widget.input_type != 'hidden' %}
-			<div class="form-group">
-				{{ field.label }}:
-				{{ field(class="form-control", **kwargs) }}
-			</div>
-			{% endfor %}
+{#			{% for field in form if field.widget.input_type != 'hidden' %}#}
+{#                #}
+{#			<div class="form-group">#}
+{#				{{ field.label }}:#}
+{#				{{ field(class="form-control", **kwargs) }}#}
+{#			</div>#}
+{#			{% endfor %}#}
+            {{ draw_fields(form) }}
 		</div>
 	{%- endset %}
 
@@ -76,7 +99,7 @@
 {####### OLYMPIADS #######}
 {##########################}
 {% macro adder_olympiad(form) %}
-    {{ editor(form=form, end_point='olympiad_add', title_for='Добавление олимпиады') }}
+    {{ editor(form=form, end_point='olympiad_add', title='Добавление олимпиады') }}
 {% endmacro %}
 
 {% macro editor_olympiad(form, end_point, id, args) %}

@@ -1,7 +1,7 @@
 from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User, ExpertAssessment, Member
 from flask.ext.wtf import Form
 from wtforms import SelectField, FormField, PasswordField
-from wtforms_alchemy import model_form_factory, ModelFormField
+from wtforms_alchemy import model_form_factory, ModelFormField, ModelFieldList
 from wtforms.validators import DataRequired
 from app import db
 
@@ -13,12 +13,24 @@ class MemberForm(ModelForm, Form):
         model = Member
 
 
+def generate_members_forms(count):
+    for index in range(count):
+        yield ModelFormField(label='Участник #%s' % str(count+2), form_class=MemberForm)
+
+
 class OlympiadForm(ModelForm, Form):
     class Meta:
         model = Olympiad
         date_format = '%d.%m.%Y'
+        # хак, для правильного порядка
+        include = ['name', 'date', 'description']
 
-    members = ModelFormField(label='Участники', form_class=MemberForm)
+    members = ModelFieldList(label='Участники', unbound_field=FormField(label='Участник #1', form_class=MemberForm))
+
+    # def __init__(self, *args, **kwargs):
+    #     ModelForm.__init__(self, *args, **kwargs)
+    #     Form.__init__(self, *args, **kwargs)
+    #     self.members.unbound_field.creation_counter=5
 
 
 class CriterionForm(ModelForm, Form):
@@ -57,6 +69,4 @@ class LoginForm(ModelForm, Form):
 class ExpertAssessmentForm(ModelForm, Form):
     class Meta:
         model = ExpertAssessment
-        include = ['member_assessment_id']
-
 

@@ -256,8 +256,8 @@ class Aspect(OlympiadBase):
 class Member(db.Model):
     __tablename__ = 'Member'
     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    order_number = Column(db.Integer, nullable=False)
-    name = Column(db.Text, nullable=False, default="Инкогнито")
+    order_number = Column(db.Integer, label='Номер', nullable=False)
+    FIO = Column(db.Text, label="ФИО", nullable=False, default="Инкогнито")
 
     olympiad_id = db.Column(db.Integer, db.ForeignKey('Olympiad.id'))
     olympiad = db.relationship("Olympiad", back_populates="members")
