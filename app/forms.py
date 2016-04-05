@@ -1,17 +1,24 @@
-from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User, ExpertAssessment
+from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User, ExpertAssessment, Member
 from flask.ext.wtf import Form
 from wtforms import SelectField, FormField, PasswordField
-from wtforms_alchemy import model_form_factory, ModelFieldList
+from wtforms_alchemy import model_form_factory, ModelFormField
 from wtforms.validators import DataRequired
 from app import db
 
 ModelForm = model_form_factory(Form)
 
 
+class MemberForm(ModelForm, Form):
+    class Meta:
+        model = Member
+
+
 class OlympiadForm(ModelForm, Form):
     class Meta:
         model = Olympiad
         date_format = '%d.%m.%Y'
+
+    members = ModelFormField(label='Участники', form_class=MemberForm)
 
 
 class CriterionForm(ModelForm, Form):
@@ -47,7 +54,9 @@ class LoginForm(ModelForm, Form):
     password = PasswordField(label='Пароль')
 
 
-class ExpertAssessmentForm:
+class ExpertAssessmentForm(ModelForm, Form):
     class Meta:
         model = ExpertAssessment
         include = ['member_assessment_id']
+
+

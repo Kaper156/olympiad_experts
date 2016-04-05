@@ -62,6 +62,8 @@ class Role(db.Model):
     privilege = db.relationship('Privilege', backref=db.backref('Role', lazy='dynamic'))
 
     olympiad_id = db.Column(db.Integer, db.ForeignKey('Olympiad.id'))
+    olympiad_experts = db.relationship("Olympiad", back_populates="experts")
+    olympiad_chief_experts = db.relationship("Olympiad", back_populates="chief_expert")
 
 
 def load_users():
@@ -132,10 +134,10 @@ class Olympiad(db.Model):
 
     # TODO
     # один (в будущем- роль)
-    chief_expert = db.relationship('Role')
+    chief_expert = db.relationship('Role', uselist=False, back_populates="olympiad_chief_experts")
     # обычно 5
-    experts = db.relationship('Role')
-    members = db.relationship('Member')
+    experts = db.relationship('Role', back_populates="olympiad_experts")
+    members = db.relationship('Member', back_populates="olympiad")
     status = Column(db.Integer, label='Статус', nullable=False)
 
     children = db.relationship('Criterion')
@@ -258,6 +260,7 @@ class Member(db.Model):
     name = Column(db.Text, nullable=False, default="Инкогнито")
 
     olympiad_id = db.Column(db.Integer, db.ForeignKey('Olympiad.id'))
+    olympiad = db.relationship("Olympiad", back_populates="members")
 
     def get_results(self):
         result = []
