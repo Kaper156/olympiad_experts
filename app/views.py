@@ -82,17 +82,16 @@ class ChildView(BaseView):
         BaseView.__init__(self, _class, _form, template_name, end_point=end_point)
         self.parent_cls = parent_cls
         self.query = dict()
-        self.query['all'] = lambda parent_id: db.session.query(self.cls).filter(self.cls.parent_id == parent_id)
-        self.query['edit'] = lambda id, parent_id: db.session.query(self.cls).filter(
-            self.cls.parent_id == parent_id).filter(self.cls.id != id)
+        self.query['all'] = lambda parent_id: db.session.query(self.parent_cls).get(parent_id).children
+        self.query['edit'] = lambda id, parent_id: db.session.query(self.parent_cls).get(parent_id).children.filter(self.cls.id != id)
         self.query['maximum_balls'] = query_maximum
 
     def init_end_points(self):
-        app.add_url_rule('/%s-of-<int:parent_id>/' % self.endpoint,
+        app.add_url_rule('/%s-of-<int:parent_id>' % self.endpoint,
                          endpoint='%s' % self.endpoint,
                          view_func=require_admin(self.all),
                          methods=['GET'])
-        app.add_url_rule('/%s-of-<int:parent_id>/add/' % self.endpoint,
+        app.add_url_rule('/%s-of-<int:parent_id>/add' % self.endpoint,
                          endpoint='%s_add' % self.endpoint,
                          view_func=require_admin(self.add),
                          methods=['POST'])
@@ -138,10 +137,6 @@ class ChildView(BaseView):
             received_balls = form.max_balls.data
             value = self.check_balls(instance.id, parent_id, received_balls, self.query['maximum_balls'](parent_id))
             if value == received_balls:
-                # instance.parent_id = parent_id
-                # form.populate_obj(instance)
-                # db.session.commit()
-                # flash_edit(instance)
                 self.populate(form, instance, parent_id)
             else:
                 flash_max_ball(received_balls, value)
@@ -156,12 +151,6 @@ class ChildView(BaseView):
             received_balls = form.max_balls.data
             value = self.check_balls(None, parent_id, received_balls, self.query['maximum_balls'](parent_id))
             if value == received_balls:
-                # form.populate_obj(instance)
-                # db.session.add(instance)
-                # instance.parent_id = parent_id
-                # db.session.commit()
-                # print(instance.id)
-                # flash_add(instance)
                 self.populate(form, instance, parent_id, True)
             else:
                 flash_max_ball(received_balls, value)
@@ -233,7 +222,7 @@ def assessment_olympiad(id):
     return 502
 
 
-@app.route('/view_olympiads/')
+@app.route('/view_olympiads')
 @requires_user
 def view_olympiads():
     # hierarchy = dict()
