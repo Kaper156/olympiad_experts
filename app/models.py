@@ -1,5 +1,5 @@
 from app import db
-# from flask_sqlalchemy import
+from flask_sqlalchemy import event
 from sqlalchemy_defaults import make_lazy_configured, Column
 
 make_lazy_configured(db.mapper)
@@ -146,19 +146,6 @@ class Olympiad(db.Model):
     def __str__(self):
         return '<Олимпиада: "%s" от [%s]>' % (self.name, self.date)
 
-    # TODO
-    # Повесить на событие
-    def open(self):
-        # Todo можно изменять шаблон а создаются участники (от количества)
-        for index in self.member_count:
-            member = Member()
-            member.olympiad_id = self.id
-            member.order_number = index
-            db.session.add(member)
-        db.session.commit()
-        print('Создано %s ' % self.__str__())
-        self.status = 0
-
     def start(self):
         # todo можно выставлять оценки
         print('Начата %s ' % self.__str__())
@@ -167,7 +154,38 @@ class Olympiad(db.Model):
     def close(self):
         # todo подсчет результатов доступен
         print('Завершена %s ' % self.__str__())
-        self.status = 3
+        self.status = 2
+
+
+@event.listens_for(Olympiad, 'after_insert')
+def after_insert_olympiad(mapper, connection, target):
+    # Todo можно изменять шаблон а создаются участники (от количества)
+    for index in range(target.member_count):
+        member = Member()
+        member.olympiad_id = target.id
+        member.order_number = index
+        db.session.add(member)
+        print('Участник #%s добавлен к олимпиаде %s' % (member.order_number, target))
+    print('Создано %s ' % target.__str__())
+    target.status = 0
+
+
+@event.listens_for(Olympiad, 'after_delete')
+def before_delete_olympiad(mapper, connection, target):
+
+    # Также удалить всех участников
+    print('DELETE ALL MEMBERS')
+    c = 0
+    for member in target.members:
+        db.session.delete(member)
+        print(c)
+        c += 1
+
+    c = 0
+    for criterion in target.children:
+        db.session.delete(criterion)
+        print(c)
+        c += 1
 
 
 # Часть олимпиады: Настройка сетевого оборудования, etc

@@ -52,11 +52,9 @@
     {% for fieldlist in form if fieldlist.type == 'ModelFieldList' %}
         <hr>
         {{ fieldlist.label }}
-        <table>
-            {% for field in fieldlist %}
-                {{ draw_fields(field) }}
-            {% endfor %}
-        </table>
+        {% for field in fieldlist %}
+            {{ draw_fields(field) }}
+        {% endfor %}
         <hr>
     {% endfor %}
 
@@ -65,13 +63,6 @@
 {% macro editor(form, end_point, args={}, id='editor-new', title='Добавление объекта', btn_text='Добавить') -%}
 	{% set body -%}
 		<div class="form-horizontal">
-{#			{% for field in form if field.widget.input_type != 'hidden' %}#}
-{#                #}
-{#			<div class="form-group">#}
-{#				{{ field.label }}:#}
-{#				{{ field(class="form-control", **kwargs) }}#}
-{#			</div>#}
-{#			{% endfor %}#}
             {{ draw_fields(form) }}
 		</div>
 	{%- endset %}

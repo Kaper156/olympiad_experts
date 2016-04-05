@@ -10,12 +10,8 @@ ModelForm = model_form_factory(Form)
 
 class MemberForm(ModelForm, Form):
     class Meta:
+        # Добавить тайтл
         model = Member
-
-
-def generate_members_forms(count):
-    for index in range(count):
-        yield ModelFormField(label='Участник #%s' % str(count+2), form_class=MemberForm)
 
 
 class OlympiadAddForm(ModelForm, Form):
@@ -32,13 +28,13 @@ class OlympiadEditForm(ModelForm, Form):
         # хак, для правильного порядка
         only = ['name', 'date', 'description']
 
-    members = ModelFieldList(label='Участники', unbound_field=FormField(label='Участник #1', form_class=MemberForm))
+    members = ModelFieldList(label='Участники', unbound_field=FormField(MemberForm))
 
     def __init__(self, *args, **kwargs):
         ModelForm.__init__(self, *args, **kwargs)
         Form.__init__(self, *args, **kwargs)
         # TODO здесь можеть быть ошибка!
-        self.members.entries = generate_members_forms(self.data['member_count'])
+        # self.members.entries = list(generate_members_forms(5))
 
 
 class CriterionForm(ModelForm, Form):

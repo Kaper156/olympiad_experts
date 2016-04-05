@@ -1,16 +1,17 @@
 from app import render_template, db, app, request, redirect, url_for, OBJECT_PER_PAGE
 # from app import breadcrumbs
 from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User, Privilege, Member
-from app.forms import OlympiadAddForm, CriterionForm, SubCriterionForm, AspectForm, CalculationForm, LoginForm
+from app.forms import OlympiadAddForm, OlympiadEditForm, CriterionForm, SubCriterionForm, AspectForm, CalculationForm, LoginForm
 from app.flashing import flash_form_errors, flash_add, flash_edit, flash_delete, flash_max_ball, \
     flash_message, flash_error
 from app.auth import requires_user, require_admin
 
 
 class BaseView:
-    def __init__(self, _class, _form, template_name, end_point=''):
+    def __init__(self, _class, _form, template_name, end_point='', edit_form=None):
         self.cls = _class
         self.form = _form
+        self.edit_form = edit_form or _form
         self.template = template_name
 
         self.endpoint = end_point
@@ -40,7 +41,7 @@ class BaseView:
     def all(self):
         results = list()
         for instance in db.session.query(self.cls).limit(OBJECT_PER_PAGE):
-            results.append((instance, self.form(obj=instance)))
+            results.append((instance, self.edit_form(obj=instance)))
 
         # form to add new inst
         editor = self.form()
@@ -48,7 +49,7 @@ class BaseView:
 
     def edit(self, id):
         instance = db.session.query(self.cls).get(id)
-        form = self.form(request.form, self.cls)
+        form = self.edit_form(request.form, self.cls)
         if form.validate_on_submit():
             form.populate_obj(instance)
             db.session.commit()
@@ -187,7 +188,8 @@ class ChildView(BaseView):
 olympiad_view = BaseView(_class=Olympiad,
                          _form=OlympiadAddForm,
                          template_name='editors/olympiad.html',
-                         end_point='olympiad')
+                         end_point='olympiad',
+                         edit_form=OlympiadEditForm)
 
 criterion_view = ChildView(_class=Criterion,
                            _form=CriterionForm,
@@ -212,17 +214,10 @@ aspect_view = ChildView(_class=Aspect,
 
 @app.route('/')
 def index():
-    # a = OlympiadAddForm()
-    # for field in a:
-    #     if field.type == 'ModelFieldList':
-    #         print(field.type)
-    #         print(field.__dict__)
-    #         for sub in field:
-    #             print(sub.type)
     return render_template('index.html')
 
 
-@app.route('/expert_assessment-<int:id>', methods=['GET', 'POST'], defaults={'id': 1})
+@app.route('/expert_assessment-<int:id>', methods=['GET', 'POST'])
 def expert_assessment(id):
     if request.method == 'POST':
         pass
