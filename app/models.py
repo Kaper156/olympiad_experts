@@ -96,14 +96,14 @@ class OlympiadBase(db.Model):
     max_balls = Column(db.Float, label='Максимум баллов', nullable=False)
     
     def get_olympiad():
-		clsasses = [Olympiad, Criterion, SubCriterion, Aspect]
-		clsasses = classes[:classes.index(self.__class__)]
-		obj = self
-		while clsasses:
-			next_cls = classes.pop()
-			obj = db.session.query(next_cls).get(obj.parent_id)
-		return obj
-			
+        clsasses = [Olympiad, Criterion, SubCriterion, Aspect]
+        clsasses = classes[:classes.index(self.__class__)]
+        obj = self
+        while clsasses:
+            next_cls = classes.pop()
+            obj = db.session.query(next_cls).get(obj.parent_id)
+        return obj
+
 
 
 # Мероприятие

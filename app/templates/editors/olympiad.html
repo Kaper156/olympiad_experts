@@ -21,11 +21,6 @@
 	                    data-toggle="modal" data-target="#editor-new">
 		            <span class="glyphicon glyphicon-plus"></span> Добавить
 	            </button>
-
-                <a class="btn btn-default" href="/">
-                    <span class="glyphicon glyphicon-bed"></span> Выставить результаты
-                </a>
-
             </div>
 
         </div>
@@ -73,7 +68,11 @@
                                         data-toggle="modal" data-target="#modal-delete-{{ olympiad.id }}">
                                     <span class="glyphicon glyphicon-remove-circle"></span>
                                 </button>
-
+                                
+								<a class="btn btn-default" href="{{ url_for('assessment_olympiad', id=olympiad.id) }}">
+									<span class="glyphicon glyphicon-bed"></span>
+								</a>
+								
                             </span>
                         </td>
                     </tr>
