@@ -272,7 +272,7 @@ def load_calculations():
 # Или субъективным, оценки экспертов могут быть различными
 class Aspect(OlympiadBase):
     __tablename__ = 'Aspect'
-    description = Column(db.Text, label='Описание')
+    description = Column(db.Text, label='Описание', nullable=True)
     
     parent_id = db.Column(db.Integer, db.ForeignKey('SubCriterion.id'))
 
@@ -285,7 +285,7 @@ class Aspect(OlympiadBase):
     calculation = db.relationship('Calculation',
                                   backref=db.backref('Aspect', lazy='dynamic'))
 
-    member_assessments = db.relationship('MemberAssessment', cascade="all, delete-orphan")
+    member_assessments = db.relationship('MemberAssessment', cascade="all, delete-orphan")#, back_populates='aspect_id')
 
     def __str__(self):
         return '<Критерий: "%s" (%s)>' % (self.name, self.max_balls)
@@ -342,6 +342,7 @@ class MemberAssessment(db.Model):
     ball = Column(db.Integer, nullable=False, default=0)
 
     aspect_id = db.Column(db.Integer, db.ForeignKey('Aspect.id'))
+    aspect = db.relationship("Aspect", back_populates="member_assessments")
 
     expert_assessments = db.relationship('ExpertAssessment',
                                          uselist=True,
@@ -350,10 +351,11 @@ class MemberAssessment(db.Model):
 
     def calc(self):
         result = []
-        expert_assessments = db.session.query(ExpertAssessment).filter(ExpertAssessment.member_assessment_id == self.id)
-        for assessment in expert_assessments:
-            result.append(assessment.ball)
-        self.ball = self.aspect.calculation.calc(result)
+        for assessment in self.expert_assessments:
+            result.append(assessment.assessment)
+        print(self.aspect_id)
+        aspect = db.session.query(Aspect).get(self.aspect_id)
+        self.ball = aspect.calculation.calc(result, aspect.max_balls)
         return self.ball
 
 

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="title text-center">{{ olympiad.name }}</h2>
+    <table>
+        <thead>
+            <th>Участник</th>
+            <th>Балл</th>
+        </thead>
+    {% for member, result in results %}
+        <tr>
+            <th>Участник №{{ member.order_number }}</th>
+            <th>{{ result }}</th>
+        </tr>
+    {% endfor %}
+    </table>
+
+{% endblock %}

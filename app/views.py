@@ -247,8 +247,19 @@ def assessment_sub_criterion(id):
 
 @app.route('/olympiad-<int:id>/results')
 def olympiad_results(id):
+    olympiad = db.session.query(Olympiad).get(id)
+    members = db.session.query(Member).filter(Member.olympiad_id == id)
+    results = list()
+    for member in members:
+        assessments = db.session.query(MemberAssessment).filter(MemberAssessment.member_id == member.id).all()
+        total = 0
+        for assessment in assessments:
+            # assessment = MemberAssessment()
+            assessment.calc()
+            total += assessment.ball
+        results.append((member, total))
+    return render_template('results.html', olympiad=olympiad, results=results)
 
-    pass
 
 @app.route('/view_olympiads')
 @requires_user
