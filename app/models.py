@@ -46,9 +46,8 @@ class User(db.Model):
     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     login = Column(db.String, label='Логин', nullable=False)
     password = Column(db.String, label='Пароль', nullable=False, info={'trim': False})
-    
-    privilege_id = db.Column(db.Integer, db.ForeignKey('Privilege.id'))
-    privilege = db.relationship('Privilege', backref=db.backref('User', lazy='dynamic'))
+
+    roles = db.relationship('Role', back_populates='user')
 
 
 class Role(db.Model):
@@ -56,7 +55,7 @@ class Role(db.Model):
     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
 
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'))
-    user = db.relationship('User', backref=db.backref('Role', lazy='dynamic'))
+    user = db.relationship('User', back_populates='roles')
 
     privilege_id = db.Column(db.Integer, db.ForeignKey('Privilege.id'))
     privilege = db.relationship('Privilege', backref=db.backref('Role', lazy='dynamic'))
@@ -113,13 +112,13 @@ class OlympiadBase(db.Model):
     
     def get_olympiad(self):
         # Иерархичный список элементов олимпиады
-        clsasses = [Olympiad, Criterion, SubCriterion, Aspect]
+        classes = [Olympiad, Criterion, SubCriterion, Aspect]
 
         # Ограничение списка до текущего
-        clsasses = clsasses[:clsasses.index(self.__class__)]
+        classes = classes[:classes.index(self.__class__)]
         obj = self
-        while clsasses:
-            next_cls = clsasses.pop()
+        while classes:
+            next_cls = classes.pop()
             obj = db.session.query(next_cls).get(obj.parent_id)
         return obj
 
@@ -167,15 +166,26 @@ class Olympiad(db.Model):
 @event.listens_for(Olympiad, 'after_insert')
 def after_insert_olympiad(mapper, connection, olympiad):
     # Todo можно изменять шаблон а создаются участники (от количества)
+    # Участники олимпиады
     for index in range(olympiad.member_count):
         member = Member()
         member.olympiad_id = olympiad.id
         member.olympiad = olympiad
         member.order_number = index
         db.session.add(member)
-        print('Участник #%s добавлен к олимпиаде %s' % (member.order_number, olympiad))
-    # TODO ADD ROLES HERE
-    print('Создано %s ' % olympiad.__str__())
+    # эскпертная группа
+    for index in range(5):
+        role = Role()
+        role.olympiad_id = olympiad.id
+        role.olympiad_experts = olympiad
+        db.session.add(role)
+
+    # Старший эксперт
+    role = Role()
+    role.olympiad_id = olympiad.id
+    role.olympiad_chief_experts = olympiad
+    db.session.add(role)
+
     olympiad.status = 0
 
 

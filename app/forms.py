@@ -1,4 +1,4 @@
-from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User, ExpertAssessment, Member
+from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User, ExpertAssessment, Member, Role
 from flask.ext.wtf import Form
 from wtforms import SelectField, FormField, PasswordField
 from wtforms_alchemy import model_form_factory, ModelFormField, ModelFieldList
@@ -19,6 +19,11 @@ class ExpertAssessmentForm(ModelForm, Form):
         model = ExpertAssessment
 
 
+class RoleForm(ModelForm, Form):
+    class Meta:
+        model = Role
+
+
 class OlympiadAddForm(ModelForm, Form):
     class Meta:
         model = Olympiad
@@ -33,13 +38,10 @@ class OlympiadEditForm(ModelForm, Form):
         # хак, для правильного порядка
         only = ['name', 'date', 'description']
 
+    # chief_expert = ModelFormField(label='Старший Эксперт', form_class=RoleForm)
+    chief_expert = ModelFieldList(label='Старший Эксперт', unbound_field=FormField(RoleForm))
+    experts = ModelFieldList(label='Эксперты', unbound_field=FormField(RoleForm))
     members = ModelFieldList(label='Участники', unbound_field=FormField(MemberForm))
-
-    def __init__(self, *args, **kwargs):
-        ModelForm.__init__(self, *args, **kwargs)
-        Form.__init__(self, *args, **kwargs)
-        # TODO здесь можеть быть ошибка!
-        # self.members.entries = list(generate_members_forms(5))
 
 
 class CriterionForm(ModelForm, Form):
