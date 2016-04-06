@@ -26,3 +26,9 @@ table.table-striped  td.result-label{min-width: 50px; text-align: right}
 }
 /*bottom margin*/
 #content{margin-bottom: 15px;}
+
+
+.level-1{background-color: red}
+.level-2{background-color: orange}
+.level-3{background-color: yellow}
+.level-4{background-color: white}

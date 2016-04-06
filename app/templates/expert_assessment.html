@@ -1,5 +1,24 @@
 {% extends 'base.html' %}
+
+{% macro draw_tree(tree, level=1) %}
+{% for object in tree.children %}
+	<tr class='level-{{ level }}'>
+		<td>{{ object.name }}</td>
+		{% if  object.__class__ == 'Aspect' %}
+			{# assessment logic #}
+		{# {% elif getattr(object, 'children') %} #}
+		{% elif object.children is defined %}
+			{{ draw_tree(object, level=level+1) }}
+		{% endif %}
+	</tr>
+{% endfor %}
+
+<tr><td> </td></tr>
+
+{% endmacro %}
+
 {% block content %}
+<form action='/' method='post'>
     <table>
         <thead>
         <th>Элемент</th>
@@ -9,17 +28,9 @@
 
         </thead>
         <tbody>
-        {% for object in hierarchy %}
-            <tr>
-                <td>{{ object.name }}</td>
-                {% if  object.__class__ == 'Aspect' %}
-                 todo
-                 add here logic of assessment
-                {% endif %}
-            </tr>
-        {% endfor %}
-
-        <tr></tr>
+        {{ draw_tree(olympiad) }}
         </tbody>
     </table>
+    <input type='submit' value='Заполнить' class='btn btn-default'>
+</form>
 {% endblock %}
