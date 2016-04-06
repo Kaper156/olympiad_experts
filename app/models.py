@@ -157,14 +157,6 @@ class Olympiad(db.Model):
         # todo можно выставлять оценки
         print('Начата %s ' % self.__str__())
         self.status = 1
-        for criterion in self.children:
-            for subcriterion in criterion.children:
-                for aspect in subcriterion.children:
-                    # aspect
-                    for member in self.members:
-                        member_assessment = MemberAssessment()
-                        member_assessment.aspect_id = aspect.id
-                        member_assessment.member_id = member
 
     def close(self):
         # todo подсчет результатов доступен
@@ -182,6 +174,7 @@ def after_insert_olympiad(mapper, connection, olympiad):
         member.order_number = index
         db.session.add(member)
         print('Участник #%s добавлен к олимпиаде %s' % (member.order_number, olympiad))
+    # TODO ADD ROLES HERE
     print('Создано %s ' % olympiad.__str__())
     olympiad.status = 0
 
@@ -277,6 +270,19 @@ class Aspect(OlympiadBase):
         return '<Критерий: "%s" (%s)>' % (self.name, self.max_balls)
 
 
+@event.listens_for(Aspect, 'after_insert')
+def after_insert_aspect(mapper, connection, aspect):
+    olympiad = aspect.get_olympiad()
+    for member in olympiad.members:
+        print(member.FIO)
+        print(member.assessments)
+        print(type(member.assessments))
+        member_assessment = MemberAssessment()
+        member_assessment.aspect_id = aspect.id
+        member_assessment.member_id = member.id
+        member.assessments.append(member_assessment)
+
+
 # Участник, связь всех оценок за аспекты и олимпиады
 class Member(db.Model):
     __tablename__ = 'Member'
@@ -286,6 +292,11 @@ class Member(db.Model):
 
     olympiad_id = db.Column(db.Integer, db.ForeignKey('Olympiad.id'))
     olympiad = db.relationship("Olympiad", back_populates="members")
+
+    assessments = db.relationship('MemberAssessment',
+                                  uselist=True,
+                                  back_populates="member",
+                                  cascade="all, delete-orphan")
 
     def get_results(self):
         result = []
@@ -302,29 +313,22 @@ class Member(db.Model):
         return result
 
 
-@event.listens_for(Member, 'after_insert')
-def after_insert_member(mapper, connection, member):
-    for criterion in member.olympiad.children:
-        for sub_criterion in criterion.children:
-            for aspect in sub_criterion.children:
-                # aspect
-                member_assessment = MemberAssessment()
-                member_assessment.aspect_id = aspect.id
-                member_assessment.member_id = member.id
-                db.session.add(member_assessment)
-
-
 # Балл за конкретный аспект, вычисленная из оценок экспертов
 class MemberAssessment(db.Model):
     __tablename__ = 'MemberAssessment'
     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
 
     member_id = db.Column(db.Integer, db.ForeignKey('Member.id'))
-    member = db.relationship('Member', backref=db.backref('MemberAssessment', lazy='dynamic'))
-    ball = Column(db.Integer, nullable=False)
+    member = db.relationship('Member', back_populates="assessments")
+    ball = Column(db.Integer, nullable=False, default=0)
 
     aspect_id = db.Column(db.Integer, db.ForeignKey('Aspect.id'))
     aspect = db.relationship('Aspect', backref=db.backref('MemberAssessment', lazy='dynamic'))
+
+    expert_assessments = db.relationship('ExpertAssessment',
+                                         uselist=True,
+                                         back_populates="member_assessment",
+                                         cascade="all, delete-orphan")
 
     def calc(self):
         result = []
@@ -333,6 +337,24 @@ class MemberAssessment(db.Model):
             result.append(assessment.ball)
         self.ball = self.aspect.calculation.calc(result)
         return self.ball
+
+
+@event.listens_for(MemberAssessment, 'after_insert')
+def after_insert_member_assessment(mapper, connection, member_assessment):
+    member = db.session.query(Member).get(member_assessment.member_id)
+    experts = member.olympiad.experts
+    chief = member.olympiad.chief_expert
+    # TODO DANGER
+    for expert in experts+[chief]:
+        expert_assessment = ExpertAssessment()
+
+        # expert_assessment.member_assessment_id = member_assessment.id
+        # expert_assessment.member_assessment = member_assessment
+
+        expert_assessment.user_id = expert.id
+        expert_assessment.user = expert
+
+        member_assessment.expert_assessments.append(expert_assessment)
 
 
 # Оценка эксперта за аспект
@@ -345,4 +367,4 @@ class ExpertAssessment(db.Model):
     user = db.relationship('User', backref=db.backref('ExpertAssessment', lazy='dynamic'))
 
     member_assessment_id = Column(db.Integer, db.ForeignKey('MemberAssessment.id'))
-    member_assessment = db.relationship('MemberAssessment', backref=db.backref('ExpertAssessment', lazy='dynamic'))
+    member_assessment = db.relationship('MemberAssessment', back_populates="expert_assessments")
