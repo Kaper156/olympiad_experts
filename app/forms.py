@@ -54,8 +54,8 @@ class OlympiadEditForm(ModelForm, Form):
         only = ['name', 'date', 'description']
 
     # chief_expert = ModelFormField(label='Старший Эксперт', form_class=RoleForm)
-    chief_expert = ModelFieldList(label='Старший Эксперт', unbound_field=FormField(RoleForm))
-    experts = ModelFieldList(label='Эксперты', unbound_field=FormField(RoleForm))
+    # chief_expert = ModelFieldList(label='Старший Эксперт', unbound_field=FormField(RoleForm))
+    # experts = ModelFieldList(label='Эксперты', unbound_field=FormField(RoleForm))
     members = ModelFieldList(label='Участники', unbound_field=FormField(MemberForm))
 
 

@@ -174,17 +174,26 @@ def after_insert_olympiad(mapper, connection, olympiad):
         member.order_number = index
         db.session.add(member)
     # эскпертная группа
-    for index in range(5):
-        role = Role()
-        role.olympiad_id = olympiad.id
-        role.olympiad_experts = olympiad
-        olympiad.experts.append(role)
+    # for index in range(5):
+    #     role = Role()
+    #     role.olympiad_id = olympiad.id
+    #     role.olympiad_experts = olympiad
+    #     olympiad.experts.append(role)
 
     # Старший эксперт
+    admin_privilege = db.session.query(Privilege).filter(Privilege.rights == R_ADMIN).first()
+    admin = db.session.query(User).filter(User.login == 'Admin').first()
     role = Role()
     role.olympiad_id = olympiad.id
     role.olympiad_chief_experts = olympiad
-    # db.session.add(role)
+    # TODO
+    role.privilege = admin_privilege
+    role.privilege_id = admin_privilege.id
+
+    role.user = admin
+    role.user_id = admin.id
+    # TODO
+
     olympiad.chief_expert = [role]
     olympiad.status = 0
 
@@ -284,9 +293,6 @@ class Aspect(OlympiadBase):
 def after_insert_aspect(mapper, connection, aspect):
     olympiad = aspect.get_olympiad()
     for member in olympiad.members:
-        print(member.FIO)
-        print(member.assessments)
-        print(type(member.assessments))
         member_assessment = MemberAssessment()
         member_assessment.aspect_id = aspect.id
         member_assessment.member_id = member.id
@@ -349,32 +355,33 @@ class MemberAssessment(db.Model):
         return self.ball
 
 
-@event.listens_for(MemberAssessment, 'after_insert')
-def after_insert_member_assessment(mapper, connection, member_assessment):
-    member = db.session.query(Member).get(member_assessment.member_id)
-    experts = member.olympiad.experts
-    chief = member.olympiad.chief_expert
-    # TODO DANGER
-    for expert in experts+[chief]:
-        expert_assessment = ExpertAssessment()
-
-        # expert_assessment.member_assessment_id = member_assessment.id
-        # expert_assessment.member_assessment = member_assessment
-
-        expert_assessment.user_id = expert.id
-        expert_assessment.user = expert
-
-        member_assessment.expert_assessments.append(expert_assessment)
-
-
 # Оценка эксперта за аспект
 class ExpertAssessment(db.Model):
     __tablename__ = 'ExpertAssessment'
     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    assessment = Column(db.Float, label='Оценка', nullable=False)
+    assessment = Column(db.Float, label='Оценка', default=0)
 
     user_id = Column(db.Integer, db.ForeignKey('User.id'))
     user = db.relationship('User', backref=db.backref('ExpertAssessment', lazy='dynamic'))
 
     member_assessment_id = Column(db.Integer, db.ForeignKey('MemberAssessment.id'))
     member_assessment = db.relationship('MemberAssessment', back_populates="expert_assessments")
+
+
+@event.listens_for(MemberAssessment, 'after_insert')
+def after_insert_member_assessment(mapper, connection, member_assessment):
+    member = db.session.query(Member).get(member_assessment.member_id)
+    experts = member.olympiad.experts
+    chief = member.olympiad.chief_expert
+    # TODO DANGER
+    for expert in chief:
+        expert_assessment = ExpertAssessment()
+
+        # expert_assessment.member_assessment_id = member_assessment.id
+        # expert_assessment.member_assessment = member_assessment
+
+        expert_assessment.user_id = expert.id
+        # expert_assessment.user = expert
+        expert_assessment.member_assessment_id = member_assessment.id
+        member_assessment.expert_assessments.append(expert_assessment)
+
