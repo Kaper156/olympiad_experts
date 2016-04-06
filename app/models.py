@@ -150,6 +150,14 @@ class Olympiad(db.Model):
         # todo можно выставлять оценки
         print('Начата %s ' % self.__str__())
         self.status = 1
+        for criterion in self.children:
+            for subcriterion in criterion.children:
+                for aspect in subcriterion.children:
+                    # aspect
+                    for member in self.members:
+                        member_assessment = MemberAssessment()
+                        member_assessment.aspect_id = aspect.id
+                        member_assessment.member_id = member
 
     def close(self):
         # todo подсчет результатов доступен
@@ -158,16 +166,16 @@ class Olympiad(db.Model):
 
 
 @event.listens_for(Olympiad, 'after_insert')
-def after_insert_olympiad(mapper, connection, target):
+def after_insert_olympiad(mapper, connection, olympiad):
     # Todo можно изменять шаблон а создаются участники (от количества)
-    for index in range(target.member_count):
+    for index in range(olympiad.member_count):
         member = Member()
-        member.olympiad_id = target.id
+        member.olympiad_id = olympiad.id
         member.order_number = index
         db.session.add(member)
-        print('Участник #%s добавлен к олимпиаде %s' % (member.order_number, target))
-    print('Создано %s ' % target.__str__())
-    target.status = 0
+        print('Участник #%s добавлен к олимпиаде %s' % (member.order_number, olympiad))
+    print('Создано %s ' % olympiad.__str__())
+    olympiad.status = 0
 
 
 @event.listens_for(Olympiad, 'after_delete')
@@ -301,6 +309,18 @@ class Member(db.Model):
             aspect = db.session.query(Aspect).get(assessment.aspect_id)
             result.append((aspect, assessment))
         return result
+
+
+@event.listens_for(Member, 'after_insert')
+def after_insert_member(mapper, connection, member):
+    for criterion in member.olympiad:
+        for sub_criterion in criterion.children:
+            for aspect in sub_criterion.children:
+                # aspect
+                member_assessment = MemberAssessment()
+                member_assessment.aspect_id = aspect.id
+                member_assessment.member_id = member.id
+                db.session.add(member_assessment)
 
 
 # Балл за конкретный аспект, вычисленная из оценок экспертов

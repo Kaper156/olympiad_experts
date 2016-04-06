@@ -14,6 +14,11 @@ class MemberForm(ModelForm, Form):
         model = Member
 
 
+class ExpertAssessmentForm(ModelForm, Form):
+    class Meta:
+        model = ExpertAssessment
+
+
 class OlympiadAddForm(ModelForm, Form):
     class Meta:
         model = Olympiad
@@ -70,7 +75,4 @@ class LoginForm(ModelForm, Form):
     password = PasswordField(label='Пароль')
 
 
-class ExpertAssessmentForm(ModelForm, Form):
-    class Meta:
-        model = ExpertAssessment
 
