@@ -231,6 +231,11 @@ def expert_assessment(id):
 @app.route('/view_olympiads')
 @requires_user
 def view_olympiads():
-
+    # TEST
+    olympiad = db.session.query(Olympiad).first()
+    a = OlympiadEditForm(obj=olympiad)
+    print(a.__dict__)
+    for b in a:
+        print(b)
     return render_template('view_olympiad.html')
 

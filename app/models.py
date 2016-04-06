@@ -134,7 +134,7 @@ class Olympiad(db.Model):
     # TODO
     # один (в будущем- роль)
     chief_expert = db.relationship('Role',
-                                   uselist=False,
+                                   uselist=True,
                                    back_populates="olympiad_chief_experts",
                                    cascade="all, delete-orphan")
     # обычно 5
@@ -178,14 +178,14 @@ def after_insert_olympiad(mapper, connection, olympiad):
         role = Role()
         role.olympiad_id = olympiad.id
         role.olympiad_experts = olympiad
-        db.session.add(role)
+        olympiad.experts.append(role)
 
     # Старший эксперт
     role = Role()
     role.olympiad_id = olympiad.id
     role.olympiad_chief_experts = olympiad
-    db.session.add(role)
-
+    # db.session.add(role)
+    olympiad.chief_expert = [role]
     olympiad.status = 0
 
 

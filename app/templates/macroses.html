@@ -42,20 +42,14 @@
 {# Print modal window-form #}
 {# by default get ready to add-form #}
 {% macro draw_fields(form) %}
-    {% for field in form if field.widget.input_type != 'hidden'
-                            and field.type != 'ModelFieldList'
-                            or field.type != 'ModelFormField' %}
+    {% for field in form if field.widget.input_type != 'hidden' and field.type != 'ModelFieldList' %}
         <div class="form-group">
                 {{ field.label }}:
                 {{ field(class="form-control", **kwargs) }}
         </div>
 
     {% endfor %}
-{#    {% for formfield in form if formfield.type == 'ModelFormField' %}#}
-{#        {{ formfield.label }}#}
-{#        {{ draw_fields(formfield) }}#}
-{#    {% endfor %}#}
-    {% for fieldlist in form if fieldlist.type == 'ModelFieldList'%}
+    {% for fieldlist in form if fieldlist.type == 'ModelFieldList' %}
         <hr>
         {{ fieldlist.label }}
         {% for field in fieldlist %}
