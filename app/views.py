@@ -1,11 +1,14 @@
 from app import render_template, db, app, request, redirect, url_for, OBJECT_PER_PAGE
 # from app import breadcrumbs
-from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User, Privilege, Member
+from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation, User, Privilege, \
+    Member, MemberAssessment, ExpertAssessment
 from app.forms import OlympiadAddForm, OlympiadEditForm, CriterionForm, SubCriterionForm, AspectForm, CalculationForm, LoginForm
 from app.flashing import flash_form_errors, flash_add, flash_edit, flash_delete, flash_max_ball, \
     flash_message, flash_error
 from app.auth import requires_user, require_admin
 
+
+admin = db.session.query(User).filter(User.login=='admin').first()
 
 class BaseView:
     def __init__(self, _class, _form, template_name, end_point='', edit_form=None):
@@ -225,6 +228,34 @@ def expert_assessment(id):
     # Выдача форм для внесения оценок
     olympiad = db.session.query(Olympiad).get(id)
     members = db.session.query(Member).filter(Member.olympiad_id == id)
+
+    # Список экспертных оценок только для текущего пользователя
+    expert_assessments = db.session.query(ExpertAssessment).filter(ExpertAssessment.user_id == admin.id)
+
+    # Формирование иерархичной структуры
+    criterions = []
+    for criterion in olympiad.children:
+        sub_criterions = []
+        for sub_criterion in criterion.children:
+            aspects = []
+            for aspect in sub_criterion.children:
+                if not aspect.calculation.is_subjective:
+                    # HERE OBJECTIVE ASPECTS
+                    inner_aspect = []
+                    # TODO HERE FORMS
+                    # for member in members:
+                    #     inner_aspect.append(MemberForm)
+                    member_assessments = db.session.query(MemberAssessment).filter(MemberAssessment.aspect_id == aspect.id)
+                    for member_assessment in member_assessments:
+                        expert_assessment = expert_assessments.filter(ExpertAssessment.member_assessment_id == member_assessment.id)
+                    aspects.append((aspect, inner_aspect))
+                else:
+                    # HERE SUBJECTIVE ASPECTS
+                    pass
+            sub_criterions.append((sub_criterion, aspects))
+
+        criterions.append((criterion, sub_criterions))
+    print(criterions)
     return render_template('expert_assessment.html', olympiad=olympiad, members=members)
 
 
