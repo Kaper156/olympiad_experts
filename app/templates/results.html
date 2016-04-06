@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2 class="title text-center">{{ olympiad.name }}</h2>
-    <table>
+    <a class="btn btn-primary" href="{{ url_for('expert_assessment', id=olympiad.id) }}">Обратно к списку подкритериев</a>
+    <table class="table table-bordered">
         <thead>
             <th>Участник</th>
             <th>Балл</th>

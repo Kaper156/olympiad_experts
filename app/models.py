@@ -353,7 +353,6 @@ class MemberAssessment(db.Model):
         result = []
         for assessment in self.expert_assessments:
             result.append(assessment.assessment)
-        print(self.aspect_id)
         aspect = db.session.query(Aspect).get(self.aspect_id)
         self.ball = aspect.calculation.calc(result, aspect.max_balls)
         return self.ball
