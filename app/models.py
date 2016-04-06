@@ -285,6 +285,8 @@ class Aspect(OlympiadBase):
     calculation = db.relationship('Calculation',
                                   backref=db.backref('Aspect', lazy='dynamic'))
 
+    member_assessments = db.relationship('MemberAssessment', cascade="all, delete-orphan")
+
     def __str__(self):
         return '<Критерий: "%s" (%s)>' % (self.name, self.max_balls)
 
@@ -297,6 +299,7 @@ def after_insert_aspect(mapper, connection, aspect):
         member_assessment.aspect_id = aspect.id
         member_assessment.member_id = member.id
         member.assessments.append(member_assessment)
+        aspect.member_assessments.append(member_assessment)
 
 
 # Участник, связь всех оценок за аспекты и олимпиады
@@ -339,7 +342,6 @@ class MemberAssessment(db.Model):
     ball = Column(db.Integer, nullable=False, default=0)
 
     aspect_id = db.Column(db.Integer, db.ForeignKey('Aspect.id'))
-    aspect = db.relationship('Aspect', backref=db.backref('MemberAssessment', lazy='dynamic'))
 
     expert_assessments = db.relationship('ExpertAssessment',
                                          uselist=True,
