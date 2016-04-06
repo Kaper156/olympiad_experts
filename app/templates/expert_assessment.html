@@ -4,8 +4,8 @@
 {% for object in tree.children %}
 	<tr class='level-{{ level }}'>
 		<td>{{ object.name }}</td>
-		{% if  object.__class__ == 'Aspect' %}
-			{# assessment logic #}
+		{% if  object.__class__ == 'SubCriterion' %}
+
 		{# {% elif getattr(object, 'children') %} #}
 		{% elif object.children is defined %}
 			{{ draw_tree(object, level=level+1) }}
@@ -22,7 +22,7 @@
         <thead>
         <th>Элемент</th>
         {% for member in members %}
-            <th>{{ 'Участник № ' ~ loop.index or member.name }}</th>
+            <th></th>
         {% endfor %}
 
         </thead>

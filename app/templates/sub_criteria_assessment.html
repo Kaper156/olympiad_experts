@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2 class="title">{{ sub_criterion.name }}</h2>
+    <form action="{{ url_for('assessment_sub_criterion', id=sub_criterion.id) }}" method="post">
+    <table class="table table-bordered">
+        <thead>
+            <th></th>
+            {% for member in members %}
+                <th>Участник №{{ member.order_number }}</th>
+            {% endfor %}
+        </thead>
+        <tbody>
+        {% for aspect in sub_criterion.children if aspect.calculation.is_subjective == False %}
+            <tr>
+                <td>{{ aspect.name }}</td>
+                {% for member_assessment in aspect.member_assessments %}
+                    {% for expert_assessment in member_assessment.expert_assessments %}
+                        <td>
+                            <input name="{{ aspect.id }}-{{ member_assessment.id }}"
+                                   type="number" value="{{ expert_assessment.assessment }}"
+                                   min="0" max="10">
+                        </td>
+                    {% endfor %}
+                {% endfor %}
+
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+        <input type="submit" value="Сохранить" class="btn btn-primary">
+    </form>
+{% endblock %}

@@ -222,41 +222,29 @@ def index():
 
 @app.route('/expert_assessment-<int:id>', methods=['GET', 'POST'])
 def expert_assessment(id):
-    if request.method == 'POST':
-        pass
-        # Занесение оценок
-    # Выдача форм для внесения оценок
     olympiad = db.session.query(Olympiad).get(id)
+    return render_template('to_assessment_sub_criterion.html', olympiad=olympiad)
+
+
+@app.route('/sub_criteria-<int:id>/assessment', methods=['GET', 'POST'])
+def assessment_sub_criterion(id):
+    current_user = admin
+    if request.method == "POST":
+        data = dict((key, request.form.getlist(key)) for key in request.form.keys())
+        print(data)
+        for coordinates, value in data.items():
+            aspect_id, member_assessment_id = coordinates.split('-')
+            print('aspect=',aspect_id, 'member=', member_assessment_id)
+            ma = db.session.query(MemberAssessment).get(member_assessment_id)
+            expert_assessment = db.session.query(ExpertAssessment).\
+                filter(ExpertAssessment.member_assessment_id == ma.id).first()
+            expert_assessment.assessment = float(value[0])
+            db.session.add(expert_assessment)
+        db.session.commit()
     members = db.session.query(Member).filter(Member.olympiad_id == id)
+    sub_criterion = db.session.query(SubCriterion).get(id)
 
-    # Список экспертных оценок только для текущего пользователя
-    expert_assessments = db.session.query(ExpertAssessment).filter(ExpertAssessment.user_id == admin.id)
-
-    # Формирование иерархичной структуры
-    criterions = []
-    for criterion in olympiad.children:
-        sub_criterions = []
-        for sub_criterion in criterion.children:
-            aspects = []
-            for aspect in sub_criterion.children:
-                if not aspect.calculation.is_subjective:
-                    # HERE OBJECTIVE ASPECTS
-                    inner_aspect = []
-                    # TODO HERE FORMS
-                    # for member in members:
-                    #     inner_aspect.append(MemberForm)
-                    member_assessments = db.session.query(MemberAssessment).filter(MemberAssessment.aspect_id == aspect.id)
-                    for member_assessment in member_assessments:
-                        expert_assessment = expert_assessments.filter(ExpertAssessment.member_assessment_id == member_assessment.id)
-                    aspects.append((aspect, inner_aspect))
-                else:
-                    # HERE SUBJECTIVE ASPECTS
-                    pass
-            sub_criterions.append((sub_criterion, aspects))
-
-        criterions.append((criterion, sub_criterions))
-    print(criterions)
-    return render_template('expert_assessment.html', olympiad=olympiad, members=members)
+    return render_template('sub_criteria_assessment.html', sub_criterion=sub_criterion, members=members)
 
 
 @app.route('/view_olympiads')

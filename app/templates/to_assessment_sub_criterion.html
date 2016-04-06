@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2 class="title"> {{ olympiad.name }} </h2>
+    <div class="criteria">
+        {% for criterion in olympiad.children %}
+            {{ criterion.name }}
+            <div class="sub_criteria">
+                {% for sub_criterion in criterion.children %}
+                    <a href="{{ url_for('assessment_sub_criterion', id=sub_criterion.id) }}">
+                        {{ sub_criterion.name }}
+                    </a>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

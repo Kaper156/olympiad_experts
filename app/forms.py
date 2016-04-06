@@ -1,5 +1,5 @@
 from app.models import Olympiad, Criterion, SubCriterion, Aspect, Calculation
-from app.models import User, ExpertAssessment, Member, Role, Privilege
+from app.models import User, ExpertAssessment, MemberAssessment, Member, Role, Privilege
 from flask.ext.wtf import Form
 from wtforms import SelectField, FormField, PasswordField
 from wtforms_alchemy import model_form_factory, ModelFormField, ModelFieldList
@@ -13,6 +13,19 @@ class MemberForm(ModelForm, Form):
     class Meta:
         # Добавить тайтл
         model = Member
+
+#
+# class AspectAssessmentForm(ModelForm, Form):
+#     class Meta:
+#         model = Aspect
+#         only = []
+#     member_assessments = ModelFormField(form_class=)
+#
+# class MemberAssessmentForm(ModelForm, Form):
+#     class Meta:
+#         model = MemberAssessment
+#     expert_assessments = ModelFormField(form_class=ExpertAssessmentForm)
+#
 
 
 class ExpertAssessmentForm(ModelForm, Form):
