@@ -234,8 +234,11 @@ def view_olympiads():
     # TEST
     olympiad = db.session.query(Olympiad).first()
     a = OlympiadEditForm(obj=olympiad)
-    print(a.__dict__)
-    for b in a:
-        print(b)
+    print(a.chief_expert.__dict__)
+    # for b in a.chief_expert:
+
+        # for c in b:
+        #     print('\t', type(c))
     return render_template('view_olympiad.html')
+
 

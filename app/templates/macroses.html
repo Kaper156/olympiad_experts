@@ -41,23 +41,41 @@
 
 {# Print modal window-form #}
 {# by default get ready to add-form #}
+{% macro draw_field(field) %}
+    <div class="form-group">
+        {{ field.label }}:
+        {{ field(class="form-control", **kwargs) }}
+    </div>
+{% endmacro %}
+
 {% macro draw_fields(form) %}
-    {% for field in form if field.widget.input_type != 'hidden' and field.type != 'ModelFieldList' %}
-        <div class="form-group">
-                {{ field.label }}:
-                {{ field(class="form-control", **kwargs) }}
-        </div>
+    {% for field in form if field.widget.input_type != 'hidden'
+                        and field.type != 'ModelFieldList'
+                        and field.type != 'FormField' %}
+        {{ draw_field(field) }}
 
     {% endfor %}
-    {% for fieldlist in form if fieldlist.type == 'ModelFieldList' %}
-        <hr>
-        {{ fieldlist.label }}
-        {% for field in fieldlist %}
-            {{ draw_fields(field) }}
-        {% endfor %}
-        <hr>
+    {% for field_list in form if field_list.type == 'ModelFieldList' %}
+        {{ draw_model_field_list(field_list) }}
     {% endfor %}
 
+{% endmacro %}
+
+{% macro draw_model_field_list(mflist) %}
+    {# Метка группы   #}
+    <hr>
+    <br>
+    {{ mflist.label }}:
+    {% for field_form in mflist %}
+        {{ draw_field_form(field_form) }}
+    {% endfor %}
+{% endmacro %}
+
+{% macro draw_field_form(field_form) %}
+    {{ field_form.label }}
+    {% for field in field_form %}
+        {{ draw_field(field) }}
+    {% endfor %}
 {% endmacro %}
 
 {% macro editor(form, end_point, args={}, id='editor-new', title='Добавление объекта', btn_text='Добавить') -%}
