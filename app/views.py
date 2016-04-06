@@ -231,10 +231,8 @@ def assessment_sub_criterion(id):
     current_user = admin
     if request.method == "POST":
         data = dict((key, request.form.getlist(key)) for key in request.form.keys())
-        print(data)
         for coordinates, value in data.items():
             aspect_id, member_assessment_id = coordinates.split('-')
-            print('aspect=',aspect_id, 'member=', member_assessment_id)
             ma = db.session.query(MemberAssessment).get(member_assessment_id)
             expert_assessment = db.session.query(ExpertAssessment).\
                 filter(ExpertAssessment.member_assessment_id == ma.id).first()
@@ -246,6 +244,11 @@ def assessment_sub_criterion(id):
 
     return render_template('sub_criteria_assessment.html', sub_criterion=sub_criterion, members=members)
 
+
+@app.route('/olympiad-<int:id>/results')
+def olympiad_results(id):
+
+    pass
 
 @app.route('/view_olympiads')
 @requires_user

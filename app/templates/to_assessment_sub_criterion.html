@@ -13,4 +13,7 @@
             </div>
         {% endfor %}
     </div>
+    <a class="btn btn-primary" href="{{ url_for('olympiad_results', id=olympiad.id) }}">
+        К текущим результатам
+    </a>
 {% endblock %}

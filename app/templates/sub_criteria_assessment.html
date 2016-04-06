@@ -1,6 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h2 class="title">{{ sub_criterion.name }}</h2>
+    <h2 class="title text-center">{{ sub_criterion.name }}</h2>
+    <p><b>Внимание!!!</b>
+    <ul>
+        <li>для установки объективной оценки <i>(либо полная сумма баллов за аспект, либо ничего)</i>,
+    достаточно вводить оценки положительно отличные от нуля</li>
+        <li>субъективная оценка, является коэффициентом балла. <i>(т.е. если оценка 4, а максимальный балл 5, то участник получит 2,5 балла)</i></li>
+    </ul>
+    </p>
+    <a class="btn btn-primary" href="{{ url_for('expert_assessment', id=sub_criterion.get_olympiad().id) }}">Обратно к списку подкритериев</a>
+    <br>
     <form action="{{ url_for('assessment_sub_criterion', id=sub_criterion.id) }}" method="post">
     <table class="table table-bordered">
         <thead>
@@ -10,7 +19,24 @@
             {% endfor %}
         </thead>
         <tbody>
+        <tr><td><b>ОБЪЕКТИВНЫЕ АСПЕКТЫ:</b></td></tr>
         {% for aspect in sub_criterion.children if aspect.calculation.is_subjective == False %}
+            <tr>
+                <td>{{ aspect.name }}</td>
+                {% for member_assessment in aspect.member_assessments %}
+                    {% for expert_assessment in member_assessment.expert_assessments %}
+                        <td>
+                            <input name="{{ aspect.id }}-{{ member_assessment.id }}"
+                                   type="number" value="{{ expert_assessment.assessment }}"
+                                   min="0" max="10">
+                        </td>
+                    {% endfor %}
+                {% endfor %}
+
+            </tr>
+        {% endfor %}
+        <tr><td><b>СУБЪЕКТИВНЫЕ АСПЕКТЫ:</b></td></tr>
+        {% for aspect in sub_criterion.children if aspect.calculation.is_subjective == True %}
             <tr>
                 <td>{{ aspect.name }}</td>
                 {% for member_assessment in aspect.member_assessments %}
@@ -29,4 +55,5 @@
     </table>
         <input type="submit" value="Сохранить" class="btn btn-primary">
     </form>
+
 {% endblock %}
