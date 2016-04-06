@@ -134,14 +134,21 @@ class Olympiad(db.Model):
 
     # TODO
     # один (в будущем- роль)
-    chief_expert = db.relationship('Role', uselist=False, back_populates="olympiad_chief_experts")
+    chief_expert = db.relationship('Role',
+                                   uselist=False,
+                                   back_populates="olympiad_chief_experts",
+                                   cascade="all, delete-orphan")
     # обычно 5
-    experts = db.relationship('Role', back_populates="olympiad_experts")
+    experts = db.relationship('Role',
+                              back_populates="olympiad_experts",
+                              cascade="all, delete-orphan")
     member_count = Column(db.Integer, label='Количество участников', default=2)
-    members = db.relationship('Member', back_populates="olympiad")
+    members = db.relationship('Member',
+                              back_populates="olympiad",
+                              cascade="all, delete-orphan")
     status = Column(db.Integer, label='Статус', default=0)
 
-    children = db.relationship('Criterion')
+    children = db.relationship('Criterion', cascade="all, delete-orphan")
 
     def __str__(self):
         return '<Олимпиада: "%s" от [%s]>' % (self.name, self.date)
@@ -171,6 +178,7 @@ def after_insert_olympiad(mapper, connection, olympiad):
     for index in range(olympiad.member_count):
         member = Member()
         member.olympiad_id = olympiad.id
+        member.olympiad = olympiad
         member.order_number = index
         db.session.add(member)
         print('Участник #%s добавлен к олимпиаде %s' % (member.order_number, olympiad))
@@ -178,29 +186,11 @@ def after_insert_olympiad(mapper, connection, olympiad):
     olympiad.status = 0
 
 
-@event.listens_for(Olympiad, 'after_delete')
-def before_delete_olympiad(mapper, connection, target):
-
-    # Также удалить всех участников
-    print('DELETE ALL MEMBERS')
-    c = 0
-    for member in target.members:
-        db.session.delete(member)
-        print(c)
-        c += 1
-
-    c = 0
-    for criterion in target.children:
-        db.session.delete(criterion)
-        print(c)
-        c += 1
-
-
 # Часть олимпиады: Настройка сетевого оборудования, etc
 class Criterion(OlympiadBase):
     __tablename__ = 'Criterion'
     parent_id = Column(db.Integer, db.ForeignKey('Olympiad.id'))
-    children = db.relationship("SubCriterion")
+    children = db.relationship("SubCriterion", cascade="all, delete-orphan")
 
     def __str__(self):
         return '<Модуль: "%s" (%s)>' % (self.name, self.max_balls)
@@ -210,7 +200,7 @@ class Criterion(OlympiadBase):
 class SubCriterion(OlympiadBase):
     __tablename__ = 'SubCriterion'
     parent_id = Column(db.Integer, db.ForeignKey('Criterion.id'))
-    children = db.relationship('Aspect')
+    children = db.relationship('Aspect', cascade="all, delete-orphan")
 
     def __str__(self):
         return '<Подмодуль: "%s" (%s)>' % (self.name, self.max_balls)
@@ -280,7 +270,8 @@ class Aspect(OlympiadBase):
                             # TODO info={'choices': [(c.id, c.name) for c in db.session.query(Calculation).all()]}
                             # TODO with try construction
                             )
-    calculation = db.relationship('Calculation', backref=db.backref('Aspect', lazy='dynamic'))
+    calculation = db.relationship('Calculation',
+                                  backref=db.backref('Aspect', lazy='dynamic'))
 
     def __str__(self):
         return '<Критерий: "%s" (%s)>' % (self.name, self.max_balls)
@@ -313,7 +304,7 @@ class Member(db.Model):
 
 @event.listens_for(Member, 'after_insert')
 def after_insert_member(mapper, connection, member):
-    for criterion in member.olympiad:
+    for criterion in member.olympiad.children:
         for sub_criterion in criterion.children:
             for aspect in sub_criterion.children:
                 # aspect

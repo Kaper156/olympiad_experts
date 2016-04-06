@@ -72,7 +72,7 @@ class BaseView:
 
     def delete(self, id):
         instance = db.session.query(self.cls).get(id)
-        db.session.query(self.cls).filter(self.cls.id == id).delete()
+        db.session.delete(instance)
         flash_delete(instance)
         db.session.commit()
         return self.redirect()
@@ -179,7 +179,7 @@ class ChildView(BaseView):
 
     def delete(self, id, parent_id):
         instance = db.session.query(self.cls).get(id)
-        db.session.query(self.cls).get(id).delete()
+        db.session.delete(instance)
         flash_delete(instance)
         db.session.commit()
         return self.redirect(parent_id=parent_id)
