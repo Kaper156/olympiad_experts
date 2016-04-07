@@ -19,7 +19,6 @@
             {% endfor %}
         </thead>
         <tbody>
-{#        <tr><td><b>ОБЪЕКТИВНЫЕ АСПЕКТЫ:</b></td></tr>#}
         {% for aspect in sub_criterion.children %}
             <tr>
                 <td>{{ aspect.name }}</td>
@@ -40,22 +39,7 @@
 
             </tr>
         {% endfor %}
-        <tr><td><b>СУБЪЕКТИВНЫЕ АСПЕКТЫ:</b></td></tr>
-        {% for aspect in sub_criterion.children if aspect.calculation.is_subjective == True %}
-            <tr>
-                <td>{{ aspect.name }}</td>
-                {% for member_assessment in aspect.member_assessments %}
-                    {% for expert_assessment in member_assessment.expert_assessments %}
-                        <td>
-                            <input name="{{ aspect.id }}-{{ member_assessment.id }}"
-                                   type="number" value="{{ expert_assessment.assessment }}"
-                                   min="0" max="10">
-                        </td>
-                    {% endfor %}
-                {% endfor %}
 
-            </tr>
-        {% endfor %}
         </tbody>
     </table>
         <input type="submit" value="Сохранить" class="btn btn-primary">
