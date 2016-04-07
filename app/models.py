@@ -256,9 +256,9 @@ class Calculation(db.Model):
 
 # Загрузить методы вычисления
 def load_calculations():
-    # if db.session.query(Calculation).count() == 0:
-        for calc in db.session.query(Calculation).all():
-            db.session.delete(calc)
+    if db.session.query(Calculation).count() == 0:
+    #     for calc in db.session.query(Calculation).all():
+    #         db.session.delete(calc)
         for name, content in objective_methods:
             instance = Calculation(is_subjective=False,
                                    content=content,
