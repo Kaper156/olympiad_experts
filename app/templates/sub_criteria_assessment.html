@@ -19,16 +19,21 @@
             {% endfor %}
         </thead>
         <tbody>
-        <tr><td><b>ОБЪЕКТИВНЫЕ АСПЕКТЫ:</b></td></tr>
-        {% for aspect in sub_criterion.children if aspect.calculation.is_subjective == False %}
+{#        <tr><td><b>ОБЪЕКТИВНЫЕ АСПЕКТЫ:</b></td></tr>#}
+        {% for aspect in sub_criterion.children %}
             <tr>
                 <td>{{ aspect.name }}</td>
                 {% for member_assessment in aspect.member_assessments %}
                     {% for expert_assessment in member_assessment.expert_assessments %}
                         <td>
+                        {% if aspect.calculation.is_subjective %}
                             <input name="{{ aspect.id }}-{{ member_assessment.id }}"
                                    type="number" value="{{ expert_assessment.assessment }}"
                                    min="0" max="10">
+                        {% else %}
+                            <input name="{{ aspect.id }}-{{ member_assessment.id }}"
+                                   type="checkbox" value="{{ expert_assessment.assessment }}">
+                        {% endif %}
                         </td>
                     {% endfor %}
                 {% endfor %}
