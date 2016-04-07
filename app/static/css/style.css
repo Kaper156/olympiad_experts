@@ -32,3 +32,9 @@ table.table-striped  td.result-label{min-width: 50px; text-align: right}
 .level-2{background-color: orange}
 .level-3{background-color: yellow}
 .level-4{background-color: white}
+
+
+.table-assessments{
+	
+}
+table.table-assessments  input { width: 50px }

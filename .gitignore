@@ -2,8 +2,10 @@
 /venv/
 /__pycache__/
 /app/__pycache__/
+app/__pycache__/
 /.idea/
 app.db
 .fuse_hidden*
 env/
+myenv/
 .idea/

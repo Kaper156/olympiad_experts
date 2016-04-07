@@ -55,14 +55,14 @@ class RoleForm(ModelForm, Form):
 class OlympiadAddForm(ModelForm, Form):
     class Meta:
         model = Olympiad
-        date_format = '%d.%m.%Y'
+        # date_format = '%y-%m-%d'
         only = ['name', 'date', 'description', 'member_count']
 
 
 class OlympiadEditForm(ModelForm, Form):
     class Meta:
         model = Olympiad
-        date_format = '%d.%m.%Y'
+        # date_format = '%y-%m-%d'
         # хак, для правильного порядка
         only = ['name', 'date', 'description']
 

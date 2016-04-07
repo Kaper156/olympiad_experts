@@ -70,17 +70,17 @@ def load_users():
         query = db.session.query(Privilege)
         privilege_admin = query.filter(Privilege.rights == R_ADMIN).first()
         privilege_expert = query.filter(Privilege.rights == R_EXPERT).first()
-        users = [('Expert1', privilege_expert),
-                 ('Expert2', privilege_expert),
-                 ('Expert3', privilege_expert),
-                 ('Expert4', privilege_expert),
-                 ('Expert5', privilege_expert),
+        users = [('Expert1', privilege_admin),
+                 ('Expert2', privilege_admin),
+                 ('Expert3', privilege_admin),
+                 ('Expert4', privilege_admin),
+                 ('Expert5', privilege_admin),
                  ('Admin', privilege_admin)]
         from os import urandom
         for login, privilege in users:
             user = User()
             user.login = login
-            user.password = login
+            user.password = 'qwerty12345'
             user.privilege_id = privilege.id
             db.session.add(user)
         db.session.commit()
@@ -128,7 +128,7 @@ class Olympiad(db.Model):
     __tablename__ = 'Olympiad'
     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(db.String, label='Название', nullable=False)
-    date = Column(db.Date, label='Дата (ДД.ММ.ГГГГ)', nullable=False)
+    date = Column(db.Date, label='Дата (ДД.ММ.ГГГГ)', nullable=False )#, info={'date_format':'%y-%m-%d'})
     description = Column(db.String, label='Описание')
 
     # TODO
@@ -167,7 +167,8 @@ class Olympiad(db.Model):
 def after_insert_olympiad(mapper, connection, olympiad):
     # Todo можно изменять шаблон а создаются участники (от количества)
     # Участники олимпиады
-    for index in range(olympiad.member_count):
+    for index in range(1, olympiad.member_count+1):
+        
         member = Member()
         member.olympiad_id = olympiad.id
         member.olympiad = olympiad

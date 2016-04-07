@@ -246,9 +246,10 @@ def assessment_sub_criterion(id):
 
 
 @app.route('/olympiad-<int:id>/results')
+@requires_user
 def olympiad_results(id):
     olympiad = db.session.query(Olympiad).get(id)
-    members = db.session.query(Member).filter(Member.olympiad_id == id)
+    members = db.session.query(Member).filter(Member.olympiad_id == id).order_by(Member.order_number)
     results = list()
     for member in members:
         assessments = db.session.query(MemberAssessment).filter(MemberAssessment.member_id == member.id).all()

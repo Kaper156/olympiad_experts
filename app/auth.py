@@ -35,10 +35,15 @@ def authenticate(incoming):
 
 
 def authorize():
+    
     if session.get('user') and session.get('privilege'):
         privilege = db.session.query(Privilege).get(session.get('privilege'))
         user = db.session.query(User).get(session['user'])
-        if user.privilege.rights >= privilege.rights:
+        return True
+        # TODO delete this
+
+        
+        if user.roles[0].privilege.rights >= privilege.rights:
             return True
         abort(502)
     return False
@@ -54,7 +59,7 @@ def logout():
 def requires_user(f, privilege=privilege_expert):
     @wraps(f)
     def decorated(*args, **kwargs):
-        return f(*args, **kwargs)
+        # return f(*args, **kwargs)
         if authorize():
             return f(*args, **kwargs)
         session['privilege'] = privilege.id
