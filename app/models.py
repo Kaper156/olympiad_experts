@@ -128,7 +128,7 @@ class Olympiad(db.Model):
     __tablename__ = 'Olympiad'
     id = Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(db.String, label='Название', nullable=False)
-    date = Column(db.Date, label='Дата (ДД.ММ.ГГГГ)', nullable=False )#, info={'date_format':'%y-%m-%d'})
+    date = Column(db.Date, label='Дата (ГГГГ.ММ.ДД)', nullable=False)
     description = Column(db.String, label='Описание')
 
     # TODO
