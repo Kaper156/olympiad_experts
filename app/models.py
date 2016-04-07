@@ -6,13 +6,14 @@ make_lazy_configured(db.mapper)
 
 # Списки методов
 subjective_methods = [
-    ('Шкала 10', 'lambda x: 1')
+    # ('Шкала 10', 'lambda x: 1')
+    ('Оценка от 0-10 (коэффициент)', 'lambda x: x/10')
 ]
 objective_methods = [
     ('Наличие', 'lambda x: bool(x)'),
     ('Коэффициент', 'lambda x: x/10'),  # Оценка в диапозоне 0-10
-    ('Диапозон-5', 'lambda x: x//5'),
-    ('Диапозон-10', 'lambda x: x//10'),
+    # ('Диапозон-5', 'lambda x: x//5'),
+    # ('Диапозон-10', 'lambda x: x//10'),
 ]
 
 # Константы прав, используются для создания пользователей
@@ -255,7 +256,9 @@ class Calculation(db.Model):
 
 # Загрузить методы вычисления
 def load_calculations():
-    if db.session.query(Calculation).count() == 0:
+    # if db.session.query(Calculation).count() == 0:
+        for calc in db.session.query(Calculation).all():
+            db.session.delete(calc)
         for name, content in objective_methods:
             instance = Calculation(is_subjective=False,
                                    content=content,

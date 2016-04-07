@@ -10,6 +10,7 @@ from app.auth import requires_user, require_admin
 
 admin = db.session.query(User).filter(User.login=='admin').first()
 
+
 class BaseView:
     def __init__(self, _class, _form, template_name, end_point='', edit_form=None):
         self.cls = _class
@@ -88,8 +89,11 @@ class ChildView(BaseView):
 
         self.query = dict()
         self.query['all'] = lambda parent_id: db.session.query(self.parent_cls).get(parent_id).children
-        self.query['edit'] = lambda id, parent_id: db.session.query(self.parent_cls).get(parent_id) \
-            .children.filter(self.cls.id != id)
+        # self.query['edit'] = lambda id, parent_id: db.session.query(self.parent_cls).get(parent_id) \
+        #     .children.filter(self.cls.id != id)
+        self.query['edit'] = lambda id, parent_id: db.session.query(self.cls).\
+            filter(self.cls.parent_id == parent_id).\
+            filter(self.cls.id != id)
         self.query['maximum_balls'] = query_maximum
 
     def init_end_points(self):
