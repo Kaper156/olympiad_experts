@@ -10,6 +10,7 @@ subjective_methods = [
 ]
 objective_methods = [
     ('Наличие', 'lambda x: bool(x)'),
+    ('Коэффициент', 'lambda x: x/10'),  # Оценка в диапозоне 0-10
     ('Диапозон-5', 'lambda x: x//5'),
     ('Диапозон-10', 'lambda x: x//10'),
 ]
